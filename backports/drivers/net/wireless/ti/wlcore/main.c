@@ -41,6 +41,7 @@
 #include "scan.h"
 #include "hw_ops.h"
 #include "sysfs.h"
+#include "version.h"
 
 #define WL1271_BOOT_RETRIES 3
 
@@ -6513,6 +6514,9 @@ static void wlcore_nvs_cb(const struct firmware *fw, void *context)
 		goto out_unreg;
 
 	wl->initialized = true;
+
+	wl1271_info("driver version: %s", wlcore_git_head);
+	wl1271_info("compilation time: %s", wlcore_timestamp);
 	goto out;
 
 out_unreg:
