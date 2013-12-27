@@ -39,6 +39,7 @@
 #define MMA8451_ID		0x1A
 #define MMA8452_ID		0x2A
 #define MMA8453_ID		0x3A
+#define FXOS8700_ID		0xC7
 
 #define POLL_INTERVAL_MIN	1
 #define POLL_INTERVAL_MAX	500
@@ -445,10 +446,10 @@ static int mma8451_probe(struct i2c_client *client,
 
 	client_id = i2c_smbus_read_byte_data(client, MMA8451_WHO_AM_I);
 	if (client_id != MMA8451_ID && client_id != MMA8452_ID
-	    && client_id != MMA8453_ID) {
+	    && client_id != MMA8453_ID && client_id != FXOS8700_ID) {
 		dev_err(&client->dev,
-			"read chip ID 0x%x is not equal to 0x%x or 0x%x!\n",
-			result, MMA8451_ID, MMA8452_ID);
+			"read chip ID 0x%x is not equal to 0x%x,0x%x,0x%x!\n",
+			result, MMA8451_ID, MMA8452_ID, FXOS8700_ID);
 		result = -EINVAL;
 		goto err_out;
 	}
