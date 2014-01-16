@@ -106,6 +106,16 @@ enum {
 	MMA8451_OFF_Y,
 	MMA8451_OFF_Z,
 
+	FXOS8700_M_DR_STATUS,
+	FXOS8700_M_OUT_X_MSB,
+	FXOS8700_M_OUT_X_LSB,
+	FXOS8700_M_OUT_Y_MSB,
+	FXOS8700_M_OUT_Y_LSB,
+	FXOS8700_M_OUT_Z_MSB,
+	FXOS8700_M_OUT_Z_LSB,
+
+	FXOS8700_M_CTRL_REG1 = 0x5B,
+
 	MMA8451_REG_END,
 };
 
@@ -124,18 +134,28 @@ enum {
 	MMA_ACTIVED,
 };
 
+enum {
+	FXOS_ACCEL_ONLY = 0,
+	FXOS_MAG_ONLY,
+	FXOS_NONE,
+	FXOS_HYBRID,
+};
+
 /* mma8451 status */
 struct mma8451_status {
 	u8 mode;
 	u8 ctl_reg1;
 	int active;
 	int position;
+	int hybrid_mode;
 };
 
 static struct mma8451_status mma_status;
 static struct input_polled_dev *mma8451_idev;
+static struct input_polled_dev *fxos8700_m_idev;
 static struct device *hwmon_dev;
 static struct i2c_client *mma8451_i2c_client;
+static int client_id;
 
 static int senstive_mode = MODE_2G;
 static int ACCHAL[8][3][3] = {
@@ -182,6 +202,14 @@ static int mma8451_change_mode(struct i2c_client *client, int mode)
 		goto out;
 	mma_status.active = MMA_STANDBY;
 
+	if (client_id == FXOS8700_ID) {
+		mma_status.hybrid_mode = FXOS_HYBRID;
+		result = i2c_smbus_write_byte_data(client, FXOS8700_M_CTRL_REG1, FXOS_HYBRID);
+		if (result < 0)
+			goto out;
+	}
+
+	mma_status.mode = mode;
 	result = i2c_smbus_write_byte_data(client, MMA8451_XYZ_DATA_CFG,
 					   mode);
 	if (result < 0)
@@ -195,13 +223,15 @@ out:
 	return result;
 }
 
-static int mma8451_read_data(short *x, short *y, short *z)
+static int mma8451_read_data(struct input_polled_dev *idev,
+		short *x, short *y, short *z)
 {
 	u8 tmp_data[MMA8451_BUF_SIZE];
+	char reg = (idev == mma8451_idev)?MMA8451_OUT_X_MSB:FXOS8700_M_OUT_X_MSB;
 	int ret;
 
 	ret = i2c_smbus_read_i2c_block_data(mma8451_i2c_client,
-					    MMA8451_OUT_X_MSB, 7, tmp_data);
+					    reg, 7, tmp_data);
 	if (ret < MMA8451_BUF_SIZE) {
 		dev_err(&mma8451_i2c_client->dev, "i2c block read failed\n");
 		return -EIO;
@@ -213,54 +243,64 @@ static int mma8451_read_data(short *x, short *y, short *z)
 	return 0;
 }
 
-static void report_abs(void)
+static void report_abs(struct input_polled_dev *idev)
 {
 	short x, y, z;
 	int result;
 	int retry = 3;
+	char reg = (idev == mma8451_idev)?MMA8451_STATUS:FXOS8700_M_DR_STATUS;
 
 	mutex_lock(&mma8451_lock);
 	if (mma_status.active == MMA_STANDBY)
 		goto out;
 	/* wait for the data ready */
 	do {
-		result = i2c_smbus_read_byte_data(mma8451_i2c_client,
-						  MMA8451_STATUS);
+		result = i2c_smbus_read_byte_data(mma8451_i2c_client, reg);
 		retry--;
 		msleep(1);
 	} while (!(result & MMA8451_STATUS_ZYXDR) && retry > 0);
 	if (retry == 0)
 		goto out;
-	if (mma8451_read_data(&x, &y, &z) != 0)
+	if (mma8451_read_data(idev, &x, &y, &z) != 0)
 		goto out;
 	mma8451_adjust_position(&x, &y, &z);
-	input_report_abs(mma8451_idev->input, ABS_X, x);
-	input_report_abs(mma8451_idev->input, ABS_Y, y);
-	input_report_abs(mma8451_idev->input, ABS_Z, z);
-	input_sync(mma8451_idev->input);
+	input_report_abs(idev->input, ABS_X, x);
+	input_report_abs(idev->input, ABS_Y, y);
+	input_report_abs(idev->input, ABS_Z, z);
+	input_sync(idev->input);
 out:
 	mutex_unlock(&mma8451_lock);
 }
 
 static void mma8451_dev_poll(struct input_polled_dev *dev)
 {
-	report_abs();
+	report_abs(dev);
 }
 
 static ssize_t mma8451_enable_show(struct device *dev,
 				   struct device_attribute *attr, char *buf)
 {
+	struct input_polled_dev *idev = dev_get_drvdata(dev);
 	struct i2c_client *client;
 	u8 val;
-	int enable;
+	int enable = 0;
 
 	mutex_lock(&mma8451_lock);
 	client = mma8451_i2c_client;
 	val = i2c_smbus_read_byte_data(client, MMA8451_CTRL_REG1);
-	if ((val & 0x01) && mma_status.active == MMA_ACTIVED)
-		enable = 1;
-	else
-		enable = 0;
+	if ((val & 0x01) && mma_status.active == MMA_ACTIVED) {
+		if (client_id == FXOS8700_ID) {
+			if (mma_status.hybrid_mode == FXOS_HYBRID)
+				enable = 1;
+			else if (mma_status.hybrid_mode == FXOS_ACCEL_ONLY
+				&& idev == mma8451_idev)
+				enable = 1;
+			else if (mma_status.hybrid_mode == FXOS_MAG_ONLY)
+				enable = 1;
+		}
+		else
+			enable = 1;
+	}
 	mutex_unlock(&mma8451_lock);
 	return sprintf(buf, "%d\n", enable);
 }
@@ -269,6 +309,7 @@ static ssize_t mma8451_enable_store(struct device *dev,
 				    struct device_attribute *attr,
 				    const char *buf, size_t count)
 {
+	struct input_polled_dev *idev = dev_get_drvdata(dev);
 	struct i2c_client *client;
 	int ret;
 	unsigned long enable;
@@ -283,6 +324,45 @@ static ssize_t mma8451_enable_store(struct device *dev,
 	mutex_lock(&mma8451_lock);
 	client = mma8451_i2c_client;
 	enable = (enable > 0) ? 1 : 0;
+	if (client_id == FXOS8700_ID) {
+		val = mma_status.hybrid_mode;
+		if (idev == mma8451_idev) {
+			if (enable) {
+				if (val == FXOS_NONE)
+					val = FXOS_ACCEL_ONLY;
+				else if (val == FXOS_MAG_ONLY)
+					val = FXOS_HYBRID;
+			} else {
+				if (val == FXOS_HYBRID)
+					val = FXOS_MAG_ONLY;
+				else if (val == FXOS_ACCEL_ONLY)
+					val = FXOS_NONE;
+			}
+		} else {
+			if (enable) {
+				if (val == FXOS_NONE)
+					val = FXOS_MAG_ONLY;
+				else if (val == FXOS_ACCEL_ONLY)
+					val = FXOS_HYBRID;
+			} else {
+				if (val == FXOS_HYBRID)
+					val = FXOS_ACCEL_ONLY;
+				else if (val == FXOS_MAG_ONLY)
+					val = FXOS_NONE;
+			}
+		}
+/*
+		if (val != FXOS_NONE) {
+			ret = i2c_smbus_write_byte_data(client,
+				FXOS8700_M_CTRL_REG1, val & 0x03);
+		}
+*/
+		mma_status.hybrid_mode = val;
+		if (mma_status.hybrid_mode == FXOS_NONE)
+			enable = 0;
+		else
+			enable = 1;
+	}
 	if (enable && mma_status.active == MMA_STANDBY) {
 		val = i2c_smbus_read_byte_data(client, MMA8451_CTRL_REG1);
 		ret =
@@ -410,7 +490,7 @@ static const struct attribute_group mma8451_attr_group = {
 static int mma8451_probe(struct i2c_client *client,
 				   const struct i2c_device_id *id)
 {
-	int result, client_id;
+	int result;
 	struct input_dev *idev;
 	struct i2c_adapter *adapter;
 	u32 pos;
@@ -469,18 +549,22 @@ static int mma8451_probe(struct i2c_client *client,
 		goto err_out;
 	}
 
+	/* create a polled input device for accelerometer */
 	mma8451_idev = input_allocate_polled_device();
 	if (!mma8451_idev) {
 		result = -ENOMEM;
 		dev_err(&client->dev, "alloc poll device failed!\n");
-		goto err_alloc_poll_device;
+		goto err_register_polled_device;
 	}
 	mma8451_idev->poll = mma8451_dev_poll;
 	mma8451_idev->poll_interval = POLL_INTERVAL;
 	mma8451_idev->poll_interval_min = POLL_INTERVAL_MIN;
 	mma8451_idev->poll_interval_max = POLL_INTERVAL_MAX;
 	idev = mma8451_idev->input;
-	idev->name = "mma845x";
+	if (client_id == FXOS8700_ID)
+		idev->name = "mma845x_a";
+	else
+		idev->name = "mma845x";
 	idev->id.bustype = BUS_I2C;
 	idev->evbit[0] = BIT_MASK(EV_ABS);
 
@@ -500,12 +584,51 @@ static int mma8451_probe(struct i2c_client *client,
 		goto err_register_polled_device;
 	}
 
+	/* create a polled input device for magnetometer */
+	if (client_id == FXOS8700_ID) {
+		fxos8700_m_idev = input_allocate_polled_device();
+		if (!fxos8700_m_idev) {
+			result = -ENOMEM;
+			dev_err(&client->dev, "alloc poll device failed!\n");
+			goto err_alloc_poll_device;
+		}
+		fxos8700_m_idev->poll = mma8451_dev_poll;
+		fxos8700_m_idev->poll_interval = POLL_INTERVAL;
+		fxos8700_m_idev->poll_interval_min = POLL_INTERVAL_MIN;
+		fxos8700_m_idev->poll_interval_max = POLL_INTERVAL_MAX;
+		idev = fxos8700_m_idev->input;
+		idev->name = "fxos8700_m";
+		idev->id.bustype = BUS_I2C;
+		idev->evbit[0] = BIT_MASK(EV_ABS);
+
+		input_set_abs_params(idev, ABS_X, -8192, 8191, INPUT_FUZZ, INPUT_FLAT);
+		input_set_abs_params(idev, ABS_Y, -8192, 8191, INPUT_FUZZ, INPUT_FLAT);
+		input_set_abs_params(idev, ABS_Z, -8192, 8191, INPUT_FUZZ, INPUT_FLAT);
+
+		result = input_register_polled_device(fxos8700_m_idev);
+		if (result) {
+			dev_err(&client->dev, "register poll device failed!\n");
+			goto err_register_polled_device1;
+		}
+		result = sysfs_create_group(&idev->dev.kobj, &mma8451_attr_group);
+		if (result) {
+			dev_err(&client->dev, "create device file failed!\n");
+			result = -EINVAL;
+			goto err_create_sysfs1;
+		}
+	}
+
 	result = of_property_read_u32(of_node, "position", &pos);
 	if (result)
 		pos = DEFAULT_POSITION;
 	mma_status.position = (int)pos;
 
 	return 0;
+
+err_create_sysfs1:
+	input_unregister_polled_device(fxos8700_m_idev);
+err_register_polled_device1:
+	input_free_polled_device(fxos8700_m_idev);
 err_register_polled_device:
 	input_free_polled_device(mma8451_idev);
 err_alloc_poll_device:
@@ -530,6 +653,13 @@ static int mma8451_remove(struct i2c_client *client)
 {
 	int ret;
 	ret = mma8451_stop_chip(client);
+
+	if (client_id == FXOS8700_ID) {
+		input_unregister_polled_device(fxos8700_m_idev);
+		input_free_polled_device(fxos8700_m_idev);
+	}
+	input_unregister_polled_device(mma8451_idev);
+	input_free_polled_device(mma8451_idev);
 	hwmon_device_unregister(hwmon_dev);
 
 	return ret;
@@ -557,6 +687,7 @@ static int mma8451_resume(struct device *dev)
 
 static const struct i2c_device_id mma8451_id[] = {
 	{"mma8451", 0},
+	{ }
 };
 
 MODULE_DEVICE_TABLE(i2c, mma8451_id);
