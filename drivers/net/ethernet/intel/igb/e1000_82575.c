@@ -2142,7 +2142,7 @@ static s32 igb_read_phy_reg_82580(struct e1000_hw *hw, u32 offset, u16 *data)
 	if (ret_val)
 		goto out;
 
-	ret_val = igb_read_phy_reg_mdic(hw, offset, data);
+	ret_val = igb_read_phy_reg_mdic(hw, hw->phy.addr, offset, data);
 
 	hw->phy.ops.release(hw);
 
@@ -2167,7 +2167,7 @@ static s32 igb_write_phy_reg_82580(struct e1000_hw *hw, u32 offset, u16 data)
 	if (ret_val)
 		goto out;
 
-	ret_val = igb_write_phy_reg_mdic(hw, offset, data);
+	ret_val = igb_write_phy_reg_mdic(hw, hw->phy.addr, offset, data);
 
 	hw->phy.ops.release(hw);
 
