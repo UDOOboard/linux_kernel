@@ -1884,8 +1884,16 @@ static ssize_t show_disp_dev(struct device *dev,
 	struct fb_info *info = dev_get_drvdata(dev);
 	struct mxcfb_info *mxcfbi = (struct mxcfb_info *)info->par;
 
-	if (mxcfbi->ipu_ch == MEM_FG_SYNC)
-		return sprintf(buf, "overlay\n");
+	/* foreground */
+	if (mxcfbi->ipu_ch == MEM_FG_SYNC) {
+		struct fb_info *fbi_tmp;
+		fbi_tmp = found_registered_fb(MEM_BG_SYNC, mxcfbi->ipu_id);
+		if (!fbi_tmp)
+			return sprintf(buf, "overlay\n");
+		mxcfbi = ((struct mxcfb_info *)(fbi_tmp->par));
+		return sprintf(buf, "%s overlay\n", mxcfbi->dispdrv->drv->name);
+	}
+	/* background */
 	else
 		return sprintf(buf, "%s\n", mxcfbi->dispdrv->drv->name);
 }
