@@ -1786,6 +1786,36 @@ static const struct ieee80211_iface_limit wl18xx_iface_ap_limits[] = {
 	},
 };
 
+static const struct ieee80211_iface_limit wl18xx_iface_ap_cl_limits[] = {
+	{
+		.max = 1,
+		.types = BIT(NL80211_IFTYPE_STATION),
+	},
+	{
+		.max = 1,
+		.types = BIT(NL80211_IFTYPE_AP),
+	},
+	{
+		.max = 1,
+		.types = BIT(NL80211_IFTYPE_P2P_CLIENT),
+	},
+};
+
+static const struct ieee80211_iface_limit wl18xx_iface_ap_go_limits[] = {
+	{
+		.max = 1,
+		.types = BIT(NL80211_IFTYPE_STATION),
+	},
+	{
+		.max = 1,
+		.types = BIT(NL80211_IFTYPE_AP),
+	},
+	{
+		.max = 1,
+		.types = BIT(NL80211_IFTYPE_P2P_GO),
+	},
+};
+
 static const struct ieee80211_iface_combination
 wl18xx_iface_combinations[] = {
 	{
@@ -1803,6 +1833,28 @@ wl18xx_iface_combinations[] = {
 					BIT(NL80211_CHAN_HT20) |
 					BIT(NL80211_CHAN_HT40MINUS) |
 					BIT(NL80211_CHAN_HT40PLUS),
+	},
+	{
+		.max_interfaces = 3,
+		.limits = wl18xx_iface_ap_cl_limits,
+		.n_limits = ARRAY_SIZE(wl18xx_iface_ap_cl_limits),
+		.num_different_channels = 2,
+	},
+	{
+		.max_interfaces = 3,
+		.limits = wl18xx_iface_ap_cl_limits,
+		.n_limits = ARRAY_SIZE(wl18xx_iface_ap_cl_limits),
+		.num_different_channels = 1,
+		.radar_detect_widths =  BIT(NL80211_CHAN_NO_HT) |
+					BIT(NL80211_CHAN_HT20) |
+					BIT(NL80211_CHAN_HT40MINUS) |
+					BIT(NL80211_CHAN_HT40PLUS),
+	},
+	{
+		.max_interfaces = 3,
+		.limits = wl18xx_iface_ap_go_limits,
+		.n_limits = ARRAY_SIZE(wl18xx_iface_ap_go_limits),
+		.num_different_channels = 1,
 	}
 };
 
