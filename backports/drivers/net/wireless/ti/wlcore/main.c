@@ -6084,8 +6084,9 @@ static int wl1271_init_ieee80211(struct wl1271 *wl)
 	wl->hw->wiphy->n_cipher_suites = ARRAY_SIZE(cipher_suites);
 
 	wl->hw->wiphy->interface_modes = BIT(NL80211_IFTYPE_STATION) |
-		BIT(NL80211_IFTYPE_ADHOC) | BIT(NL80211_IFTYPE_AP) |
-		BIT(NL80211_IFTYPE_P2P_CLIENT) | BIT(NL80211_IFTYPE_P2P_GO);
+					 BIT(NL80211_IFTYPE_AP) |
+					 BIT(NL80211_IFTYPE_P2P_CLIENT) |
+					 BIT(NL80211_IFTYPE_P2P_GO);
 	wl->hw->wiphy->max_scan_ssids = 1;
 	wl->hw->wiphy->max_sched_scan_ssids = 16;
 	wl->hw->wiphy->max_match_sets = 16;
