@@ -297,6 +297,66 @@ static const struct file_operations radar_detection_ops = {
 	.llseek = default_llseek,
 };
 
+static ssize_t radar_debug_mode_write(struct file *file,
+				      const char __user *user_buf,
+				      size_t count, loff_t *ppos)
+{
+	struct wl1271 *wl = file->private_data;
+	struct wl12xx_vif *wlvif;
+	unsigned long value;
+	int ret;
+
+	ret = kstrtoul_from_user(user_buf, count, 10, &value);
+	if (ret < 0) {
+		wl1271_warning("illegal value in radar_debug_mode!");
+		return -EINVAL;
+	}
+
+	/* valid values: 0/1 */
+	if (!(value == 0 || value == 1)) {
+		wl1271_warning("value is not in valid!");
+		return -EINVAL;
+	}
+
+	mutex_lock(&wl->mutex);
+
+	wl->radar_debug_mode = value;
+
+	if (unlikely(wl->state != WLCORE_STATE_ON))
+		goto out;
+
+	ret = wl1271_ps_elp_wakeup(wl);
+	if (ret < 0)
+		goto out;
+
+	wl12xx_for_each_wlvif_ap(wl, wlvif) {
+		wlcore_cmd_generic_cfg(wl, wlvif,
+				       WLCORE_CFG_FEATURE_RADAR_DEBUG,
+				       wl->radar_debug_mode, 0);
+	}
+
+	wl1271_ps_elp_sleep(wl);
+out:
+	mutex_unlock(&wl->mutex);
+	return count;
+}
+
+static ssize_t radar_debug_mode_read(struct file *file,
+				     char __user *userbuf,
+				     size_t count, loff_t *ppos)
+{
+	struct wl1271 *wl = file->private_data;
+	return wl1271_format_buffer(userbuf, count, ppos,
+				    "%d\n", wl->radar_debug_mode);
+}
+
+static const struct file_operations radar_debug_mode_ops = {
+	.write = radar_debug_mode_write,
+	.read = radar_debug_mode_read,
+	.open = simple_open,
+	.llseek = default_llseek,
+};
+
 int wl18xx_debugfs_add_files(struct wl1271 *wl,
 			     struct dentry *rootdir)
 {
@@ -464,6 +524,7 @@ int wl18xx_debugfs_add_files(struct wl1271 *wl,
 
 	DEBUGFS_ADD(conf, moddir);
 	DEBUGFS_ADD(radar_detection, moddir);
+	DEBUGFS_ADD(radar_debug_mode, moddir);
 
 	return 0;
 
