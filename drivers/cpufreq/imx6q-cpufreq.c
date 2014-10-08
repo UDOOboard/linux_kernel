@@ -50,6 +50,7 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	unsigned long freq_hz, volt, volt_old;
 	unsigned int old_freq, new_freq;
 	int ret;
+	int tol = 25000; /* 25mv tollerance */
 
 	mutex_lock(&set_cpufreq_lock);
 
@@ -84,7 +85,7 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	if (new_freq > old_freq) {
 		if (!IS_ERR(pu_reg) && regulator_is_enabled(pu_reg)) {
 			ret = regulator_set_voltage_tol(pu_reg,
-				imx6_soc_volt[index], 0);
+				imx6_soc_volt[index], tol);
 			if (ret) {
 				dev_err(cpu_dev,
 					"failed to scale vddpu up: %d\n", ret);
@@ -92,13 +93,13 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 				return ret;
 			}
 		}
-		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], 0);
+		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], tol);
 		if (ret) {
 			dev_err(cpu_dev, "failed to scale vddsoc up: %d\n", ret);
 			mutex_unlock(&set_cpufreq_lock);
 			return ret;
 		}
-		ret = regulator_set_voltage_tol(arm_reg, volt, 0);
+		ret = regulator_set_voltage_tol(arm_reg, volt, tol);
 		if (ret) {
 			dev_err(cpu_dev,
 				"failed to scale vddarm up: %d\n", ret);
@@ -137,27 +138,27 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	ret = clk_set_rate(arm_clk, new_freq * 1000);
 	if (ret) {
 		dev_err(cpu_dev, "failed to set clock rate: %d\n", ret);
-		regulator_set_voltage_tol(arm_reg, volt_old, 0);
+		regulator_set_voltage_tol(arm_reg, volt_old, tol);
 		mutex_unlock(&set_cpufreq_lock);
 		return ret;
 	}
 
 	/* scaling down?  scale voltage after frequency */
 	if (new_freq < old_freq) {
-		ret = regulator_set_voltage_tol(arm_reg, volt, 0);
+		ret = regulator_set_voltage_tol(arm_reg, volt, tol);
 		if (ret) {
 			dev_warn(cpu_dev,
 				 "failed to scale vddarm down: %d\n", ret);
 			ret = 0;
 		}
-		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], 0);
+		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], tol);
 		if (ret) {
 			dev_warn(cpu_dev, "failed to scale vddsoc down: %d\n", ret);
 			ret = 0;
 		}
 		if (!IS_ERR(pu_reg) && regulator_is_enabled(pu_reg)) {
 			ret = regulator_set_voltage_tol(pu_reg,
-				imx6_soc_volt[index], 0);
+				imx6_soc_volt[index], tol);
 			if (ret) {
 				dev_warn(cpu_dev,
 					"failed to scale vddpu down: %d\n",
