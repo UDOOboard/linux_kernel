@@ -111,6 +111,10 @@ struct edt_ft5x06_ts_data {
 
 	struct edt_reg_addr reg_addr;
 	enum edt_ver version;
+
+	bool invert;
+	int screen_x;
+	int screen_y;
 };
 
 static int edt_ft5x06_ts_readwrite(struct i2c_client *client,
@@ -235,6 +239,13 @@ static irqreturn_t edt_ft5x06_ts_isr(int irq, void *dev_id)
 		y = ((buf[2] << 8) | buf[3]) & 0x0fff;
 		id = (buf[2] >> 4) & 0x0f;
 		down = (type != TOUCH_EVENT_UP);
+
+		/* invert axis */
+		if (tsdata->invert) {
+			x = tsdata->screen_x - x;
+			y = tsdata->screen_y - y;
+		}
+		dev_dbg(dev, "%d: %dx%d %s\n", id, x, y, down ? "UP" : "DOWN");
 
 		input_mt_slot(tsdata->input, id);
 		input_mt_report_slot_state(tsdata->input, MT_TOOL_FINGER, down);
@@ -873,6 +884,11 @@ static void edt_ft5x06_ts_get_dt_defaults(struct device_node *np,
 	EDT_GET_PROP(threshold, reg_addr->reg_threshold);
 	EDT_GET_PROP(gain, reg_addr->reg_gain);
 	EDT_GET_PROP(offset, reg_addr->reg_offset);
+
+	if (of_property_read_bool(np, "invert"))
+		tsdata->invert = true;
+	of_property_read_u32(np, "screen-x", &tsdata->screen_x);
+	of_property_read_u32(np, "screen-y", &tsdata->screen_y);
 }
 
 static void
@@ -1028,10 +1044,16 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 		edt_ft5x06_ts_get_defaults(tsdata, pdata);
 
 	edt_ft5x06_ts_get_parameters(tsdata);
+	if (!tsdata->screen_x || !tsdata->screen_y) {
+		tsdata->screen_x = tsdata->num_x * 64 - 1;
+		tsdata->screen_y = tsdata->num_y * 64 - 1;
+	}
 
 	dev_dbg(&client->dev,
-		"Model \"%s\", Rev. \"%s\", %dx%d sensors\n",
-		tsdata->name, fw_version, tsdata->num_x, tsdata->num_y);
+		"Model \"%s\", Rev. \"%s\", %dx%d sensors (%dx%d) %sinverted\n",
+		tsdata->name, fw_version, tsdata->num_x, tsdata->num_y,
+		tsdata->screen_x, tsdata->screen_y,
+		tsdata->invert ? "" : "non");
 
 	input->name = tsdata->name;
 	input->id.bustype = BUS_I2C;
@@ -1041,12 +1063,12 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	__set_bit(EV_KEY, input->evbit);
 	__set_bit(EV_ABS, input->evbit);
 	__set_bit(BTN_TOUCH, input->keybit);
-	input_set_abs_params(input, ABS_X, 0, tsdata->num_x * 64 - 1, 0, 0);
-	input_set_abs_params(input, ABS_Y, 0, tsdata->num_y * 64 - 1, 0, 0);
+	input_set_abs_params(input, ABS_X, 0, tsdata->screen_x - 1, 0, 0);
+	input_set_abs_params(input, ABS_Y, 0, tsdata->screen_y - 1, 0, 0);
 	input_set_abs_params(input, ABS_MT_POSITION_X,
-			     0, tsdata->num_x * 64 - 1, 0, 0);
+			     0, tsdata->screen_x - 1, 0, 0);
 	input_set_abs_params(input, ABS_MT_POSITION_Y,
-			     0, tsdata->num_y * 64 - 1, 0, 0);
+			     0, tsdata->screen_y - 1, 0, 0);
 	error = input_mt_init_slots(input, MAX_SUPPORT_POINTS, 0);
 	if (error) {
 		dev_err(&client->dev, "Unable to init MT slots.\n");
