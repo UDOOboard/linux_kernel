@@ -15,6 +15,7 @@
  */
 
 #include <linux/kernel.h>
+#include <linux/gpio.h>
 #include <linux/i2c.h>
 #include <linux/input.h>
 #include <linux/input/mt.h>
@@ -23,6 +24,7 @@
 #include <linux/irq.h>
 #include <linux/interrupt.h>
 #include <linux/slab.h>
+#include <linux/of_gpio.h>
 #include <asm/unaligned.h>
 
 struct goodix_ts_data {
@@ -322,6 +324,10 @@ static int goodix_ts_probe(struct i2c_client *client,
 	unsigned long irq_flags;
 	int error;
 	u16 version_info;
+#ifdef CONFIG_OF
+	int reset_pin;
+	int int_pin;
+#endif
 
 	dev_dbg(&client->dev, "I2C Address: 0x%02x\n", client->addr);
 
@@ -333,6 +339,49 @@ static int goodix_ts_probe(struct i2c_client *client,
 	ts = devm_kzalloc(&client->dev, sizeof(*ts), GFP_KERNEL);
 	if (!ts)
 		return -ENOMEM;
+
+#ifdef CONFIG_OF
+	/*
+	 * The GT9110 requires that INT be driven low by the host for 50ms
+	 * after sampling the state of INT to determine its slave address.
+	 * If reset-gpio and int-gpio are provided in the device-tree, perform
+	 * this init sequence.
+	 */
+	reset_pin = of_get_named_gpio(client->dev.of_node, "reset-gpio", 0);
+	int_pin = of_get_named_gpio(client->dev.of_node, "int-gpio", 0);
+	if (gpio_is_valid(reset_pin) && gpio_is_valid(int_pin)) {
+		int int_val = (client->addr == 0x14) ?
+			      GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW;
+
+		error = devm_gpio_request_one(&client->dev,
+				reset_pin, GPIOF_OUT_INIT_LOW,
+				"gtxx reset");
+		if (error) {
+			dev_err(&client->dev,
+				"Failed to request gpio%d reset pin: %d\n",
+				reset_pin, error);
+			return error;
+		}
+		error = devm_gpio_request_one(&client->dev,
+				int_pin, int_val, "gtxx int");
+		if (error) {
+			dev_err(&client->dev,
+				"Failed to request gpio%d int pin: %d\n",
+				int_pin, error);
+			return error;
+		}
+
+		msleep(5);
+		gpio_set_value(reset_pin, 1);
+		msleep(5);
+		gpio_set_value(int_pin, 0);
+		msleep(50);
+		gpio_direction_input(int_pin);
+
+		dev_info(&client->dev, "Performed init sequence using "
+			 "gpio%d/gpio%d as RST#/INT\n", reset_pin, int_pin);
+	}
+#endif
 
 	ts->client = client;
 	i2c_set_clientdata(client, ts);
