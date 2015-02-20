@@ -34,6 +34,8 @@ struct goodix_ts_data {
 	int abs_y_max;
 	unsigned int max_touch_num;
 	unsigned int int_trigger_type;
+	bool invert;
+	bool rotate;
 };
 
 #define GOODIX_MAX_HEIGHT		4096
@@ -127,8 +129,17 @@ static void goodix_ts_report_touch(struct goodix_ts_data *ts, u8 *coor_data)
 
 	input_mt_slot(ts->input_dev, id);
 	input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, true);
-	input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_x);
-	input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_y);
+	if (ts->invert) {
+		input_x = ts->abs_x_max - input_x;
+		input_y = ts->abs_y_max - input_y;
+	}
+	if (ts->rotate) {
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
+	} else {
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_x);
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_y);
+	}
 	input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, input_w);
 	input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, input_w);
 }
@@ -207,8 +218,13 @@ static void goodix_read_config(struct goodix_ts_data *ts)
 		return;
 	}
 
-	ts->abs_x_max = get_unaligned_le16(&config[RESOLUTION_LOC]);
-	ts->abs_y_max = get_unaligned_le16(&config[RESOLUTION_LOC + 2]);
+	if (ts->rotate) {
+		ts->abs_x_max = get_unaligned_le16(&config[RESOLUTION_LOC + 2]);
+		ts->abs_y_max = get_unaligned_le16(&config[RESOLUTION_LOC]);
+	} else {
+		ts->abs_x_max = get_unaligned_le16(&config[RESOLUTION_LOC]);
+		ts->abs_y_max = get_unaligned_le16(&config[RESOLUTION_LOC + 2]);
+	}
 	ts->int_trigger_type = (config[TRIGGER_LOC]) & 0x03;
 	if (!ts->abs_x_max || !ts->abs_y_max) {
 		dev_err(&ts->client->dev,
@@ -327,6 +343,7 @@ static int goodix_ts_probe(struct i2c_client *client,
 #ifdef CONFIG_OF
 	int reset_pin;
 	int int_pin;
+	struct device_node *np = client->dev.of_node;
 #endif
 
 	dev_dbg(&client->dev, "I2C Address: 0x%02x\n", client->addr);
@@ -347,8 +364,8 @@ static int goodix_ts_probe(struct i2c_client *client,
 	 * If reset-gpio and int-gpio are provided in the device-tree, perform
 	 * this init sequence.
 	 */
-	reset_pin = of_get_named_gpio(client->dev.of_node, "reset-gpio", 0);
-	int_pin = of_get_named_gpio(client->dev.of_node, "int-gpio", 0);
+	reset_pin = of_get_named_gpio(np, "reset-gpio", 0);
+	int_pin = of_get_named_gpio(np, "int-gpio", 0);
 	if (gpio_is_valid(reset_pin) && gpio_is_valid(int_pin)) {
 		int int_val = (client->addr == 0x14) ?
 			      GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW;
@@ -381,6 +398,11 @@ static int goodix_ts_probe(struct i2c_client *client,
 		dev_info(&client->dev, "Performed init sequence using "
 			 "gpio%d/gpio%d as RST#/INT\n", reset_pin, int_pin);
 	}
+
+	if (of_property_read_bool(np, "invert"))
+		ts->invert = true;
+	if (of_property_read_bool(np, "rotate"))
+		ts->rotate = true;
 #endif
 
 	ts->client = client;
