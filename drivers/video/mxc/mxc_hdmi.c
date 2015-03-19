@@ -273,16 +273,12 @@ static ssize_t mxc_hdmi_show_edid(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct mxc_hdmi *hdmi = dev_get_drvdata(dev);
-	int i, j, len = 0;
+	int j;
 
-	for (j = 0; j < HDMI_EDID_LEN/16; j++) {
-		for (i = 0; i < 16; i++)
-			len += sprintf(buf+len, "0x%02X ",
-					hdmi->edid[j*16 + i]);
-		len += sprintf(buf+len, "\n");
-	}
+	for (j = 0; j < HDMI_EDID_LEN; j++)
+		buf[j] = hdmi->edid[j];
 
-	return len;
+	return HDMI_EDID_LEN;
 }
 
 static DEVICE_ATTR(edid, S_IRUGO, mxc_hdmi_show_edid, NULL);
