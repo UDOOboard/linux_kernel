@@ -146,6 +146,11 @@ int boot_secondary(unsigned int cpu, struct task_struct *idle)
 	return -ENOSYS;
 }
 
+int platform_can_secondary_boot(void)
+{
+	return !!smp_ops.smp_boot_secondary;
+}
+
 int platform_can_cpu_hotplug(void)
 {
 #ifdef CONFIG_HOTPLUG_CPU
