@@ -70,9 +70,9 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	rcu_read_unlock();
 	volt_old = regulator_get_voltage(arm_reg);
 
-	dev_dbg(cpu_dev, "%u MHz, %ld mV --> %u MHz, %ld mV\n",
+	dev_dbg(cpu_dev, "%u MHz, %ld mV --> %u MHz, %ld/%d mV\n",
 		old_freq / 1000, volt_old / 1000,
-		new_freq / 1000, volt / 1000);
+		new_freq / 1000, volt / 1000, imx6_soc_volt[index] / 1000);
 	/*
 	 * CPU freq is increasing, so need to ensure
 	 * that bus frequency is increased too.
