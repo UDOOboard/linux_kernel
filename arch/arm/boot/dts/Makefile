@@ -181,32 +181,16 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-sabresd-ldo.dtb \
 	imx6q-sbc6x.dtb \
 	imx6q-udoo.dtb \
+	imx6sx-udooneo.dtb \
+	imx6sx-udooneo-7lvds.dtb \
+	imx6sx-udooneo-15lvds.dtb \
 	imx6q-wandboard.dtb \
 	imx6sl-evk.dtb \
 	imx6sl-evk-csi.dtb \
 	imx6sl-evk-ldo.dtb \
 	imx6sl-evk-pf200.dtb \
 	imx6sl-evk-uart.dtb \
-	imx6sx-17x17-arm2.dtb \
-	imx6sx-17x17-arm2-ldo.dtb \
-	imx6sx-17x17-arm2-ecspi.dtb \
-	imx6sx-17x17-arm2-gpmi-weim.dtb \
-	imx6sx-17x17-arm2-mlb.dtb \
-	imx6sx-19x19-arm2.dtb \
-	imx6sx-19x19-arm2-ldo.dtb \
-	imx6sx-19x19-arm2-csi.dtb \
-	imx6sx-19x19-arm2-lcdif1.dtb \
-	imx6sx-19x19-arm2-gpmi-weim.dtb \
-	imx6sx-sdb.dtb \
-	imx6sx-sdb-ldo.dtb \
-	imx6sx-sdb-reva.dtb \
-	imx6sx-sdb-reva-ldo.dtb \
-	imx6sx-sabreauto.dtb \
-	imx6sx-sabreauto-m4.dtb \
-	imx6sx-sdb-lcdif1.dtb \
 	vf610-cosmic.dtb \
-	imx6sx-sdb-emmc.dtb \
-	imx6sx-sdb-m4.dtb \
 	vf610-twr.dtb
 dtb-$(CONFIG_ARCH_MXS) += imx23-evk.dtb \
 	imx23-olinuxino.dtb \
