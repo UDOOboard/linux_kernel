@@ -358,12 +358,14 @@
         pinctrl-0 = <&pinctrl_i2c2_1>;
         status = "okay";
 
-	fxos8700@1e {
+	accelerometer: fxos8700@1e {
 		compatible = "fsl,fxos8700";
 		reg = <0x1e>;
-		interrupt-parent = <&gpio4>;
-		interrupts = <26 14>;
-		shared-interrupt;
+	};
+
+	gyroscope: fxas2100x@20 {
+		compatible = "fsl,fxas2100x";
+		reg = <0x20>;
 	};
 
 //	egalax_ts@04 {

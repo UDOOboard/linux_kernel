@@ -1,0 +1,13 @@
+config FXOS8700_ACC_MAG_I2C
+tristate "FXOS8700 - 6-Axis Acc and Mag Combo Sensor driver" 
+depends on ARM
+default y if ARM
+help
+  Freescale FXOS8700 - Digital Sensor - 3D Accelerometer (±2g/±4g/±8g) + 3D Magnetometer.
+
+config FXAS2100X_GYRO_I2C
+tristate "FXAS21002C - Freescale 3-Axis Digital Gyroscope driver" 
+depends on ARM
+default y if ARM
+help
+  Freescale FXAS21002C - Freescale 3-Axis Digital Gyroscope driver.
