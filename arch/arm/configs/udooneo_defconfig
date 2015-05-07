@@ -1078,6 +1078,12 @@ CONFIG_EEPROM_AT25=y
 #
 
 #
+# Freescale Motion sensor Driver
+#
+CONFIG_FXOS8700_ACC_MAG_I2C=y
+CONFIG_FXAS2100X_GYRO_I2C=y
+
+#
 # SCSI device support
 #
 CONFIG_SCSI_MOD=y

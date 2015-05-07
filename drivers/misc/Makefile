@@ -57,3 +57,6 @@ obj-$(CONFIG_LATTICE_ECP3_CONFIG)	+= lattice-ecp3-config.o
 obj-$(CONFIG_SRAM)		+= sram.o
 obj-y				+= mic/
 obj-$(CONFIG_GENWQE)		+= genwqe/
+obj-$(CONFIG_FXOS8700_ACC_MAG_I2C)	+= udooneo/
+obj-$(CONFIG_FXAS2100X_GYRO_I2C)	+= udooneo/
+
