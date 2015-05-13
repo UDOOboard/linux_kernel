@@ -1151,6 +1151,13 @@ static int wl18xx_hw_init(struct wl1271 *wl)
 	return ret;
 }
 
+static int wl18xx_init_vif(struct wl1271 *wl, struct wl12xx_vif *wlvif)
+{
+	return wlcore_cmd_generic_cfg(wl, wlvif,
+				      WLCORE_CFG_FEATURE_DIVERSITY_MODE,
+				      wl->diversity_mode, 0);
+}
+
 static void wl18xx_convert_fw_status(struct wl1271 *wl, void *raw_fw_status,
 				     struct wl_fw_status *fw_status)
 {
@@ -1692,6 +1699,7 @@ static struct wlcore_ops wl18xx_ops = {
 	.tx_immediate_compl = wl18xx_tx_immediate_completion,
 	.tx_delayed_compl = NULL,
 	.hw_init	= wl18xx_hw_init,
+	.init_vif	= wl18xx_init_vif,
 	.convert_fw_status = wl18xx_convert_fw_status,
 	.set_tx_desc_csum = wl18xx_set_tx_desc_csum,
 	.get_pg_ver	= wl18xx_get_pg_ver,
@@ -1990,10 +1998,8 @@ static int wl18xx_setup(struct wl1271 *wl)
 				  &wl18xx_siso20_ht_cap);
 	}
 
-	if (!checksum_param) {
+	if (!checksum_param)
 		wl18xx_ops.set_rx_csum = NULL;
-		wl18xx_ops.init_vif = NULL;
-	}
 
 	/* Enable 11a Band only if we have 5G antennas */
 	wl->enable_11a = (priv->conf.phy.number_of_assembled_ant5 != 0);

@@ -655,6 +655,7 @@ struct wl12xx_cmd_regdomain_dfs_config {
 } __packed;
 
 enum wlcore_generic_cfg_feature {
+	WLCORE_CFG_FEATURE_DIVERSITY_MODE = 1,
 	WLCORE_CFG_FEATURE_RADAR_DEBUG = 2,
 };
 

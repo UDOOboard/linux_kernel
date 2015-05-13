@@ -509,6 +509,9 @@ struct wl1271 {
 
 	/* dynamic fw traces */
 	u32 dynamic_fw_traces;
+
+	/* antenna diversity shut down */
+	u8 diversity_mode;
 };
 
 int wlcore_probe(struct wl1271 *wl, struct platform_device *pdev);
