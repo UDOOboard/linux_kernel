@@ -15,7 +15,6 @@
 / {
 	aliases {
 		ipu1 = &ipu2;
-		spi4 = &ecspi5;
 	};
 
 	cpus {
@@ -83,15 +82,15 @@
 
 	soc {
 		busfreq {
-                        compatible = "fsl,imx6_busfreq";
-                        clocks = <&clks 171>, <&clks 6>, <&clks 11>, <&clks 104>, <&clks 172>, <&clks 58>,
-                                <&clks 18>, <&clks 60>, <&clks 20>, <&clks 3>;
-                        clock-names = "pll2_bus", "pll2_pfd2_396m", "pll2_198m", "arm", "pll3_usb_otg", "periph",
-                                "periph_pre", "periph_clk2", "periph_clk2_sel", "osc";
-                        interrupts = <0 107 0x04>, <0 112 0x4>, <0 113 0x4>, <0 114 0x4>;
-                        interrupt-names = "irq_busfreq_0", "irq_busfreq_1", "irq_busfreq_2", "irq_busfreq_3";
-                        fsl,max_ddr_freq = <528000000>;
-                };
+			compatible = "fsl,imx6_busfreq";
+			clocks = <&clks 171>, <&clks 6>, <&clks 11>, <&clks 104>, <&clks 172>, <&clks 58>,
+				<&clks 18>, <&clks 60>, <&clks 20>, <&clks 3>;
+			clock-names = "pll2_bus", "pll2_pfd2_396m", "pll2_198m", "arm", "pll3_usb_otg", "periph",
+				"periph_pre", "periph_clk2", "periph_clk2_sel", "osc";
+			interrupts = <0 107 0x04>, <0 112 0x4>, <0 113 0x4>, <0 114 0x4>;
+			interrupt-names = "irq_busfreq_0", "irq_busfreq_1", "irq_busfreq_2", "irq_busfreq_3";
+			fsl,max_ddr_freq = <528000000>;
+		};
 
 		gpu@00130000 {
 			compatible = "fsl,imx6q-gpu";
@@ -131,39 +130,6 @@
 			reg = <0x00905000 0x3B000>;
 			clocks = <&clks IMX6QDL_CLK_OCRAM>;
 		};
-		
-		hdmi_core: hdmi_core@00120000 {
-                        compatible = "fsl,imx6q-hdmi-core";
-                        reg = <0x00120000 0x9000>;
-                        clocks = <&clks 124>, <&clks 123>, <&clks 138>;
-                        clock-names = "hdmi_isfr", "hdmi_iahb", "mipi_core";
-                        status = "disabled";
-                };
-
-                hdmi_video: hdmi_video@020e0000 {
-                        compatible = "fsl,imx6q-hdmi-video";
-                        reg = <0x020e0000 0x1000>;
-                        reg-names = "hdmi_gpr";
-                        interrupts = <0 115 0x04>;
-                        clocks = <&clks 124>, <&clks 123>, <&clks 138>;
-                        clock-names = "hdmi_isfr", "hdmi_iahb", "mipi_core";
-                        status = "disabled";
-                };
-
-                hdmi_audio: hdmi_audio@00120000 {
-                        compatible = "fsl,imx6q-hdmi-audio";
-                        clocks = <&clks 124>, <&clks 123>, <&clks 138>;
-                        clock-names = "hdmi_isfr", "hdmi_iahb", "mipi_core";
-                        dmas = <&sdma 2 23 0>;
-                        dma-names = "tx";
-                        status = "disabled";
-                };
-
-                hdmi_cec: hdmi_cec@00120000 {
-                        compatible = "fsl,imx6q-hdmi-cec";
-                        interrupts = <0 115 0x04>;
-                        status = "disabled";
-                };
 
 		aips-bus@02000000 { /* AIPS1 */
 			spba-bus@02000000 {
@@ -179,10 +145,6 @@
 					status = "disabled";
 				};
 			};
-
-                        vpu@02040000 {
-                                status = "okay";
-                        };
 
 			iomuxc: iomuxc@020e0000 {
 				compatible = "fsl,imx6q-iomuxc";
@@ -265,4 +227,41 @@
 			bypass_reset = <0>;
 		};
 	};
+};
+
+&ecspi1 {
+	dmas = <&sdma 3 7 1>, <&sdma 4 7 2>;
+	dma-names = "rx", "tx";
+};
+
+&ecspi2 {
+	dmas = <&sdma 5 7 1>, <&sdma 6 7 2>;
+	dma-names = "rx", "tx";
+};
+
+&ecspi3 {
+	dmas = <&sdma 7 7 1>, <&sdma 8 7 2>;
+	dma-names = "rx", "tx";
+};
+
+&ecspi4 {
+	dmas = <&sdma 9 7 1>, <&sdma 10 7 2>;
+	dma-names = "rx", "tx";
+};
+
+&ldb {
+	compatible = "fsl,imx6q-ldb", "fsl,imx53-ldb";
+
+	clocks = <&clks IMX6QDL_CLK_LDB_DI0>, <&clks IMX6QDL_CLK_LDB_DI1>,
+		 <&clks IMX6QDL_CLK_IPU1_DI0_SEL>, <&clks IMX6QDL_CLK_IPU1_DI1_SEL>,
+		 <&clks IMX6QDL_CLK_IPU2_DI0_SEL>, <&clks IMX6QDL_CLK_IPU2_DI1_SEL>,
+		 <&clks IMX6QDL_CLK_LDB_DI0_DIV_3_5>, <&clks IMX6QDL_CLK_LDB_DI1_DIV_3_5>,
+		 <&clks IMX6QDL_CLK_LDB_DI0_DIV_7>, <&clks IMX6QDL_CLK_LDB_DI1_DIV_7>,
+		 <&clks IMX6QDL_CLK_LDB_DI0_DIV_SEL>, <&clks IMX6QDL_CLK_LDB_DI1_DIV_SEL>;
+	clock-names = "ldb_di0", "ldb_di1",
+		      "di0_sel", "di1_sel",
+		      "di2_sel", "di3_sel",
+		      "ldb_di0_div_3_5", "ldb_di1_div_3_5",
+		      "ldb_di0_div_7", "ldb_di1_div_7",
+		      "ldb_di0_div_sel", "ldb_di1_div_sel";
 };
