@@ -17,6 +17,9 @@
 
 / {
 	aliases {
+		ethernet0 = &fec;
+		can0 = &can1;
+		can1 = &can2;
 		gpio0 = &gpio1;
 		gpio1 = &gpio2;
 		gpio2 = &gpio3;
@@ -61,19 +64,26 @@
 
 		ckil {
 			compatible = "fsl,imx-ckil", "fixed-clock";
+			#clock-cells = <0>;
 			clock-frequency = <32768>;
 		};
 
 		ckih1 {
 			compatible = "fsl,imx-ckih1", "fixed-clock";
+			#clock-cells = <0>;
 			clock-frequency = <0>;
 		};
 
 		osc {
 			compatible = "fsl,imx-osc", "fixed-clock";
+			#clock-cells = <0>;
 			clock-frequency = <24000000>;
 		};
 	};
+
+        pu_dummy: pudummy_reg {
+                compatible = "fsl,imx6-dummy-pureg"; /* only used in ldo-bypass */
+        };
 
 	soc {
 		#address-cells = <1>;
@@ -141,6 +151,8 @@
 			cache-level = <2>;
 			arm,tag-latency = <4 2 3>;
 			arm,data-latency = <4 2 3>;
+                        arm,dynamic-clk-gating;
+                        arm,standby-mode;
 		};
 
 		pcie: pcie@0x01000000 {
@@ -171,45 +183,6 @@
 		pmu {
 			compatible = "arm,cortex-a9-pmu";
 			interrupts = <0 94 IRQ_TYPE_LEVEL_HIGH>;
-		};
-
-		hdmi_core: hdmi_core@00120000 {
-			compatible = "fsl,imx6q-hdmi-core";
-			reg = <0x00120000 0x9000>;
-			clocks = <&clks IMX6QDL_CLK_HDMI_ISFR>,
-					<&clks IMX6QDL_CLK_HDMI_IAHB>,
-					<&clks IMX6QDL_CLK_HSI_TX>;
-			clock-names = "hdmi_isfr", "hdmi_iahb", "mipi_core";
-			status = "disabled";
-		};
-
-		hdmi_video: hdmi_video@020e0000 {
-			compatible = "fsl,imx6q-hdmi-video";
-			reg = <0x020e0000 0x1000>;
-			reg-names = "hdmi_gpr";
-			interrupts = <0 115 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&clks IMX6QDL_CLK_HDMI_ISFR>,
-					<&clks IMX6QDL_CLK_HDMI_IAHB>,
-					<&clks IMX6QDL_CLK_HSI_TX>;
-			clock-names = "hdmi_isfr", "hdmi_iahb", "mipi_core";
-			status = "disabled";
-		};
-
-		hdmi_audio: hdmi_audio@00120000 {
-			compatible = "fsl,imx6q-hdmi-audio";
-			clocks = <&clks IMX6QDL_CLK_HDMI_ISFR>,
-					<&clks IMX6QDL_CLK_HDMI_IAHB>,
-					<&clks IMX6QDL_CLK_HSI_TX>;
-			clock-names = "hdmi_isfr", "hdmi_iahb", "mipi_core";
-			dmas = <&sdma 2 24 0>;
-			dma-names = "tx";
-			status = "disabled";
-		};
-
-		hdmi_cec: hdmi_cec@00120000 {
-			compatible = "fsl,imx6q-hdmi-cec";
-			interrupts = <0 115 IRQ_TYPE_LEVEL_HIGH>;
-			status = "disabled";
 		};
 
 		aips-bus@02000000 { /* AIPS1 */
@@ -255,6 +228,8 @@
 					clocks = <&clks IMX6QDL_CLK_ECSPI1>,
 						 <&clks IMX6QDL_CLK_ECSPI1>;
 					clock-names = "ipg", "per";
+					dmas = <&sdma 3 7 1>, <&sdma 4 7 2>;
+					dma-names = "rx", "tx";
 					status = "disabled";
 				};
 
@@ -267,6 +242,8 @@
 					clocks = <&clks IMX6QDL_CLK_ECSPI2>,
 						 <&clks IMX6QDL_CLK_ECSPI2>;
 					clock-names = "ipg", "per";
+					dmas = <&sdma 5 7 1>, <&sdma 6 7 2>;
+					dma-names = "rx", "tx";
 					status = "disabled";
 				};
 
@@ -279,6 +256,8 @@
 					clocks = <&clks IMX6QDL_CLK_ECSPI3>,
 						 <&clks IMX6QDL_CLK_ECSPI3>;
 					clock-names = "ipg", "per";
+					dmas = <&sdma 7 7 1>, <&sdma 8 7 2>;
+					dma-names = "rx", "tx";
 					status = "disabled";
 				};
 
@@ -291,6 +270,8 @@
 					clocks = <&clks IMX6QDL_CLK_ECSPI4>,
 						 <&clks IMX6QDL_CLK_ECSPI4>;
 					clock-names = "ipg", "per";
+					dmas = <&sdma 9 7 1>, <&sdma 10 7 2>;
+					dma-names = "rx", "tx";
 					status = "disabled";
 				};
 
@@ -323,6 +304,7 @@
 				};
 
 				ssi1: ssi@02028000 {
+					#sound-dai-cells = <0>;
 					compatible = "fsl,imx6q-ssi","fsl,imx21-ssi";
 					reg = <0x02028000 0x4000>;
 					interrupts = <0 46 IRQ_TYPE_LEVEL_HIGH>;
@@ -338,6 +320,7 @@
 				};
 
 				ssi2: ssi@0202c000 {
+					#sound-dai-cells = <0>;
 					compatible = "fsl,imx6q-ssi","fsl,imx21-ssi";
 					reg = <0x0202c000 0x4000>;
 					interrupts = <0 47 IRQ_TYPE_LEVEL_HIGH>;
@@ -353,6 +336,7 @@
 				};
 
 				ssi3: ssi@02030000 {
+					#sound-dai-cells = <0>;
 					compatible = "fsl,imx6q-ssi","fsl,imx21-ssi";
 					reg = <0x02030000 0x4000>;
 					interrupts = <0 48 IRQ_TYPE_LEVEL_HIGH>;
@@ -392,6 +376,15 @@
 					status = "okay";
 				};
 
+ 				asrc_p2p: asrc_p2p {
+                                        compatible = "fsl,imx6q-asrc-p2p";
+                                        fsl,output-rate  = <48000>;
+                                        fsl,output-width = <16>;
+                                        fsl,asrc-dma-rx-events = <17 18 19>;
+                                        fsl,asrc-dma-tx-events = <20 21 22>;
+                                        status = "okay";
+                                };
+
 				spba@0203c000 {
 					reg = <0x0203c000 0x4000>;
 				};
@@ -411,7 +404,8 @@
 				iramsize = <0x21000>;
 				iram = <&ocram>;
 				resets = <&src 1>;
-				power-domains = <&gpc 1>;
+				pu-supply = <&reg_pu>;
+				status = "disabled";
 			};
 
 			aipstz@0207c000 { /* AIPSTZ1 */
@@ -458,7 +452,7 @@
 				clock-names = "ipg", "per";
 			};
 
-			flexcan1: can@02090000 {
+			can1: flexcan@02090000 {
 				compatible = "fsl,imx6q-flexcan";
 				reg = <0x02090000 0x4000>;
 				interrupts = <0 110 IRQ_TYPE_LEVEL_HIGH>;
@@ -469,7 +463,7 @@
 				status = "disabled";
 			};
 
-			flexcan2: can@02094000 {
+			can2: flexcan@02094000 {
 				compatible = "fsl,imx6q-flexcan";
 				reg = <0x02094000 0x4000>;
 				interrupts = <0 111 IRQ_TYPE_LEVEL_HIGH>;
@@ -485,8 +479,9 @@
 				reg = <0x02098000 0x4000>;
 				interrupts = <0 55 IRQ_TYPE_LEVEL_HIGH>;
 				clocks = <&clks IMX6QDL_CLK_GPT_IPG>,
-					 <&clks IMX6QDL_CLK_GPT_IPG_PER>;
-				clock-names = "ipg", "per";
+					 <&clks IMX6QDL_CLK_GPT_IPG_PER>,
+					 <&clks IMX6QDL_CLK_GPT_3M>;
+				clock-names = "ipg", "per", "osc_per";
 			};
 
 			gpio1: gpio@0209c000 {
@@ -567,8 +562,11 @@
 			};
 
 			kpp: kpp@020b8000 {
+				compatible = "fsl,imx6q-kpp", "fsl,imx21-kpp";
 				reg = <0x020b8000 0x4000>;
 				interrupts = <0 82 IRQ_TYPE_LEVEL_HIGH>;
+				clocks = <&clks IMX6QDL_CLK_IPG>;
+				status = "disabled";
 			};
 
 			wdog1: wdog@020bc000 {
@@ -670,6 +668,7 @@
 					regulator-max-microvolt = <1450000>;
 					regulator-enable-ramp-delay = <150>;
 					regulator-boot-on;
+					regulator-always-on;
 					anatop-reg-offset = <0x140>;
 					anatop-vol-bit-shift = <9>;
 					anatop-vol-bit-width = <5>;
@@ -803,10 +802,24 @@
 			};
 
 			ldb: ldb@020e0008 {
+                                compatible = "fsl,imx6q-ldb", "fsl,imx53-ldb";
+                                reg = <0x020e0000 0x4000>;
 				#address-cells = <1>;
 				#size-cells = <0>;
 				gpr = <&gpr>;
 				status = "disabled";
+				clocks = <&clks 135>, <&clks 136>,
+                                         <&clks 39>, <&clks 40>,
+                                         <&clks 41>, <&clks 42>,
+                                         <&clks 184>, <&clks 185>,
+                                         <&clks 210>, <&clks 211>,
+                                         <&clks 212>, <&clks 213>;
+                                clock-names = "ldb_di0", "ldb_di1",
+                                              "ipu1_di0_sel", "ipu1_di1_sel",
+                                              "ipu2_di0_sel", "ipu2_di1_sel",
+                                              "di0_div_3_5", "di1_div_3_5",
+                                              "di0_div_7", "di1_div_7",
+                                              "di0_div_sel", "di1_div_sel";
 
 				lvds-channel@0 {
 					reg = <0>;
@@ -858,29 +871,31 @@
 			reg = <0x02100000 0x100000>;
 			ranges;
 
-			crypto: caam@2100000 {
-				compatible = "fsl,sec-v4.0";
-				#address-cells = <1>;
-				#size-cells = <1>;
-				reg = <0x2100000 0x40000>;
-				ranges = <0 0x2100000 0x40000>;
-				interrupt-parent = <&intc>; /* interrupts = <0 92 0x4>; */
-				clocks = <&clks IMX6QDL_CAAM_MEM>, <&clks IMX6QDL_CAAM_ACLK>, <&clks IMX6QDL_CAAM_IPG> ,<&clks IMX6QDL_CLK_EIM_SLOW>;
-				clock-names = "caam_mem", "caam_aclk", "caam_ipg", "caam_emi_slow";
-
-				sec_jr0: jr0@1000 {
-					compatible = "fsl,sec-v4.0-job-ring";
-					reg = <0x1000 0x1000>;
-					interrupt-parent = <&intc>;
-					interrupts = <0 105 0x4>;
-				};
-
-				sec_jr1: jr1@2000 {
-					compatible = "fsl,sec-v4.0-job-ring";
-					reg = <0x2000 0x1000>;
-					interrupt-parent = <&intc>;
-					interrupts = <0 106 0x4>;
-				};
+			crypto: caam@02100000 {
+					compatible = "fsl,sec-v4.0";
+					#address-cells = <1>;
+					#size-cells = <1>;
+					reg = <0x2100000 0x40000>;
+					ranges = <0 0x2100000 0x40000>;
+					interrupt-parent = <&intc>; /* interrupts = <0 92 0x4>; */
+					interrupts = <0 105 IRQ_TYPE_LEVEL_HIGH>,
+						     <0 106 IRQ_TYPE_LEVEL_HIGH>;
+					clocks = <&clks IMX6QDL_CAAM_MEM>, <&clks IMX6QDL_CAAM_ACLK>, <&clks IMX6QDL_CAAM_IPG> ,<&clks IMX6QDL_CLK_EIM_SLOW>;
+					clock-names = "caam_mem", "caam_aclk", "caam_ipg", "caam_emi_slow";
+	
+					sec_jr0: jr0@1000 {
+						compatible = "fsl,sec-v4.0-job-ring";
+						reg = <0x1000 0x1000>;
+						interrupt-parent = <&intc>;
+						interrupts = <0 105 0x4>;
+					};
+	
+					sec_jr1: jr1@2000 {
+						compatible = "fsl,sec-v4.0-job-ring";
+						reg = <0x2000 0x1000>;
+						interrupt-parent = <&intc>;
+						interrupts = <0 106 0x4>;
+					};
 			};
 
 			aipstz@0217c000 { /* AIPSTZ2 */
@@ -1069,7 +1084,7 @@
 			};
 
 			ocotp: ocotp-ctrl@021bc000 {
-				compatible = "syscon";
+				compatible = "fsl,imx6q-ocotp", "syscon";
 				reg = <0x021bc000 0x4000>;
 				clocks = <&clks IMX6QDL_CLK_IIM>;
 			};
@@ -1174,6 +1189,8 @@
 		};
 
 		ipu1: ipu@02400000 {
+			#address-cells = <1>;
+			#size-cells = <0>;
 			compatible = "fsl,imx6q-ipu";
 			reg = <0x02400000 0x400000>;
 			interrupts = <0 6 IRQ_TYPE_LEVEL_HIGH>,
@@ -1188,6 +1205,14 @@
 				      "ldb_di0", "ldb_di1";
 			resets = <&src 2>;
 			bypass_reset = <0>;
+			
+			ipu1_csi0: port@0 {
+				reg = <0>;
+			};
+
+			ipu1_csi1: port@1 {
+				reg = <1>;
+			};
 		};
 
 		imx_ion {
