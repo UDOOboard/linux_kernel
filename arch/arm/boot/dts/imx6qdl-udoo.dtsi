@@ -13,15 +13,9 @@
 / {
 	aliases {
 		mxcfb0 = &mxcfb1;
+// 		mxcfb1 = &mxcfb2;
 		reg_can_xcvr = &reg_can_xcvr;
 	};
-
-        backlight {     /* could use pwm1 as backlight */
-                compatible = "pwm-backlight";
-                pwms = <&pwm1 0 5000000>;
-                brightness-levels = <0 4 8 16 32 64 128 255>;
-                default-brightness-level = <0>;
-        };
 
 	memory {
 		reg = <0x10000000 0x40000000>;
@@ -43,9 +37,31 @@
 			gpio = <&gpio7 12 0>;
 		};
 
-		reg_can_xcvr: regulator@1 {
+		reg_lcd0_pwr: regulator@1 {
+			compatible = "regulator-fixed";
+			regulator-name = "LCD0 POWER";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio = <&gpio1 2 0>;
+			enable-active-high;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+	 
+		reg_lcd0_backlight: regulator@2 {
+			compatible = "regulator-fixed";
+			regulator-name = "LCD0 BACKLIGHT";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio = <&gpio1 4 0>;
+			enable-active-high;
+			regulator-boot-on;
+			regulator-always-on;
+		};   
+                
+		reg_can_xcvr: regulator@3 {
                         compatible = "regulator-fixed";
-			reg = <1>;
+			reg = <3>;
                         regulator-name = "CAN XCVR";
                         regulator-min-microvolt = <3300000>;
                         regulator-max-microvolt = <3300000>;
@@ -53,27 +69,12 @@
                         enable-active-low;
                 };
 
-                reg_usb_otg_vbus: regulator@2 {
+                reg_usb_otg_vbus: regulator@4 {
                         compatible = "regulator-fixed";
-                        reg = <2>;
+                        reg = <4>;
                         regulator-name = "usb_otg_vbus";
                         regulator-min-microvolt = <5000000>;
                         regulator-max-microvolt = <5000000>;
-                        enable-active-high;
-                };
-
-                reg_audio: regulator@3 {
-                        compatible = "regulator-fixed";
-                        reg = <3>;
-                        regulator-name = "8962-SUPPLY";
-                        gpio = <&gpio4 10 0>;
-                        enable-active-high;
-                };
-
-                reg_sensor: regulator@4 {
-                        compatible = "regulator-fixed";
-                        reg = <4>;
-                        regulator-name = "sensor-SUPPLY";
                         enable-active-high;
                 };
 
@@ -85,44 +86,30 @@
                         regulator-max-microvolt = <2500000>;
                         regulator-always-on;
                 };
+                
 	};
+
+// 	mxcfb1: fb@0 {
+// 		compatible = "fsl,mxc_sdc_fb";
+// 		disp_dev = "hdmi";
+// 		interface_pix_fmt = "RGB24";
+// 		mode_str ="";
+// 		default_bpp = <32>;
+// 		int_clk = <0>;
+// 		late_init = <0>;
+// 		status = "okay";
+// 	};
 
 	mxcfb1: fb@0 {
 		compatible = "fsl,mxc_sdc_fb";
-		disp_dev = "hdmi";
-		interface_pix_fmt = "RGB24";
-		mode_str ="";
+		disp_dev = "ldb";
+		interface_pix_fmt = "RGB666";
+		mode_str ="LDB-WVGA";
 		default_bpp = <32>;
 		int_clk = <0>;
 		late_init = <0>;
-		status = "disabled";
+		status = "okay";
 	};
-
-	codec: vt1613 {
-                compatible = "fsl,vt1613";
-                amic-mono;
-        };
-
-        sound {
-                compatible = "fsl,imx6q-udoo-vt1613",
-                        "fsl,imx-audio-vt1613";
-                model = "vt1613-audio";
-                ssi-controller = <&ssi1>;
-                audio-codec = <&codec>;
-                audio-routing =
-                        "Headphone Jack", "HPOUTL",
-                        "Headphone Jack", "HPOUTR",
-                        "Ext Spk", "SPKOUTL",
-                        "Ext Spk", "SPKOUTR",
-                        "MICBIAS", "AMIC",
-                        "IN3R", "MICBIAS",
-                        "DMIC", "MICBIAS",
-                        "DMICDAT", "DMIC";
-                mux-int-port = <1>;
-                mux-ext-port = <6>;
-		hp-det-gpios = <&gpio7 8 1>;
-		mic-det-gpios = <&gpio1 9 1>;
-        };
 
 	sound-hdmi {
 		compatible = "fsl,imx6q-audio-hdmi",
@@ -196,6 +183,51 @@
 	fsl,phy_reg_vlev = <0x0294>;
 	fsl,phy_reg_cksymtx = <0x800d>;
 	status = "okay";
+};
+
+&ldb {
+	status = "okay";
+        primary;
+        
+	lvds-channel@0 {
+                reg = <0>;
+		fsl,data-mapping = "spwg";
+		fsl,data-width = <18>;
+		status = "okay";
+                primary;
+                crtc = "ipu1-di0";
+                display-timings {
+                        native-mode = <&timing1>;
+                        timing1: hsd100pxn1 {
+//                                 clock-frequency = <76000000>;
+//                                 hactive = <1366>;
+//                                 vactive = <768>;
+//                                 hback-porch = <220>;
+//                                 hfront-porch = <40>;
+//                                 vback-porch = <21>;
+//                                 vfront-porch = <7>;
+//                                 hsync-len = <60>;
+//                                 vsync-len = <10>;
+// //                                 de-active = <0>;
+//                                 pixelclk-active = <0>;
+// //                                 interlaced = <0>;
+//                         };			
+//                         timing0: 800x480 {
+				clock-frequency = <38000000>;
+				hactive = <800>;
+				vactive = <480>;
+				hback-porch = <56>;
+				hfront-porch = <50>;
+				vback-porch = <23>;
+				vfront-porch = <20>;
+				hsync-len = <150>;
+				vsync-len = <2>;
+                                de-active = <1>;
+                                pixelclk-active = <1>;
+                                interlaced = <0>;
+			};
+		};
+	};
 };
 
 &i2c1 {
@@ -522,10 +554,6 @@
 	status = "okay";
 };
 
-&mxcfb1 {
-	status = "okay";
-};
-
 &pwm1 {
         pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm1>;
@@ -560,13 +588,6 @@
         csi_id = <1>;
         v_channel = <0>;
         lanes = <1>;
-};
-
-&ssi1 {
-        fsl,mode = "ac97-slave";
-        codec-handle = <1>;
-        status = "okay";
-        ac97-reset = <&gpio2 30 0>;
 };
 
 &spdif {
