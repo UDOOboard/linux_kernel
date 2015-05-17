@@ -1,0 +1,17 @@
+/*
+ * Copyright (C) 2015 Jasbir Matharu
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+
+/dts-v1/;
+
+#include "imx6sx-udoo-neo.dtsi"
+
+/ {
+	model = "UDoo Neo (based on imx6 SoloX)";
+   	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
+};
