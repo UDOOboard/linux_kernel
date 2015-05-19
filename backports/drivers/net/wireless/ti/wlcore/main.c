@@ -27,6 +27,7 @@
 #include <linux/vmalloc.h>
 #include <linux/interrupt.h>
 #include <linux/irq.h>
+#include <linux/gpio.h>
 
 #include "wlcore.h"
 #include "debug.h"
@@ -6070,6 +6071,33 @@ static void wl1271_unregister_hw(struct wl1271 *wl)
 
 }
 
+void wlcore_trigger_time_sync(struct wl1271 *wl)
+{
+	wl->time_sync.gpio_ktime = ktime_get();
+	gpio_set_value(wl->time_sync.gpio, 1);
+	udelay(1);
+	gpio_set_value(wl->time_sync.gpio, 0);
+}
+EXPORT_SYMBOL_GPL(wlcore_trigger_time_sync);
+
+static enum hrtimer_restart wlcore_time_sync_hrtimer_cb(struct hrtimer *timer)
+{
+	struct wlcore_time_sync *time_sync =
+		container_of(timer, struct wlcore_time_sync, timer);
+	struct wl1271 *wl =
+		container_of(time_sync, struct wl1271, time_sync);
+	struct timespec ts;
+
+	while (ktime_compare(ktime_get(), wl->time_sync.target_ktime) < 0)
+	{
+		ndelay(100);
+	}
+
+	wlcore_trigger_time_sync(wl);
+
+	return HRTIMER_NORESTART;
+}
+
 static int wl1271_init_ieee80211(struct wl1271 *wl)
 {
 	int i;
@@ -6335,8 +6363,24 @@ struct ieee80211_hw *wlcore_alloc_hw(size_t priv_size, u32 aggr_buf_size,
 		goto err_mbox;
 	}
 
+	/* time sync */
+	wl->time_sync.gpio = 66;
+	ret = gpio_request_one(wl->time_sync.gpio, GPIOF_DIR_OUT, "time_sync");
+	if (ret < 0) {
+		wl1271_error("error requesting time_sync gpio");
+		goto err_buffer_32;
+	}
+	wl1271_info("Time Sync: gpio requested");
+
+	hrtimer_init(&wl->time_sync.timer, CLOCK_MONOTONIC, HRTIMER_MODE_ABS);
+	wl->time_sync.timer.function = &wlcore_time_sync_hrtimer_cb;
+	wl->time_sync.gpio_ktime = ktime_set(0, 0);
+	wl->time_sync.target_ktime = ktime_set(0, 0);
+
 	return hw;
 
+err_buffer_32:
+	kfree(wl->buffer_32);
 err_mbox:
 	kfree(wl->mbox);
 
@@ -6384,6 +6428,8 @@ int wlcore_free_hw(struct wl1271 *wl)
 	mutex_unlock(&wl->mutex);
 
 	wlcore_sysfs_free(wl);
+
+	gpio_free(wl->time_sync.gpio);
 
 	kfree(wl->buffer_32);
 	kfree(wl->mbox);

@@ -99,6 +99,7 @@ struct wl18xx_event_mailbox {
 
 	/* time sync msb*/
 	u16 time_sync_tsf_msb;
+
 	/* radar detect */
 	u8 radar_channel;
 	u8 radar_type;
