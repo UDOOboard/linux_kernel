@@ -55,6 +55,7 @@
 #define TEMPSENSE2_PANIC_VALUE_SHIFT	16
 #define TEMPSENSE2_PANIC_VALUE_MASK	0xfff0000
 
+#define OCOTP_MEM0			0x0480
 #define OCOTP_ANA1			0x04e0
 
 /* The driver supports 1 passive trip point and 1 critical trip point */
@@ -65,11 +66,10 @@ enum imx_thermal_trip {
 };
 
 /*
- * It defines the temperature in millicelsius for passive trip point
- * that will trigger cooling action when crossed.
+ * The temperature delta from max in millicelsius for passive
+ * trip point that will trigger cooling action when crossed.
  */
-#define IMX_TEMP_PASSIVE		85000
-#define IMX_TEMP_PASSIVE_COOL_DELTA     10000
+#define IMX_TEMP_PASSIVE_COOL_DELTA	10000
 
 #define IMX_POLLING_DELAY		2000 /* millisecond */
 #define IMX_PASSIVE_DELAY		1000
@@ -98,15 +98,16 @@ struct imx_thermal_data {
 	struct thermal_cooling_device *cdev[2];
 	enum thermal_device_mode mode;
 	struct regmap *tempmon;
+	unsigned long trip_temp[IMX_TRIP_NUM];
 	u32 c1, c2; /* See formula in imx_get_sensor_data() */
-	unsigned long temp_passive;
-	unsigned long temp_critical;
 	unsigned long alarm_temp;
 	unsigned long last_temp;
 	bool irq_enabled;
 	int irq;
 	struct clk *thermal_clk;
 	const struct thermal_soc_data *socdata;
+	u32 temp_max;
+	const char *temp_grade;
 };
 
 static struct imx_thermal_data *imx_thermal_data;
@@ -187,10 +188,12 @@ static int imx_get_temp(struct thermal_zone_device *tz, unsigned long *temp)
 	*temp = data->c2 - n_meas * data->c1;
 
 	/* Update alarm value to next higher trip point */
-	if (data->alarm_temp == data->temp_passive && *temp >= data->temp_passive)
-		imx_set_alarm_temp(data, data->temp_critical);
-	if (data->alarm_temp == data->temp_critical && *temp < data->temp_passive) {
-		imx_set_alarm_temp(data, data->temp_passive);
+	if (data->alarm_temp == data->trip_temp[IMX_TRIP_PASSIVE] &&
+	    *temp >= data->trip_temp[IMX_TRIP_PASSIVE])
+		imx_set_alarm_temp(data, data->trip_temp[IMX_TRIP_CRITICAL]);
+	if (data->alarm_temp == data->trip_temp[IMX_TRIP_CRITICAL] &&
+	    *temp < data->trip_temp[IMX_TRIP_PASSIVE]) {
+		imx_set_alarm_temp(data, data->trip_temp[IMX_TRIP_PASSIVE]);
 		dev_dbg(&tz->device, "thermal alarm off: T < %lu\n",
 			data->alarm_temp / 1000);
 	}
@@ -268,7 +271,7 @@ static int imx_get_crit_temp(struct thermal_zone_device *tz,
 {
 	struct imx_thermal_data *data = tz->devdata;
 
-	*temp = data->temp_critical;
+	*temp = data->trip_temp[IMX_TRIP_CRITICAL];
 	return 0;
 }
 
@@ -277,8 +280,8 @@ static int imx_get_trip_temp(struct thermal_zone_device *tz, int trip,
 {
 	struct imx_thermal_data *data = tz->devdata;
 
-	*temp = (trip == IMX_TRIP_PASSIVE) ? data->temp_passive :
-					     data->temp_critical;
+	*temp = (trip == IMX_TRIP_PASSIVE) ? data->trip_temp[IMX_TRIP_PASSIVE] :
+					     data->trip_temp[IMX_TRIP_CRITICAL];
 	return 0;
 }
 
@@ -288,15 +291,15 @@ static int imx_set_trip_temp(struct thermal_zone_device *tz, int trip,
 	struct imx_thermal_data *data = tz->devdata;
 
 	if (trip == IMX_TRIP_CRITICAL) {
-		data->temp_critical = temp;
+		data->trip_temp[IMX_TRIP_CRITICAL] = temp;
 		if (data->socdata->version == TEMPMON_V2)
 			imx_set_panic_temp(data, temp);
 	}
 
 	if (trip == IMX_TRIP_PASSIVE) {
-		if (temp > IMX_TEMP_PASSIVE)
+		if (temp > data->trip_temp[IMX_TRIP_PASSIVE])
 			return -EINVAL;
-		data->temp_passive = temp;
+		data->trip_temp[IMX_TRIP_PASSIVE] = temp;
 		imx_set_alarm_temp(data, temp);
 	}
 
@@ -431,17 +434,39 @@ static int imx_get_sensor_data(struct platform_device *pdev)
 	data->c1 = temp64;
 	data->c2 = n1 * data->c1 + 1000 * t1;
 
-	/*
-	 * Set the default passive cooling trip point to IMX_TEMP_PASSIVE.
-	 * Can be changed from userspace.
-	 */
-	data->temp_passive = IMX_TEMP_PASSIVE;
+	/* use OTP for thermal grade */
+	ret = regmap_read(map, OCOTP_MEM0, &val);
+	if (ret) {
+		dev_err(&pdev->dev, "failed to read temp grade: %d\n", ret);
+		return ret;
+	}
+
+	/* The maximum die temp is specified by the Temperature Grade */
+	switch ((val >> 6) & 0x3) {
+	case 0: /* Commercial (0 to 95C) */
+		data->temp_grade = "Commercial";
+		data->temp_max = 95000;
+		break;
+	case 1: /* Extended Commercial (-20 to 105C) */
+		data->temp_grade = "Extended Commercial";
+		data->temp_max = 105000;
+		break;
+	case 2: /* Industrial (-40 to 105C) */
+		data->temp_grade = "Industrial";
+		data->temp_max = 105000;
+		break;
+	case 3: /* Automotive (-40 to 125C) */
+		data->temp_grade = "Automotive";
+		data->temp_max = 125000;
+		break;
+	}
 
 	/*
-	 * Set the default critical trip point to 20 C higher
-	 * than passive trip point. Can be changed from userspace.
+	 * Let's give some cushion for noise and possible temperature rise
+	 * between measurements.
 	 */
-	data->temp_critical = IMX_TEMP_PASSIVE + 20 * 1000;
+	data->trip_temp[IMX_TRIP_CRITICAL] = data->temp_max - 5000;
+	data->trip_temp[IMX_TRIP_PASSIVE] = data->temp_max - 10000;
 
 	return 0;
 }
@@ -621,10 +646,10 @@ static int imx_thermal_probe(struct platform_device *pdev)
 	regmap_write(map, TEMPSENSE1 + REG_CLR, TEMPSENSE1_MEASURE_FREQ);
 	measure_freq = DIV_ROUND_UP(32768, 10); /* 10 Hz */
 	regmap_write(map, TEMPSENSE1 + REG_SET, measure_freq);
-	imx_set_alarm_temp(data, data->temp_passive);
+	imx_set_alarm_temp(data, data->trip_temp[IMX_TRIP_PASSIVE]);
 
 	if (data->socdata->version == TEMPMON_V2)
-		imx_set_panic_temp(data, data->temp_critical);
+		imx_set_panic_temp(data, data->trip_temp[IMX_TRIP_CRITICAL]);
 
 	regmap_write(map, TEMPSENSE0 + REG_CLR, TEMPSENSE0_POWER_DOWN);
 	regmap_write(map, TEMPSENSE0 + REG_SET, TEMPSENSE0_MEASURE_TEMP);
@@ -637,6 +662,13 @@ static int imx_thermal_probe(struct platform_device *pdev)
 		return ret;
 	}
 	data->irq_enabled = true;
+
+	dev_info(&pdev->dev, "%s CPU temperature grade\n", data->temp_grade);
+	dev_info(&pdev->dev, "max:%dC crit:%ldC passive:%ldC\n",
+		 data->temp_max / 1000,
+		 data->trip_temp[IMX_TRIP_CRITICAL] / 1000,
+		 data->trip_temp[IMX_TRIP_PASSIVE] / 1000);
+
 	data->mode = THERMAL_DEVICE_ENABLED;
 	/* register the busfreq notifier called in low bus freq */
 	register_busfreq_notifier(&thermal_notifier);
