@@ -264,7 +264,7 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_hog>;
+	pinctrl-0 = <&pinctrl_hog &external_hog>;
 
 	imx6q-udoo {
 		pinctrl_hog: hoggrp {
@@ -297,9 +297,11 @@
 
 				MX6QDL_PAD_CSI0_DAT19__GPIO6_IO05		0x80000000  // CSI camera reset (CN11)
 				MX6QDL_PAD_CSI0_DAT18__GPIO6_IO04		0x80000000  // CSI camera enable (CN11)
+			>;
+		};
 
-
-
+		external_hog: hoggrp-2 {
+			fsl,pins = <
 				// External Pinout GPIOs
 				MX6QDL_PAD_CSI0_DAT11__GPIO5_IO29		0x80000000  // pin 00
 				MX6QDL_PAD_CSI0_DAT10__GPIO5_IO28		0x80000000  // pin 01
