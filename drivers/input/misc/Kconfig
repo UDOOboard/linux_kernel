@@ -707,4 +707,17 @@ config SENSOR_FXLS8471
 	depends on I2C
 	default n
 
+config INPUT_FXAS2100X
+	tristate "Freescale FXAS2100X 3-Axis Digital Gyroscope I2C driver"
+	depends on I2C
+	help
+	  Say yes here to add support for Freescale FXAS2100X 3-Axis
+	  Digital Gyrosope Sensor
+
+config INPUT_FXOS8700
+	tristate "Freescale FXOS8700 6-Axis Sensor I2C driver"
+	depends on I2C
+	help
+	  Say yes here to add support for Freescale 6-Axis Sensor with
+	  Integrated Linear Accelerometer and Magnetometer
 endif
