@@ -64,3 +64,5 @@ obj-$(CONFIG_INPUT_XEN_KBDDEV_FRONTEND)	+= xen-kbdfront.o
 obj-$(CONFIG_INPUT_YEALINK)		+= yealink.o
 obj-$(CONFIG_INPUT_IDEAPAD_SLIDEBAR)	+= ideapad_slidebar.o
 obj-$(CONFIG_INPUT_ISL29023)            += isl29023.o
+obj-$(CONFIG_INPUT_FXAS2100X)		+= fxas2100x.o
+obj-$(CONFIG_INPUT_FXOS8700)		+= fxos8700.o
