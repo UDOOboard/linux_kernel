@@ -1045,6 +1045,9 @@ static int tw6869_video_register(struct tw6869_dev *dev)
 			tw6869_video_unregister(dev);
 			return ret;
 		}
+		dev_info(&pdev->dev, "vch%i registered as %s\n",
+			 vch->id,
+			 video_device_node_name(&vch->vdev));
 	}
 	return 0;
 }
