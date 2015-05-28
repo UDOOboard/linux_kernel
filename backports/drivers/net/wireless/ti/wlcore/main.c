@@ -6177,7 +6177,6 @@ static enum hrtimer_restart wlcore_time_sync_hrtimer_cb(struct hrtimer *timer)
 		container_of(timer, struct wlcore_time_sync, timer);
 	struct wl1271 *wl =
 		container_of(time_sync, struct wl1271, time_sync);
-	struct timespec ts;
 
 	while (ktime_compare(ktime_get(), wl->time_sync.target_ktime) < 0)
 	{
