@@ -77,8 +77,9 @@ config OF_MTD
 	def_bool y
 
 config OF_RESERVED_MEM
-	depends on OF_EARLY_FLATTREE
+	depends on OF_EARLY_FLATTREE && HAVE_MEMBLOCK
 	bool
+	def_bool y
 	help
 	  Helpers to allow for reservation of memory regions
 

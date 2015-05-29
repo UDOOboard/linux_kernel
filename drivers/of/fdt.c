@@ -390,8 +390,8 @@ static int __init __reserved_mem_reserve_reg(unsigned long node,
 {
 	int t_len = (dt_root_addr_cells + dt_root_size_cells) * sizeof(__be32);
 	phys_addr_t base, size;
-	int len;
-	const __be32 *prop;
+	unsigned long len;
+	__be32 *prop;
 	int nomap, first = 1;
 
 	prop = of_get_flat_dt_prop(node, "reg", &len);
@@ -412,7 +412,7 @@ static int __init __reserved_mem_reserve_reg(unsigned long node,
 
 		if (base && size &&
 		    early_init_dt_reserve_memory_arch(base, size, nomap) == 0)
-			pr_debug("Reserved memory: reserved region for node '%s': base %pa, size %ld MiB\n",
+			pr_info("Reserved memory: reserved region for node '%s': base %pa, size %ld MiB\n",
 				uname, &base, (unsigned long)size / SZ_1M);
 		else
 			pr_info("Reserved memory: failed to reserve memory for node '%s': base %pa, size %ld MiB\n",
@@ -434,7 +434,7 @@ static int __init __reserved_mem_reserve_reg(unsigned long node,
  */
 static int __init __reserved_mem_check_root(unsigned long node)
 {
-	const __be32 *prop;
+	__be32 *prop;
 
 	prop = of_get_flat_dt_prop(node, "#size-cells", NULL);
 	if (!prop || be32_to_cpup(prop) != dt_root_size_cells)
