@@ -75,4 +75,10 @@ config OF_MTD
 	depends on MTD
 	def_bool y
 
+config OF_RESERVED_MEM
+	depends on HAVE_MEMBLOCK
+	def_bool y
+	help
+	  Helpers to allow for reservation of memory regions
+
 endmenu # OF
