@@ -141,7 +141,6 @@
 &gpc { // General power controller
 	/* use ldo-bypass, u-boot will check it and configure */
 	fsl,ldo-bypass = <1>;
-	fsl,wdog-reset = <2>;
 };
 
 &hdmi_audio {
