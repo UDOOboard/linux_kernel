@@ -12,9 +12,10 @@
  */
 
 / {
-// 	aliases {
+	aliases {
+		mxcfb0 = &mxcfb1;
 // 		reg_can_xcvr = &reg_can_xcvr;
-// 	};
+	};
 	
 	memory {
 		reg = <0x10000000 0x40000000>;
@@ -160,12 +161,12 @@
 };
 
 &ldb { // LVDS display bridge
-	status = "okay";
+	status = "disabled";
 	primary;
 	lvds-channel@0 {
 		reg = <0>;
 		fsl,data-mapping = "spwg";
-		status = "okay";
+		status = "disabled";
 		primary;
 		crtc = "ipu1-di0";
 	};

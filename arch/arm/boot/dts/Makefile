@@ -186,6 +186,8 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-sabresd-ldo.dtb \
 	imx6q-sbc6x.dtb \
 	imx6q-udoo.dtb \
+	imx6q-udoo-7lvds.dtb \
+	imx6q-udoo-15lvds.dtb \
 	imx6sx-udoo-neo.dtb \
 	imx6sx-udoo-neo-hdmi.dtb \
 	imx6sx-udoo-neo-m4.dtb \
