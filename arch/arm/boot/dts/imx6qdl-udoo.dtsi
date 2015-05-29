@@ -202,7 +202,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet>;
 	phy-mode = "rgmii";
-	phy-reset-gpios = <&gpio3 23 0>;
 	status = "okay";
 };
 
@@ -320,8 +319,8 @@
 			MX6QDL_PAD_ENET_REF_CLK__ENET_TX_CLK		0x1b0b0
 			MX6QDL_PAD_ENET_MDIO__ENET_MDIO			0x1b0b0
 			MX6QDL_PAD_ENET_MDC__ENET_MDC			0x1b0b0
-			MX6QDL_PAD_EIM_D23__GPIO3_IO23			0x80000000 /* RGMII_nRST */
-			MX6QDL_PAD_EIM_EB3__GPIO2_IO31			0x80000000  /* EN_ETH_PWR */
+			MX6QDL_PAD_EIM_D23__GPIO3_IO23                  0x80000000 /* RGMII_nRST */
+			MX6QDL_PAD_EIM_EB3__GPIO2_IO31                  0x80000000  /* EN_ETH_PWR */
 			>;
 		};
 		
