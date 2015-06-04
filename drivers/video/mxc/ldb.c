@@ -302,36 +302,6 @@ static const struct of_device_id ldb_dt_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, ldb_dt_ids);
 
-void printfb(struct fb_videomode fb_vm, struct device *dev)
-{
-       	u32 xres_ = fb_vm.xres;
-	u32 yres_ = fb_vm.yres;
-        u32 pixclock_ = fb_vm.pixclock;
-        u32 left_margin_ = fb_vm.left_margin ;
-	u32 right_margin_ = fb_vm.right_margin;
-	u32 upper_margin_ = fb_vm.upper_margin;
-	u32 lower_margin_ = fb_vm.lower_margin;
-	u32 hsync_len_ = fb_vm.hsync_len;
-	u32 vsync_len_ = fb_vm.vsync_len;
-	u32 vmode_ = fb_vm.vmode;
-        u32 sync_ = fb_vm.sync;
-        u32 flag_ = fb_vm.flag;
-        
-        dev_err(dev, "LVDS videomode: \n");
-        dev_err(dev, "LVDS videomode: xr %d \n", xres_);
-        dev_err(dev, "LVDS videomode: yr %d \n", yres_);  
-        dev_err(dev, "LVDS videomode: pc %d \n", pixclock_);  
-        dev_err(dev, "LVDS videomode: lm %d \n", left_margin_);
-        dev_err(dev, "LVDS videomode: rm %d \n", right_margin_);
-        dev_err(dev, "LVDS videomode: um %d \n", upper_margin_);
-        dev_err(dev, "LVDS videomode: lw %d \n", lower_margin_);
-        dev_err(dev, "LVDS videomode: hs %d \n", hsync_len_);
-        dev_err(dev, "LVDS videomode: vs %d \n", vsync_len_);
-        dev_err(dev, "LVDS videomode: vm %d \n", vmode_);
-        dev_err(dev, "LVDS videomode: sy %d \n", sync_);
-        dev_err(dev, "LVDS videomode: fl %d \n", flag_);
-}
-
 static int ldb_init(struct mxc_dispdrv_handle *mddh,
 		    struct mxc_dispdrv_setting *setting)
 {
@@ -361,8 +331,7 @@ static int ldb_init(struct mxc_dispdrv_handle *mddh,
 	chan->fbi = fbi;
 
 	fb_videomode_from_videomode(&chan->vm, &fb_vm);
-        printfb(fb_vm, dev);
-        
+
 	INIT_LIST_HEAD(&fbi->modelist);
 	fb_add_videomode(&fb_vm, &fbi->modelist);
 	fb_videomode_to_var(&fbi->var, &fb_vm);
