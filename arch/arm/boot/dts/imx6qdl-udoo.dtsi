@@ -202,6 +202,7 @@
 	pinctrl-0 = <&pinctrl_enet>;
 	phy-mode = "rgmii";
 	phy-reset-gpios = <&gpio3 23 0>;
+	phy-reset-duration = <50>;
 	status = "okay";
 };
 
