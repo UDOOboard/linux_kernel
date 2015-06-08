@@ -26,6 +26,7 @@
 #include <linux/skbuff.h>
 #include <linux/slab.h>
 #include <linux/module.h>
+#include <linux/interrupt.h>
 
 #include "wlcore.h"
 #include "debug.h"
@@ -1238,6 +1239,40 @@ static const struct file_operations dev_mem_ops = {
 	.llseek = dev_mem_seek,
 };
 
+static ssize_t irq_type_read(struct file *file, char __user *user_buf,
+			     size_t count, loff_t *ppos)
+{
+	struct wl1271 *wl = file->private_data;
+	const char *wlcore_irq_type;
+
+	switch (wl->irq_flags & IRQF_TRIGGER_MASK) {
+	case IRQF_TRIGGER_RISING:
+		wlcore_irq_type = "RISING EDGE";
+		break;
+	case IRQF_TRIGGER_FALLING:
+		wlcore_irq_type = "FALLING EDGE";
+		break;
+	case IRQF_TRIGGER_HIGH:
+		wlcore_irq_type = "LEVEL HIGH";
+		break;
+	case IRQF_TRIGGER_LOW:
+		wlcore_irq_type = "LEVEL LOW";
+		break;
+	default:
+		wlcore_irq_type = "NONE";
+	}
+
+	return wl1271_format_buffer(user_buf, count,
+				ppos, "%s\n",
+				wlcore_irq_type);
+}
+
+static const struct file_operations irq_type_ops = {
+	.read = irq_type_read,
+	.open = simple_open,
+	.llseek = default_llseek,
+};
+
 static int wl1271_debugfs_add_files(struct wl1271 *wl,
 				    struct dentry *rootdir)
 {
@@ -1264,6 +1299,7 @@ static int wl1271_debugfs_add_files(struct wl1271 *wl,
 	DEBUGFS_ADD(irq_timeout, rootdir);
 	DEBUGFS_ADD(fw_stats_raw, rootdir);
 	DEBUGFS_ADD(sleep_auth, rootdir);
+	DEBUGFS_ADD(irq_type, rootdir);
 
 	streaming = debugfs_create_dir("rx_streaming", rootdir);
 	if (!streaming || IS_ERR(streaming))
