@@ -27,6 +27,7 @@ struct spmi_device;
 struct regmap;
 struct regmap_range_cfg;
 struct regmap_field;
+struct snd_ac97;
 
 /* An enum of all the supported cache types */
 enum regcache_type {
@@ -326,6 +327,8 @@ struct regmap *regmap_init_spmi(struct spmi_device *dev,
 struct regmap *regmap_init_mmio_clk(struct device *dev, const char *clk_id,
 				    void __iomem *regs,
 				    const struct regmap_config *config);
+struct regmap *regmap_init_ac97(struct snd_ac97 *ac97,
+				const struct regmap_config *config);
 
 struct regmap *devm_regmap_init(struct device *dev,
 				const struct regmap_bus *bus,
@@ -340,6 +343,10 @@ struct regmap *devm_regmap_init_spmi(struct spmi_device *dev,
 struct regmap *devm_regmap_init_mmio_clk(struct device *dev, const char *clk_id,
 					 void __iomem *regs,
 					 const struct regmap_config *config);
+struct regmap *devm_regmap_init_ac97(struct snd_ac97 *ac97,
+				     const struct regmap_config *config);
+
+bool regmap_ac97_default_volatile(struct device *dev, unsigned int reg);
 
 /**
  * regmap_init_mmio(): Initialise register map
