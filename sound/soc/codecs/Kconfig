@@ -398,6 +398,7 @@ config SND_SOC_UDA1380
         tristate
         
 config SND_SOC_VT1613
+	select REGMAP_AC97
         tristate
         
 config SND_SOC_WL1273
