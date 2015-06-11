@@ -197,6 +197,6 @@ static struct platform_driver imx_vt1613_driver = {
 module_platform_driver(imx_vt1613_driver);
 
 MODULE_AUTHOR("Seco <info@seco.it>");
-MODULE_DESCRIPTION(DRV_NAME : "Freescale i.MX VT1613 AC97 ASoC machine driver");
+MODULE_DESCRIPTION(DRV_NAME ": Freescale i.MX VT1613 AC97 ASoC machine driver");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:imx-vt1613");
