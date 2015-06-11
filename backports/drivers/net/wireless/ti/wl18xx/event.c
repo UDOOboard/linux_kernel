@@ -120,22 +120,29 @@ static void wlcore_event_time_sync(struct wl1271 *wl, u16 tsf_msb, u16 tsf_lsb)
 	u32 clock;
 	u32 interval_usc;
 	u32 mod_usc;
-	u32 next_tick_usc;
+	u32 next_tick_usc, ap_delta;
 
     /* convert the MSB+LSB to a u32 TSF value */
     clock = (tsf_msb << 16) | tsf_lsb;
 
-    wl1271_info("TIME_SYNC_EVENT_ID: clock %u", clock);
-
-    wl1271_info("TIME_SYNC_EVENT_ID: clock %d", clock);
+    wl1271_info("TIME_SYNC_EVENT_ID+: clock %u", clock);
 
 	/* Calculate the next tick */
 	interval_usc = wl->time_sync.interval_ms * USEC_PER_MSEC;
 	mod_usc  = clock % interval_usc;
 	next_tick_usc  = interval_usc -  mod_usc;
 
+	ap_delta = 0;
+	/* We have an AP running, fix the delta (reduce target in 25 usec) */
+	if (wl->ap_count > 0)
+	{
+	    //Fix the jitter by a fixed value in ap mode.
+	    next_tick_usc = next_tick_usc - 25;
+	}
+
+
 	/* skip the current interval if it's too close in time */
-	if (next_tick_usc < 50)
+	if (next_tick_usc < 5000)
 		next_tick_usc = next_tick_usc + interval_usc;
 
 	/* schedule hr timer 200ns before the desired time */
