@@ -541,7 +541,6 @@ int soc_ac97_dev_register(struct snd_soc_codec *codec)
 	}
 	return 0;
 }
-EXPORT_SYMBOL_GPL(soc_ac97_dev_register);
 #endif
 
 static void codec2codec_close_delayed_work(struct work_struct *work)
