@@ -24,7 +24,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lcdif_dat_0
 		     &pinctrl_lcdif_ctrl_0>;
-	lcd-supply = <&sw4_reg>;
+	lcd-supply = <&vgen5_reg>;
 	display = <&display0>;
 	status = "okay";
 
