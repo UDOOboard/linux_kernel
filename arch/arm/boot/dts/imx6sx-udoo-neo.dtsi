@@ -80,7 +80,7 @@
 
 		led1: led1 {
 			label = "led1";
-			gpios = <&gpio2 18 1>;
+			gpios = <&gpio4 6 0>;
 			default-state = "off";
 		};
 	};
