@@ -1,0 +1,64 @@
+/*
+ * Copyright (C) 2015 Jasbir Matharu
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+
+/dts-v1/;
+
+#include "imx6sx-udoo-neo.dtsi"
+
+/ {
+	model = "UDoo Neo (based on imx6 SoloX)";
+   	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
+};
+
+&lcdif2 {
+	display = <&display1>;
+	disp-dev = "ldb";
+	status = "okay";
+
+	display1: display {
+		bits-per-pixel = <16>;
+		bus-width = <18>;
+	};
+};
+
+&ldb {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ldb_0>;
+	lcd-supply = <&reg_lcd_pwr
+                      &reg_lcd_bl>;
+	status = "okay";
+
+	lvds-channel@0 {
+		fsl,data-mapping = "spwg";
+		fsl,data-width = <18>;
+		crtc = "lcdif2";
+		status = "okay";
+
+		display-timings {
+                        native-mode = <&timing1>;
+                        timing1: hsd100pxn1 {
+				clock-frequency = <30000000>;
+				hactive = <800>;
+				vactive = <480>;
+				hback-porch = <50>;
+				hfront-porch = <50>;
+				vback-porch = <21>;
+				vfront-porch = <7>;
+				hsync-len = <60>;
+				vsync-len = <10>;
+                        };
+                };
+	};
+};
+
+&dcic2 {
+	dcic_id = <1>;
+	dcic_mux = "dcic-lvds";
+	status = "okay";
+};
