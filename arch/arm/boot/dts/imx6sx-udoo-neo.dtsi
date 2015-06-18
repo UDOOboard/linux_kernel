@@ -40,6 +40,15 @@
 			regulator-boot-on;
 		};
 
+		reg_usb_otg1_vbus: usb_otg1_vbus {
+			compatible = "regulator-fixed";
+			regulator-name = "usb_otg1_vbus";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+			gpio = <&gpio1 9 0>;
+			enable-active-low;
+		};
+
 		reg_usb_otg2_vbus: usb_otg2_vbus {
 			compatible = "regulator-fixed";
 			regulator-name = "usb_otg2_vbus";
@@ -297,6 +306,13 @@
 			>;
 		};
 
+		pinctrl_usbotg1_1: usbotg1grp-1 {
+			fsl,pins = <
+				MX6SX_PAD_GPIO1_IO10__ANATOP_OTG1_ID	0x17059
+				MX6SX_PAD_GPIO1_IO08__USB_OTG1_OC	0x17059
+			>;
+		};
+
 		pinctrl_enet1_2: enet1grp-2 {
 			fsl,pins = <
 				MX6SX_PAD_ENET1_MDIO__ENET1_MDIO        0xa0b1
@@ -418,6 +434,14 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2_1>;
 	status = "disabled";
+};
+
+&usbotg1 {
+	vbus-supply = <&reg_usb_otg1_vbus>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usbotg1_1>;
+	imx6-usb-charger-detection;
+	status = "okay";
 };
 
 &usbotg2 {
