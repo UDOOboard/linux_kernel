@@ -88,3 +88,7 @@ config HANNSTAR_CABC
 	  function.  This function turns backlight density of a
 	  display panel automatically according to the content
 	  shown on the panel.
+
+config FB_UDOO_TDA19988
+	tristate "UDOO TDA19988 HDMI Interface Chip"
+	depends on FB_MXS && I2C

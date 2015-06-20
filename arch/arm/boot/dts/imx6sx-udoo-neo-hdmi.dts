@@ -18,6 +18,12 @@
 
 &i2c3 {
 	status = "okay";
+
+	tda19988: tda19988@34 {
+		compatible = "udoo,tda19988";
+		reg = <0x34>;
+		status = "okay";
+	};
 };
 
 &lcdif1 {
