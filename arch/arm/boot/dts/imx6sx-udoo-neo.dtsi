@@ -58,24 +58,6 @@
 			enable-active-low;
 		};
 
-		reg_lcd_pwr: lcd_pwr {
-			compatible = "regulator-fixed";
-			regulator-name = "LCD POWER";
-			gpio = <&gpio4 27 0>;
-			enable-active-high;
-			regulator-boot-on;
-			regulator-always-on;
-			status = "okay";
-		};
-
-		reg_lcd_bl: lcd_bl {
-			compatible = "regulator-fixed";
-			regulator-name = "LCD BACKLIGHT BL_ON";
-			gpio = <&gpio6 3 0>;
-			enable-active-high;
-			regulator-boot-on;
-			regulator-always-on;
-		};
 	};
 
 	leds {
