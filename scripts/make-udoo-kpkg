@@ -1,0 +1,33 @@
+#!/bin/bash
+
+CPUS=$(grep -c 'processor' /proc/cpuinfo)
+CTHREADS="-j$(($CPUS + $CPUS/2))";
+
+TEMP=$(mktemp -d /tmp/udoo-kernel.XXXXXXXX)
+mkdir -p $TEMP/boot/dts
+mkdir -p $TEMP/lib/modules
+mkdir -p $TEMP/DEBIAN
+
+make $CTHREADS ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage imx6q-udoo.dtb firmware modules
+cp arch/arm/boot/zImage $TEMP/boot/
+cp arch/arm/boot/dts/imx6q-udoo.dtb $TEMP/boot/dts
+
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=$TEMP modules_install
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=$TEMP firmware_install
+
+KERNEL_VERSION=$(ls $TEMP/lib/modules/)
+SIZE=$(du -s $TEMP |awk '{print $1}')
+
+cat <<END > $TEMP/DEBIAN/control
+Package: linux-kernel-udoo-qdl
+Version: $KERNEL_VERSION
+Architecture: armhf
+Maintainer: UDOO Team <social@udoo.org>
+Installed-Size: $SIZE
+Section: kernel
+Priority: optional
+Description: The Linux Kernel, patched to run on UDOO boards
+END
+
+dpkg-deb --build $TEMP /tmp/udookernel.deb
+
