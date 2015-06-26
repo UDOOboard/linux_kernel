@@ -15,6 +15,10 @@
 	aliases {
 		mxcfb0 = &mxcfb1;
 // 		reg_can_xcvr = &reg_can_xcvr;
+		mmc0 = &usdhc3;
+		mmc1 = &usdhc2;
+		mmc2 = &usdhc1;
+		mmc3 = &usdhc4;
 	};
 	
 	memory {
@@ -139,9 +143,21 @@
 // 		compatible = "fsl,mxc_v4l2_output";
 // 		status = "okay";
 // 	};
-	
-};
 
+	udoo_ard: udoo_ard_manager {
+		compatible = "udoo,imx6q-udoo-ard";
+		pinctrl-names = "default", "udoo_ard_alt";
+		pinctrl-0 = <&pinctrl_uart4>;
+		pinctrl-1 = <&pinctrl_udoo_ard_alt>;
+		bossac-clk-gpio   = <&gpio6 3 GPIO_ACTIVE_LOW>;
+		bossac-dat-gpio   = <&gpio5 18 GPIO_ACTIVE_LOW>;
+		bossac-erase-gpio = <&gpio4 21 GPIO_ACTIVE_LOW>;
+		bossac-reset-gpio = <&gpio1 0 GPIO_ACTIVE_LOW>;
+		bossac-4_6-gpio   = <&gpio4 6 GPIO_ACTIVE_LOW>;
+		bossac-4_7-gpio   = <&gpio4 7 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
+};
 
 &audmux { 
 	status = "okay";
@@ -238,12 +254,8 @@
 			MX6QDL_PAD_NANDF_D5__GPIO2_IO05			0x80000000  // SD card power
 			MX6QDL_PAD_SD3_DAT5__GPIO7_IO00			0x80000000  // SD card detect
 			
-			MX6QDL_PAD_GPIO_0__GPIO1_IO00			0x80000000  // SAM3X reset (J16)
-			MX6QDL_PAD_DISP0_DAT0__GPIO4_IO21		0x30b1      // SAM3X erase (J22)
 			MX6QDL_PAD_GPIO_16__GPIO7_IO11			0xb0b1      // SAM3X OTG vbus_en
 			MX6QDL_PAD_SD4_DAT7__GPIO2_IO15			0x80000000  // SAM3X usb host
-			MX6QDL_PAD_CSI0_DAT17__GPIO6_IO03		0x80000000  // RTS_ARD used in Bossac
-			MX6QDL_PAD_CSI0_PIXCLK__GPIO5_IO18		0x80000000  // DTR_ARD used in Bossac
 			MX6QDL_PAD_GPIO_3__GPIO1_IO03			0x30b1      // Arduino pinout pin 12
 			
 			MX6QDL_PAD_GPIO_2__GPIO1_IO02			0x80000000  // LVDS panel on (CN13)
@@ -365,10 +377,21 @@
 		
 		pinctrl_uart4: uart4grp {
 			fsl,pins = <
-			MX6QDL_PAD_KEY_COL0__UART4_TX_DATA 0x1b0b1
-			MX6QDL_PAD_KEY_ROW0__UART4_RX_DATA 0x1b0b1
+			MX6QDL_PAD_KEY_COL0__UART4_TX_DATA 0x1b0b1 // or 0x100b1
+			MX6QDL_PAD_KEY_ROW0__UART4_RX_DATA 0x1b0b1 // or 0x100b1
 			>;
 		};
+		
+        pinctrl_udoo_ard_alt: udooard2grp {
+            fsl,pins = <
+            MX6QDL_PAD_KEY_ROW0__GPIO4_IO07         0x80000000
+            MX6QDL_PAD_KEY_COL0__GPIO4_IO06         0x80000000
+            MX6QDL_PAD_DISP0_DAT0__GPIO4_IO21       0x80000000
+            MX6QDL_PAD_CSI0_DAT17__GPIO6_IO03       0x80000000
+            MX6QDL_PAD_CSI0_PIXCLK__GPIO5_IO18      0x80000000
+            MX6QDL_PAD_GPIO_0__GPIO1_IO00           0x80000000
+            >;
+        };
 		
 // 		pinctrl_flexcan1: can1grp {
 // 			fsl,pins = <
@@ -467,7 +490,7 @@
 &uart4 { // iMX6-Arduino internal serial port - ttymxc3
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
-	status = "okay";
+	//status = "okay";
 };
 
 &usdhc3 {
