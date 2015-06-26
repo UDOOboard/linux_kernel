@@ -38,13 +38,13 @@ static struct platform_device_id udoo_ard_devtype[] = {
                 /* sentinel */
         }
 };
-MODULE_DEVICE_TABLE(platform, fec_devtype);
+MODULE_DEVICE_TABLE(platform, udoo_ard_devtype);
 
 static const struct of_device_id udoo_ard_dt_ids[] = {
         { .compatible = "udoo,imx6q-udoo-ard", .data = &udoo_ard_devtype[0], },
         { /* sentinel */ }
 };
-MODULE_DEVICE_TABLE(of, fec_dt_ids);
+MODULE_DEVICE_TABLE(of, udoo_ard_dt_ids);
 
 static struct workqueue_struct *erase_reset_wq;
 
