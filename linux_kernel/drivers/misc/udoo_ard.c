@@ -89,8 +89,8 @@ static void erase_reset_wq_function( struct work_struct *work2)
             gpio_direction_input(work->gpio_4_7);
     }
 
-    gpio_direction_input(work->gpio_ard_reset);
-//    gpio_set_value(work->gpio_ard_reset, 1);
+    gpio_direction_input(work->gpio_ard_erase);
+    gpio_set_value(work->gpio_ard_reset, 1);
     msleep(1);
 
     gpio_direction_output(work->gpio_ard_erase, 1);
