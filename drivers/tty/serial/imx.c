@@ -971,6 +971,14 @@ static void dma_rx_callback(void *data)
 	sport->rx_buf.buf_info[sport->rx_buf.cur_idx].rx_bytes = count;
 	sport->rx_buf.cur_idx++;
 	sport->rx_buf.cur_idx %= IMX_RXBD_NUM;
+
+	if (readl(sport->port.membase + USR2) & USR2_IDLE) {
+		/* In condition [3] the SDMA counted up too early */
+		count--;
+
+		writel(USR2_IDLE, sport->port.membase + USR2);
+	}
+
 	dev_dbg(sport->port.dev, "We get %d bytes.\n", count);
 
 	if (sport->rx_buf.cur_idx == sport->rx_buf.last_completed_idx)
