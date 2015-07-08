@@ -704,6 +704,20 @@ static int tw6869_enum_fmt_vid_cap(struct file *file, void *priv,
 	return 0;
 }
 
+static int tw6869_enum_framesizes(struct file *file, void *priv,
+				  struct v4l2_frmsizeenum *fsize)
+{
+	struct tw6869_vch *vch = video_drvdata(file);
+
+	if (fsize->index != 0)
+		return -EINVAL;
+
+	fsize->discrete.width = vch->format.width;
+	fsize->discrete.height = vch->format.height;
+
+	return 0;
+}
+
 static int tw6869_querystd(struct file *file, void *priv, v4l2_std_id *std)
 {
 	struct tw6869_vch *vch = video_drvdata(file);
@@ -886,6 +900,7 @@ static const struct v4l2_ioctl_ops tw6869_ioctl_ops = {
 	.vidioc_s_fmt_vid_cap = tw6869_s_fmt_vid_cap,
 	.vidioc_g_fmt_vid_cap = tw6869_g_fmt_vid_cap,
 	.vidioc_enum_fmt_vid_cap = tw6869_enum_fmt_vid_cap,
+	.vidioc_enum_framesizes = tw6869_enum_framesizes,
 
 	.vidioc_querystd = tw6869_querystd,
 	.vidioc_s_std = tw6869_s_std,
