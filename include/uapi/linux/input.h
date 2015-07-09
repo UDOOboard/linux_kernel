@@ -552,6 +552,14 @@ struct input_keymap_entry {
 #define BTN_GEAR_DOWN		0x150
 #define BTN_GEAR_UP		0x151
 
+#define BTN_ECTRL_PWR           0x152
+#define BTN_ECTRL_BATLOW_HL     0x153
+#define BTN_ECTRL_BATLOW_LH     0x154
+#define BTN_ECTRL_LID_HL        0x155
+#define BTN_ECTRL_LID_LH        0x156
+#define BTN_ECTRL_SLEEP         0x157
+#define BTN_ECTRL_WAKE          0x158
+
 #define KEY_OK			0x160
 #define KEY_SELECT		0x161
 #define KEY_GOTO		0x162

@@ -44,6 +44,7 @@
 #include "common.h"
 #include "cpuidle.h"
 #include "hardware.h"
+#include "apx_wdog-trigger.h"
 
 static struct fec_platform_data fec_pdata;
 static struct flexcan_platform_data flexcan_pdata[2];
@@ -444,9 +445,27 @@ static const struct of_dev_auxdata imx6q_auxdata_lookup[] __initconst = {
 	{ /* sentinel */ }
 };
 
+static const struct apx_wdog_trigger_data apx_wdt __initconst = {
+	.gpio_trg__iomux_ctrl   = 0x020e00b8,
+	.gpio_trg__pad_ctrl     = 0x20e03cc,
+	.gpio_trg__base         = 0x020a4000,
+	.gpio_trg__num           = 25,
+	.gpio_en__iomux_ctrl    = 0x20e020c,
+	.gpio_en__pad_ctrl      = 0x20e05dc,
+	.gpio_en__base          = 0x020a8000,
+	.gpio_en__num           = 11,
+};
+
 static void __init imx6q_init_machine(void)
 {
 	struct device *parent;
+
+	if ( of_machine_is_compatible("fsl,imx6q-SBC_A62") ||
+			of_machine_is_compatible("fsl,imx6dl-SBC_A62") ) {
+	
+		apx_wdog_trigger_early_init (&apx_wdt, 0);
+
+	}
 
 	imx_print_silicon_rev(cpu_is_imx6dl() ? "i.MX6DL" : "i.MX6Q",
 			      imx_get_soc_revision());
@@ -464,6 +483,13 @@ static void __init imx6q_init_machine(void)
 	imx_anatop_init();
 	imx6q_csi_mux_init();
 	cpu_is_imx6q() ?  imx6q_pm_init() : imx6dl_pm_init();
+
+	if ( of_machine_is_compatible("fsl,imx6q-SBC_A62") ||
+			of_machine_is_compatible("fsl,imx6dl-SBC_A62") ) {
+		
+		apx_wdog_trigger_work_init(0);
+
+	}
 }
 
 #define OCOTP_CFG3			0x440
@@ -556,6 +582,8 @@ static struct platform_device imx6q_cpufreq_pdev = {
 
 static void __init imx6q_init_late(void)
 {
+
+
 	/*
 	 * WAIT mode is broken on TO 1.0 and 1.1, so there is no point
 	 * to run cpuidle on them.
@@ -592,6 +620,11 @@ static void __init imx6q_init_irq(void)
 	irqchip_init();
 }
 
+
+static void __init imx6q_init_early (void) {
+}
+
+
 static const char *imx6q_dt_compat[] __initdata = {
 	"fsl,imx6dl",
 	"fsl,imx6q",
@@ -607,6 +640,7 @@ DT_MACHINE_START(IMX6Q, "Freescale i.MX6 Quad/DualLite (Device Tree)")
 	.dma_zone_size	= (SZ_2G - SZ_256M),
 	.smp		= smp_ops(imx_smp_ops),
 	.map_io		= imx6q_map_io,
+	.init_early     = imx6q_init_early,
 	.init_irq	= imx6q_init_irq,
 	.init_machine	= imx6q_init_machine,
 	.init_late      = imx6q_init_late,

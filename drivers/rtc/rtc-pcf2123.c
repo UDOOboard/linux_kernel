@@ -44,6 +44,7 @@
 #include <linux/spi/spi.h>
 #include <linux/module.h>
 #include <linux/sysfs.h>
+#include <linux/of.h>
 
 #define DRV_VERSION "0.6"
 
@@ -340,10 +341,20 @@ static int pcf2123_remove(struct spi_device *spi)
 	return 0;
 }
 
+
+#ifdef CONFIG_OF
+static const struct of_device_id pcf2123_of_match[] = {
+	{ .compatible = "nxp,pcf2123" },
+	{}
+};
+MODULE_DEVICE_TABLE(of, pcf2123_of_match);
+#endif
+
 static struct spi_driver pcf2123_driver = {
 	.driver	= {
 			.name	= "rtc-pcf2123",
 			.owner	= THIS_MODULE,
+			.of_match_table = of_match_ptr(pcf2123_of_match),
 	},
 	.probe	= pcf2123_probe,
 	.remove	= pcf2123_remove,

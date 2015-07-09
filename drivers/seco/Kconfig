@@ -1,0 +1,16 @@
+#
+#  SECO system driver
+#
+
+menu "SECO mxc support"
+
+config ECTRL
+	bool "Communication system with the Embedded Controller"
+	depends on I2C && ARCH_MXC 
+	help
+		Say Y here if you wanto to use the SecoCommunication System with the Embedded Controller.
+		
+		if usure, say Y.
+
+endmenu
+

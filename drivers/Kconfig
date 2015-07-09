@@ -98,6 +98,8 @@ source "drivers/memstick/Kconfig"
 
 source "drivers/mxc/Kconfig"
 
+source "drivers/seco/Kconfig"
+
 source "drivers/leds/Kconfig"
 
 source "drivers/accessibility/Kconfig"

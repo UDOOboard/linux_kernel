@@ -3207,6 +3207,12 @@ static void fec_reset_phy(struct platform_device *pdev)
 	}
 	msleep(msec);
 	gpio_set_value(phy_reset, 1);
+
+	/* delay introduced after reset of the PHY.
+ 	   This to allow to the ENABLE signal to go in a
+	   consistent state 
+	*/
+	msleep(50);
 }
 #else /* CONFIG_OF */
 static void fec_reset_phy(struct platform_device *pdev)
