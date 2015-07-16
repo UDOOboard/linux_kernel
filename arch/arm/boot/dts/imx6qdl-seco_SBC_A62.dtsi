@@ -121,33 +121,33 @@
 //		status = "okay";
 //	};
 
-//	v4l2_cap_0 {
-//		compatible = "fsl,imx6q-v4l2-capture";
-//		ipu_id = <0>;
-//		csi_id = <0>;
-//		mclk_source = <0>;
-//		status = "okay";
-//	};
-//
-//	v4l2_cap_1 {
-//		compatible = "fsl,imx6q-v4l2-capture";
-//		ipu_id = <0>;
-//		csi_id = <1>;
-//		mclk_source = <0>;
-//		status = "okay";
-//	};
-//
-//	v4l2_out {
-//		compatible = "fsl,mxc_v4l2_output";
-//		status = "okay";
-//	};
+	v4l2_cap_0 {
+		compatible = "fsl,imx6q-v4l2-capture";
+		ipu_id = <0>;
+		csi_id = <0>;
+		mclk_source = <0>;
+		status = "okay";
+	};
 
-//	mipi_dsi_reset: mipi-dsi-reset {
-//		compatible = "gpio-reset";
-//		reset-gpios = <&gpio6 11 GPIO_ACTIVE_LOW>;
-//		reset-delay-us = <50>;
-//		#reset-cells = <0>;
-//	};
+	v4l2_cap_1 {
+		compatible = "fsl,imx6q-v4l2-capture";
+		ipu_id = <0>;
+		csi_id = <1>;
+		mclk_source = <0>;
+		status = "okay";
+	};
+
+	v4l2_out {
+		compatible = "fsl,mxc_v4l2_output";
+		status = "okay";
+	};
+
+	mipi_dsi_reset: mipi-dsi-reset {
+		compatible = "gpio-reset";
+		reset-gpios = <&gpio6 11 GPIO_ACTIVE_LOW>;
+		reset-delay-us = <50>;
+		#reset-cells = <0>;
+	};
 };
 
 &clks {
