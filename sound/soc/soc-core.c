@@ -523,7 +523,7 @@ static int soc_ac97_dev_unregister(struct snd_soc_codec *codec)
 static void soc_ac97_device_release(struct device *dev){}
 
 /* register ac97 codec to bus */
-static int soc_ac97_dev_register(struct snd_soc_codec *codec)
+int soc_ac97_dev_register(struct snd_soc_codec *codec)
 {
 	int err;
 
@@ -541,6 +541,7 @@ static int soc_ac97_dev_register(struct snd_soc_codec *codec)
 	}
 	return 0;
 }
+EXPORT_SYMBOL_GPL(soc_ac97_dev_register);
 #endif
 
 static void codec2codec_close_delayed_work(struct work_struct *work)
