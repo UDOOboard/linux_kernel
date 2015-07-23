@@ -10,7 +10,7 @@
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <linux/workqueue.h>
-
+#include <linux/fs.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/of_gpio.h>
@@ -26,6 +26,9 @@
 
 /* pinctrl state */
 #define PINCTRL_DEFAULT      "default"
+
+static int major;
+static struct class *udoo_class;
 
 static struct platform_device_id udoo_ard_devtype[] = {
     {
@@ -67,10 +70,10 @@ static u32 origTX, origRX;
 
 static void disable_serial(void)
 {
-    printk("[bossac] Disable UART4 serial port.\n");
-    
     u32 addrTX;
     void __iomem *_addrTX;
+
+    printk("[bossac] Disable UART4 serial port.\n");
    
     addrTX = 0x20E01F8;
     _addrTX = ioremap(addrTX, 8);
@@ -86,10 +89,10 @@ static void disable_serial(void)
 
 static void enable_serial(void)
 {
-    printk("[bossac] Enable UART4 serial port.\n");
-    
     u32 addrTX;
     void __iomem *_addrTX;
+
+    printk("[bossac] Enable UART4 serial port.\n");
    
     addrTX = 0x20E01F8;
     _addrTX = ioremap(addrTX, 8);
@@ -100,9 +103,9 @@ static void enable_serial(void)
     iounmap(_addrTX);
 }
 
-static void erase_reset_wq_function( struct work_struct *work2)
+static void erase_reset(void)
 {
-    disable_serial();
+    printk("[bossac] UDOO ERASE and RESET on Sam3x started.\n");
     
     gpio_direction_input(work->gpio_ard_erase);
     gpio_set_value(work->gpio_ard_reset, 1);
@@ -118,7 +121,13 @@ static void erase_reset_wq_function( struct work_struct *work2)
     msleep(80);
     gpio_set_value(work->gpio_ard_reset, 1);
 
-    printk("[bossac] UDOO ERASE and RESET on Sam3x EXECUTED. [%d]\n", work->erase_reset_lock);
+    printk("[bossac] UDOO ERASE and RESET on Sam3x EXECUTED.\n");
+}
+
+static void erase_reset_wq_function( struct work_struct *work2)
+{
+    disable_serial();
+    erase_reset();
     msleep(GRAY_TIME_BETWEEN_RESET);
 
     work->erase_reset_lock = 0;
@@ -225,6 +234,15 @@ static int gpio_setup(void)
     return 0;
 }
 
+static int device_open(struct inode *inode, struct file *file)
+{
+    erase_reset();
+    return 0;
+}
+
+static struct file_operations fops = {
+    .open = device_open,
+};
 
 static int udoo_ard_probe(struct platform_device *pdev)
 {
@@ -232,6 +250,7 @@ static int udoo_ard_probe(struct platform_device *pdev)
 
     struct platform_device *bdev;
     bdev = kzalloc(sizeof(*bdev), GFP_KERNEL);
+    struct device *temp_class;
 
     struct device_node *np = pdev->dev.of_node;
 
@@ -257,6 +276,24 @@ static int udoo_ard_probe(struct platform_device *pdev)
     printk("[bossac] Registering IRQ %d for BOSSAC Arduino erase/reset operation\n", gpio_to_irq(work->gpio_bossac_clk));
     retval = request_irq(gpio_to_irq(work->gpio_bossac_clk), udoo_bossac_req, IRQF_TRIGGER_FALLING, "UDOO", bdev);
 
+    major = register_chrdev(major, "udoo_ard", &fops);
+    if (major < 0) {
+		printk(KERN_ERR "[bossac] Cannot get major for UDOO Ard\n");
+		return -EBUSY;
+	}
+    
+    udoo_class = class_create(THIS_MODULE, "udoo_ard");
+	if (IS_ERR(udoo_class)) {
+		return PTR_ERR(udoo_class);
+	}
+
+	temp_class = device_create(udoo_class, NULL, MKDEV(major, 0), NULL, "udoo_ard");
+	if (IS_ERR(temp_class)) {
+		return PTR_ERR(temp_class);
+	}
+    
+    printk("[bossac] Created device file /dev/udoo_ard\n");
+    
     erase_reset_wq = create_workqueue("erase_reset_queue");
     if (erase_reset_wq) {
 
@@ -283,7 +320,10 @@ static void udoo_ard_remove(struct platform_device *pdev)
     gpio_free(work->gpio_ard_erase);
     gpio_free(work->gpio_bossac_clk);
     gpio_free(work->gpio_bossac_dat);
-    return;
+    
+    device_destroy(udoo_class, MKDEV(major, 0));
+    class_destroy(udoo_class);
+    unregister_chrdev(major, "udoo_ard");
 }
 
 static struct platform_driver udoo_ard_driver = {
