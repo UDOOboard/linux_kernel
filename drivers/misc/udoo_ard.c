@@ -1,3 +1,25 @@
+/*
+ * udoo_ard.c
+ * UDOO quad/dual Arduino flash erase / CPU resetter
+ *
+ * Copyright (C) 2013-2015 Aidilab srl
+ * Author: UDOO Team <social@udoo.org>
+ * Author: Giuseppe Pagano <giuseppe.pagano@seco.com>
+ * Author: Francesco Montefoschi <francesco.monte@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published by
+ * the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -17,17 +39,31 @@
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
 
-#define DRIVER_NAME     "udoo_ard"
+#define DRIVER_NAME              "udoo_ard"
+#define PINCTRL_DEFAULT          "default"
+#define AUTH_TOKEN               0x5A5A
+#define MAX_MSEC_SINCE_LAST_IRQ  400
+#define GRAY_TIME_BETWEEN_RESET  10000 // In this time we can't accept new erase/reset code 
 
-#define AUTH_TOKEN 0x5A5A
-// #define MAX_MSEC_SINCE_LAST_IRQ 1000*1000*1000
-#define MAX_MSEC_SINCE_LAST_IRQ 400 // 
-#define GRAY_TIME_BETWEEN_RESET 10000 // In this time we can't accept new erase/reset code 
+static struct workqueue_struct *erase_reset_wq;
+typedef struct {
+    struct work_struct erase_reset_work;
+    struct pinctrl *pinctrl;
+    struct pinctrl_state *pins_default;
+    int    step;
+    int    cmdcode;
+    int    erase_reset_lock;
+    int    gpio_bossac_clk;
+    int    gpio_bossac_dat;
+    int    gpio_ard_erase;
+    int    gpio_ard_reset;
+    unsigned long    last_int_time_in_ns;
+    unsigned long    last_int_time_in_sec;
+} erase_reset_work_t;
 
-/* pinctrl state */
-#define PINCTRL_DEFAULT      "default"
-
-static int major;
+erase_reset_work_t *work;
+static u32 origTX, origRX; // original UART4 TX/RX pad control registers
+static int major; // for /dev/udoo_ard
 static struct class *udoo_class;
 
 static struct platform_device_id udoo_ard_devtype[] = {
@@ -46,27 +82,6 @@ static const struct of_device_id udoo_ard_dt_ids[] = {
     { /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, udoo_ard_dt_ids);
-
-static struct workqueue_struct *erase_reset_wq;
-
-typedef struct {
-    struct work_struct erase_reset_work;
-    struct pinctrl *pinctrl;
-    struct pinctrl_state *pins_default;
-    int    step;
-    int    cmdcode;
-    int    erase_reset_lock;
-    int    gpio_bossac_clk;
-    int    gpio_bossac_dat;
-    int    gpio_ard_erase;
-    int    gpio_ard_reset;
-    unsigned long    last_int_time_in_ns;
-    unsigned long    last_int_time_in_sec;
-} erase_reset_work_t;
-
-erase_reset_work_t *work;
-
-static u32 origTX, origRX;
 
 static void disable_serial(void)
 {
@@ -133,21 +148,29 @@ static void erase_reset_wq_function( struct work_struct *work2)
     work->erase_reset_lock = 0;
 }
 
-
+/*
+ * Called everytime the gpio_bossac_clk signal toggles.
+ * If the auth token (16 bit) is found, we look for the command code (4 bit).
+ * The code 0x0F is sent by Bossac to trigger an erase/reset (to achieve this,
+ * erase_reset_wq is scheduled). Before starting to program the flash, we disable
+ * the UART4 serial port, otherwise there is too noise on the serial lines (the
+ * programming port and UART4 port are connected together, see hw schematics).
+ * When Bossac finishes to flash/verify, the code 0x00 is sent which re-enables
+ * the UART4 port.
+ */
 static irqreturn_t udoo_bossac_req(int irq, void *dev_id)
 {
-    int     retval, auth_bit, expected_bit;
-    int     cmdcode = 0x0;
-    int     msec_since_last_irq;
-    u64        nowsec;
-    unsigned long  rem_nsec;
+    int retval, auth_bit, expected_bit, msec_since_last_irq;
+    u64 nowsec;
+    unsigned long rem_nsec;
+    erase_reset_work_t *erase_reset_work;
 
     auth_bit = 0;
     if (gpio_get_value(work->gpio_bossac_dat) != 0x0) {
         auth_bit = 1;
     }
 
-    erase_reset_work_t *erase_reset_work = (erase_reset_work_t *)work;
+    erase_reset_work = (erase_reset_work_t *)work;
 
     nowsec = local_clock();
     rem_nsec = do_div(nowsec, 1000000000) ;
@@ -155,11 +178,14 @@ static irqreturn_t udoo_bossac_req(int irq, void *dev_id)
 
     if (msec_since_last_irq > MAX_MSEC_SINCE_LAST_IRQ) {
         erase_reset_work->step = 0;
+#ifdef DEBUG
         printk("[bossac] Reset authentication timeout!\n");
+#endif
     }
 
-    //printk("STEP %d -> 0x%d \n", erase_reset_work->step, auth_bit);
-    
+#ifdef DEBUG
+    printk("[bossac] STEP %d -> 0x%d \n", erase_reset_work->step, auth_bit);
+#endif
     erase_reset_work->last_int_time_in_ns = rem_nsec;
     erase_reset_work->last_int_time_in_sec = nowsec;
 
@@ -175,15 +201,21 @@ static irqreturn_t udoo_bossac_req(int irq, void *dev_id)
         erase_reset_work->step = erase_reset_work->step + 1;
     }
 
-    //printk("erase_reset_work->erase_reset_lock = %d \n", erase_reset_work->erase_reset_lock);
+#ifdef DEBUG
+    printk("erase_reset_work->erase_reset_lock = %d \n", erase_reset_work->erase_reset_lock);
+#endif
     if ( erase_reset_work->step == 20 ) {  // Passed authentication and code acquiring step.
+#ifdef DEBUG
         printk("[bossac] Received code = 0x%04x \n", erase_reset_work->cmdcode);
+#endif
         if (erase_reset_work->cmdcode == 0xF) {
             if (erase_reset_work->erase_reset_lock == 0) {
             	erase_reset_work->erase_reset_lock = 1;
             	retval = queue_work( erase_reset_wq, (struct work_struct *)work );
             } else {
-                //printk("Erase and reset operation already in progress. Do nothing.\n");
+#ifdef DEBUG
+                printk("Erase and reset operation already in progress. Do nothing.\n");
+#endif
             } 
         } else {
             enable_serial();
@@ -195,6 +227,9 @@ static irqreturn_t udoo_bossac_req(int irq, void *dev_id)
     return IRQ_HANDLED;
 }
 
+/*
+ * Takes control of clock, data, erase, reset GPIOs.
+ */
 static int gpio_setup(void)
 {
     int ret;
@@ -234,6 +269,10 @@ static int gpio_setup(void)
     return 0;
 }
 
+/*
+ * When /dev/udoo_ard is opened, we trigger an erase/reset.
+ * This is used when programming the Arduino from UDOOBuntu.
+ */
 static int device_open(struct inode *inode, struct file *file)
 {
     erase_reset();
@@ -244,15 +283,19 @@ static struct file_operations fops = {
     .open = device_open,
 };
 
+/*
+ * If a fdt udoo_ard entry is found, we register an IRQ on bossac clock line
+ * and we create /dev/udoo_ard
+ */
 static int udoo_ard_probe(struct platform_device *pdev)
 {
     int retval;
-
-    struct platform_device *bdev;
-    bdev = kzalloc(sizeof(*bdev), GFP_KERNEL);
     struct device *temp_class;
-
-    struct device_node *np = pdev->dev.of_node;
+    struct platform_device *bdev;
+    struct device_node *np;
+    
+    bdev = kzalloc(sizeof(*bdev), GFP_KERNEL);
+    np = pdev->dev.of_node;
 
     if (!np)
             return -ENODEV;
@@ -311,7 +354,7 @@ static int udoo_ard_probe(struct platform_device *pdev)
     return  0;
 }
 
-static void udoo_ard_remove(struct platform_device *pdev)
+static int udoo_ard_remove(struct platform_device *pdev)
 {
     printk("[bossac] Unloading UDOO ard driver.\n");
     free_irq(gpio_to_irq(work->gpio_bossac_clk), NULL);
@@ -324,6 +367,8 @@ static void udoo_ard_remove(struct platform_device *pdev)
     device_destroy(udoo_class, MKDEV(major, 0));
     class_destroy(udoo_class);
     unregister_chrdev(major, "udoo_ard");
+    
+    return 0;
 }
 
 static struct platform_driver udoo_ard_driver = {
