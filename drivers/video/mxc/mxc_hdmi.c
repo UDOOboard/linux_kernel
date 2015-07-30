@@ -1473,8 +1473,13 @@ static void hdmi_av_composer(struct mxc_hdmi *hdmi)
 	hdmi_writeb(fb_mode.xres, HDMI_FC_INHACTV0);
 
 	/* Set up vertical blanking pixel region width */
-	hdmi_writeb(fb_mode.yres >> 8, HDMI_FC_INVACTV1);
-	hdmi_writeb(fb_mode.yres, HDMI_FC_INVACTV0);
+	if (vmode->mInterlaced) {
+		hdmi_writeb((fb_mode.yres/2) >> 8, HDMI_FC_INVACTV1);
+		hdmi_writeb((fb_mode.yres/2), HDMI_FC_INVACTV0);
+	} else {
+		hdmi_writeb(fb_mode.yres >> 8, HDMI_FC_INVACTV1);
+		hdmi_writeb(fb_mode.yres, HDMI_FC_INVACTV0);
+	}
 
 	/* Set up horizontal blanking pixel region width */
 	hblank = fb_mode.left_margin + fb_mode.right_margin +
@@ -1485,21 +1490,30 @@ static void hdmi_av_composer(struct mxc_hdmi *hdmi)
 	/* Set up vertical blanking pixel region width */
 	vblank = fb_mode.upper_margin + fb_mode.lower_margin +
 		fb_mode.vsync_len;
-	hdmi_writeb(vblank, HDMI_FC_INVBLANK);
+	if (vmode->mInterlaced)
+		hdmi_writeb(vblank/2, HDMI_FC_INVBLANK);
+	else
+		hdmi_writeb(vblank, HDMI_FC_INVBLANK);
 
 	/* Set up HSYNC active edge delay width (in pixel clks) */
 	hdmi_writeb(fb_mode.right_margin >> 8, HDMI_FC_HSYNCINDELAY1);
 	hdmi_writeb(fb_mode.right_margin, HDMI_FC_HSYNCINDELAY0);
 
 	/* Set up VSYNC active edge delay (in pixel clks) */
-	hdmi_writeb(fb_mode.lower_margin, HDMI_FC_VSYNCINDELAY);
+	if (vmode->mInterlaced)
+		hdmi_writeb(fb_mode.lower_margin / 2, HDMI_FC_VSYNCINDELAY);
+	else
+		hdmi_writeb(fb_mode.lower_margin, HDMI_FC_VSYNCINDELAY);
 
 	/* Set up HSYNC active pulse width (in pixel clks) */
 	hdmi_writeb(fb_mode.hsync_len >> 8, HDMI_FC_HSYNCINWIDTH1);
 	hdmi_writeb(fb_mode.hsync_len, HDMI_FC_HSYNCINWIDTH0);
 
 	/* Set up VSYNC active edge delay (in pixel clks) */
-	hdmi_writeb(fb_mode.vsync_len, HDMI_FC_VSYNCINWIDTH);
+	if (vmode->mInterlaced)
+		hdmi_writeb(fb_mode.vsync_len / 2, HDMI_FC_VSYNCINWIDTH);
+	else
+		hdmi_writeb(fb_mode.vsync_len, HDMI_FC_VSYNCINWIDTH);
 
 	dev_dbg(&hdmi->pdev->dev, "%s exit\n", __func__);
 }
@@ -1799,8 +1813,7 @@ static void mxc_hdmi_edid_rebuild_modelist(struct mxc_hdmi *hdmi)
 		 */
 		mode = &hdmi->fbi->monspecs.modedb[i];
 
-		if (!(mode->vmode & FB_VMODE_INTERLACED) &&
-				(mxc_edid_mode_to_vic(mode) != 0)) {
+		if (mxc_edid_mode_to_vic(mode) != 0) {
 
 			dev_dbg(&hdmi->pdev->dev, "Added mode %d:", i);
 			dev_dbg(&hdmi->pdev->dev,
@@ -1843,7 +1856,7 @@ static void  mxc_hdmi_default_modelist(struct mxc_hdmi *hdmi)
 	/*Add all no interlaced CEA mode to default modelist */
 	for (i = 0; i < ARRAY_SIZE(mxc_cea_mode); i++) {
 		mode = &mxc_cea_mode[i];
-		if (!(mode->vmode & FB_VMODE_INTERLACED) && (mode->xres != 0))
+		if (mode->xres != 0)
 			fb_add_videomode(mode, &hdmi->fbi->modelist);
 	}
 
@@ -2577,7 +2590,7 @@ static int mxc_hdmi_disp_init(struct mxc_dispdrv_handle *disp,
 	/*Add all no interlaced CEA mode to default modelist */
 	for (i = 0; i < ARRAY_SIZE(mxc_cea_mode); i++) {
 		mode = &mxc_cea_mode[i];
-		if (!(mode->vmode & FB_VMODE_INTERLACED) && (mode->xres != 0))
+		if (mode->xres != 0)
 			fb_add_videomode(mode, &hdmi->fbi->modelist);
 	}
 
