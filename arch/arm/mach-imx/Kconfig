@@ -918,3 +918,16 @@ config MACH_IMX_BLUETOOTH_RFKILL
 source "arch/arm/mach-imx/devices/Kconfig"
 
 endmenu
+
+
+
+menu "UDOO Boards"
+	depends on SOC_IMX6
+
+config UDOO_QDL_HALT
+	bool "QDL: enable HALT on shutdown"
+	help
+	  If enabled, powers off the board toggling the GPIO(2,4).
+	  Just say Y.
+
+endmenu
