@@ -38,6 +38,7 @@
 #include <linux/of_gpio.h>
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
+#include <asm/uaccess.h>
 
 #define DRIVER_NAME              "udoo_ard"
 #define PINCTRL_DEFAULT          "default"
@@ -137,6 +138,13 @@ static void erase_reset(void)
     gpio_set_value(work->gpio_ard_reset, 1);
 
     printk("[bossac] UDOO ERASE and RESET on Sam3x EXECUTED.\n");
+}
+
+static void shutdown_sam3x(void)
+{
+    printk("[bossac] RESET on Sam3x.\n");
+    
+    gpio_set_value(work->gpio_ard_reset, 0);
 }
 
 static void erase_reset_wq_function( struct work_struct *work2)
@@ -269,18 +277,38 @@ static int gpio_setup(void)
     return 0;
 }
 
-/*
- * When /dev/udoo_ard is opened, we trigger an erase/reset.
- * This is used when programming the Arduino from UDOOBuntu.
- */
-static int device_open(struct inode *inode, struct file *file)
+static ssize_t device_write(struct file *filp, const char *buff, size_t len, loff_t *off)
 {
-    erase_reset();
-    return 0;
+    char msg[10];
+    long res;
+
+    if (len > 10)
+		return -EINVAL;
+    
+    
+	res = copy_from_user(msg, buff, len);
+    if (res) {
+        return -EFAULT;
+    }
+	msg[len] = '\0';
+    
+    if (strcmp(msg, "erase")==0) {
+        erase_reset();
+    } else if (strcmp(msg, "shutdown")==0) {
+        shutdown_sam3x();
+    } else if (strcmp(msg, "uartoff")==0) {
+        disable_serial();
+    } else if (strcmp(msg, "uarton")==0) {
+        enable_serial();
+    } else {
+        printk("[bossac] udoo_ard invalid operation! %s", msg);
+    }
+    
+	return len;
 }
 
 static struct file_operations fops = {
-    .open = device_open,
+    .write = device_write,
 };
 
 /*
