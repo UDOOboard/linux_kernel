@@ -178,6 +178,13 @@ static int ksz9031rn_phy_fixup(struct phy_device *dev)
 	return 0;
 }
 
+
+static int ksz8091rn_phy_fixup(struct phy_device *dev)
+{
+	return 0;
+}
+
+
 /*
  * fixup for PLX PEX8909 bridge to configure GPIO1-7 as output High
  * as they are used for slots1-7 PERST#
@@ -279,6 +286,8 @@ static void __init imx6q_enet_phy_init(void)
 				ksz9021rn_phy_fixup);
 		phy_register_fixup_for_uid(PHY_ID_KSZ9031, MICREL_PHY_ID_MASK,
 				ksz9031rn_phy_fixup);
+		phy_register_fixup_for_uid(PHY_ID_KSZ8091, MICREL_PHY_ID_MASK,
+				ksz8091rn_phy_fixup);
 		phy_register_fixup_for_uid(PHY_ID_AR8031, 0xffffffff,
 				ar8031_phy_fixup);
 		phy_register_fixup_for_uid(PHY_ID_AR8035, 0xffffffef,
@@ -291,6 +300,9 @@ static void __init imx6q_1588_init(void)
 	struct device_node *np;
 	struct clk *ptp_clk;
 	struct regmap *gpr;
+	const char *pm;
+	int err, clk_out = 1;
+
 
 	np = of_find_compatible_node(NULL, NULL, "fsl,imx6q-fec");
 	if (!np) {
@@ -304,17 +316,34 @@ static void __init imx6q_1588_init(void)
 		goto put_node;
 	}
 
+	err = of_property_read_string (np, "phy-mode", &pm);
+	if (err < 0)
+		return err;
+
+	if ( !strcasecmp (pm, "rmii") )
+		clk_out = 0;
+
 	/*
 	 * If enet_ref from ANATOP/CCM is the PTP clock source, we need to
 	 * set bit IOMUXC_GPR1[21].  Or the PTP clock must be from pad
 	 * (external OSC), and we need to clear the bit.
+	 * If we have a RMII phy we want to get enet tx reference clk 
+	 * from pad (external OSC for both external PHY and Internal Controller)
 	 */
 	gpr = syscon_regmap_lookup_by_compatible("fsl,imx6q-iomuxc-gpr");
-	if (!IS_ERR(gpr))
-		regmap_update_bits(gpr, IOMUXC_GPR1,
-				IMX6Q_GPR1_ENET_CLK_SEL_MASK,
-				IMX6Q_GPR1_ENET_CLK_SEL_ANATOP);
-	else
+	printk (KERN_INFO "davide sono passato di qui..... \n");
+	if (!IS_ERR(gpr)) {
+
+		if ( clk_out )
+			regmap_update_bits(gpr, IOMUXC_GPR1,
+					IMX6Q_GPR1_ENET_CLK_SEL_MASK, 
+					IMX6Q_GPR1_ENET_CLK_SEL_ANATOP);
+		else
+			regmap_update_bits(gpr, IOMUXC_GPR1,
+					IMX6Q_GPR1_ENET_CLK_SEL_MASK, 
+					~IMX6Q_GPR1_ENET_CLK_SEL_ANATOP);
+
+	} else
 		pr_err("failed to find fsl,imx6q-iomux-gpr regmap\n");
 
 	clk_put(ptp_clk);

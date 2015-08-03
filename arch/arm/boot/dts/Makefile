@@ -211,9 +211,11 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-seco_quadmo747_928.dtb \
 	imx6q-seco_uq7_962.dtb \
 	imx6q-seco_SBC_A62.dtb \
+	imx6q-seco_uq7-j_A75.dtb \
 	imx6dl-seco_quadmo747_928.dtb \
 	imx6dl-seco_uq7_962.dtb \
-	imx6dl-seco_SBC_A62.dtb
+	imx6dl-seco_SBC_A62.dtb \
+	imx6dl-seco_uq7-j_A75.dtb 
 dtb-$(CONFIG_ARCH_MXS) += imx23-evk.dtb \
 	imx23-olinuxino.dtb \
 	imx23-stmp378x_devb.dtb \
