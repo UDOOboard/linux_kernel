@@ -98,7 +98,7 @@ static int imx_vt1613_probe(struct platform_device *pdev)
 	int int_port, ext_port;
 	int ret;
 
-	if (!of_machine_is_compatible("udoo,imx6q-udoo")) 
+	if (!of_machine_is_compatible("udoo,imx6q-udoo") && !of_machine_is_compatible("udoo,imx6dl-udoo")) 
 		return -ENODEV;
 	
 	ret = of_property_read_u32(np, "mux-int-port", &int_port);
