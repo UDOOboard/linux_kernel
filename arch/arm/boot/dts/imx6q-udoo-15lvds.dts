@@ -18,21 +18,21 @@
 / {
 	model = "Udoo i.MX6 Quad Board";
 	compatible = "udoo,imx6q-udoo", "fsl,imx6q";	
-        
-        regulators {
+	
+	regulators {
 		reg_lcd0_pwr: regulator@1 {
 			status = "okay";
 		};
-	 
+		
 		reg_lcd0_backlight: regulator@2 {
-                        status = "okay";
+			status = "okay";
 		};   
-        };
-        
+	};
+	
 	mxcfb1: fb@0 {
 		compatible = "fsl,mxc_sdc_fb";
 		disp_dev = "ldb";
-                default_bpp = <32>;
+		default_bpp = <32>;
 		interface_pix_fmt = "RGB24";
 		mode_str ="";
 		int_clk = <0>;
@@ -42,25 +42,25 @@
 };
 
 &ldb {
-        status = "okay";
-        lvds-channel@0 {        
-            status = "okay";
-            fsl,data-width = <24>;
-            display-timings {
-                native-mode = <&timing1>;
-                timing1: 1366x768 {
-                        clock-frequency = <76000000>;
-                        hactive = <1366>;
-                        vactive = <768>;
-                        hback-porch = <220>;
-                        hfront-porch = <40>;
-                        vback-porch = <21>;
-                        vfront-porch = <7>;
-                        hsync-len = <60>;
-                        vsync-len = <10>;
-                };
-            };
-        };
+	status = "okay";
+	lvds-channel@0 {        
+		status = "okay";
+		fsl,data-width = <24>;
+		display-timings {
+			native-mode = <&timing1>;
+			timing1: 1366x768 {
+				clock-frequency = <76000000>;
+				hactive = <1366>;
+				vactive = <768>;
+				hback-porch = <220>;
+				hfront-porch = <40>;
+				vback-porch = <21>;
+				vfront-porch = <7>;
+				hsync-len = <60>;
+				vsync-len = <10>;
+			};
+		};
+	};
 };
 
 &sata {
