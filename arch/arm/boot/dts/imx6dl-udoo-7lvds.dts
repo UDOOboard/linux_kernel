@@ -3,12 +3,13 @@
  *
  * Author: Fabio Estevam <fabio.estevam@freescale.com>
  * Author: Ettore Chimenti <ettore.chimenti@udoo.org>
- *
+ * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  *
  */
+
 /dts-v1/;
 #include "imx6dl.dtsi"
 #include "imx6qdl-udoo.dtsi"
@@ -17,15 +18,46 @@
 	model = "Udoo i.MX6 Dual-lite Board";
 	compatible = "udoo,imx6dl-udoo", "fsl,imx6dl";
 	
+	regulators {
+		reg_lcd0_pwr: regulator@1 {
+			status = "okay";
+		};
+		
+		reg_lcd0_backlight: regulator@2 {
+			status = "okay";
+		};   
+	};
+	
 	mxcfb1: fb@0 {
 		compatible = "fsl,mxc_sdc_fb";
-		disp_dev = "hdmi";
-		interface_pix_fmt = "RGB24";
-		mode_str ="1920x1080M@60";
+		disp_dev = "ldb";
+		interface_pix_fmt = "RGB666";
+		mode_str ="800x480";
 		default_bpp = <32>;
 		int_clk = <0>;
 		late_init = <0>;
 		status = "okay";
 	};
-	
+};
+
+&ldb {
+	status = "okay";
+	lvds-channel@0 {     
+		status = "okay";
+		fsl,data-width = <18>;
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: 800x480 {
+				clock-frequency = <33660000>;
+				hactive = <800>;
+				vactive = <480>;
+				hback-porch = <56>;
+				hfront-porch = <50>;
+				vback-porch = <23>;
+				vfront-porch = <20>;
+				hsync-len = <150>;
+				vsync-len = <2>;
+			};
+		};
+	};
 };
