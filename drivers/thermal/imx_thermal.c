@@ -27,6 +27,10 @@
 #include <linux/thermal.h>
 #include <linux/types.h>
 
+static int crit_delta = 5000;
+module_param(crit_delta, int, S_IRUGO);
+MODULE_PARM_DESC(crit_delta, "Override 5C criticalthreshold below CPU Max");
+
 #define REG_SET		0x4
 #define REG_CLR		0x8
 #define REG_TOG		0xc
@@ -465,7 +469,7 @@ static int imx_get_sensor_data(struct platform_device *pdev)
 	 * Let's give some cushion for noise and possible temperature rise
 	 * between measurements.
 	 */
-	data->trip_temp[IMX_TRIP_CRITICAL] = data->temp_max - 5000;
+	data->trip_temp[IMX_TRIP_CRITICAL] = data->temp_max - crit_delta;
 	data->trip_temp[IMX_TRIP_PASSIVE] = data->temp_max - 10000;
 
 	return 0;
