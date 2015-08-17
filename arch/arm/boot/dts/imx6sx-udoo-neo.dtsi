@@ -446,3 +446,23 @@
 &pxp {
 	status = "okay";
 };
+
+&csi1 {
+	status = "okay";
+	port {
+		csi1_ep: endpoint {
+			remote-endpoint = <&vadc_ep>;
+		};
+	};
+};
+
+&vadc {
+	vadc_in = <0>;
+	csi_id = <0>;
+	status = "okay";
+	port {
+		vadc_ep: endpoint {
+			remote-endpoint = <&csi1_ep>;
+		};
+	};
+};
