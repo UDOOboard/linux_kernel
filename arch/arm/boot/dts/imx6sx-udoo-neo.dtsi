@@ -45,8 +45,8 @@
 			regulator-name = "usb_otg1_vbus";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
-			gpio = <&gpio1 9 0>;
-			enable-active-low;
+			gpio = <&gpio1 9 1>;
+			enable-active-high;
 		};
 
 		reg_usb_otg2_vbus: usb_otg2_vbus {
@@ -54,8 +54,8 @@
 			regulator-name = "usb_otg2_vbus";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
-			gpio = <&gpio4 12 0>;
-			enable-active-low;
+			gpio = <&gpio4 12 1>;
+			enable-active-high;
 		};
 
 	};
@@ -65,7 +65,7 @@
 
 		led0: led0 {
 			label = "led0";
-			gpios = <&gpio6 0 1>;
+			gpios = <&gpio6 0 0>;
 			default-state = "off";
 		};
 
@@ -214,17 +214,7 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_1>;
-	status = "okay";
-
-	accelerometer: fxos8700@1e {
-		compatible = "fsl,fxos8700";
-		reg = <0x1e>;
-	};
-
-	gyroscope: fxas2100x@20 {
-		compatible = "fsl,fxas2100x";
-		reg = <0x20>;
-	};
+	status = "disabled";
 };
 
 
@@ -239,7 +229,17 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c4_1>;
-	status = "disabled";
+	status = "okay";
+
+	accelerometer: fxos8700@1e {
+		compatible = "fsl,fxos8700";
+		reg = <0x1e>;
+	};
+
+	gyroscope: fxas2100x@20 {
+		compatible = "fsl,fxas2100x";
+		reg = <0x20>;
+	};
 };
 
 
@@ -258,7 +258,7 @@
 				MX6SX_PAD_SD1_CMD__GPIO6_IO_1       0x80000000 // USDHC2 PWR
 				MX6SX_PAD_SD1_DATA0__GPIO6_IO_2     0x80000000 // USDHC2 CD
 
-				MX6SX_PAD_KEY_COL3__GPIO2_IO_13     0x80000000 // Gyro interrupt
+				MX6SX_PAD_NAND_CE0_B__GPIO4_IO_1    0x80000000 // Gyro interrupt
 				MX6SX_PAD_NAND_WE_B__GPIO4_IO_14    0x80000000 // Mag interrupt
 				MX6SX_PAD_QSPI1B_DATA2__GPIO4_IO_26 0x80000000 // Accel interupt
 
@@ -351,8 +351,8 @@
 
 		pinctrl_i2c4_1: i2c4grp-1 {
 			fsl,pins = <
-				MX6SX_PAD_CSI_DATA07__I2C4_SDA          0x4001b8b1
-				MX6SX_PAD_CSI_DATA06__I2C4_SCL          0x4001b8b1
+				MX6SX_PAD_USB_H_DATA__I2C4_SDA			0x4001b8b1
+				MX6SX_PAD_USB_H_STROBE__I2C4_SCL		0x4001b8b1
 			>;
 		};
 
