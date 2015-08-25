@@ -58,6 +58,19 @@
 			enable-active-high;
 		};
 
+		wlan_en_reg: fixedregulator@1 {
+			compatible = "regulator-fixed";
+			regulator-name = "wlan-en-regulator";
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+
+			/* WLAN_EN GPIO for this board - KEY_COL2  Bank2, pin12 */
+			gpio = <&gpio2 12 0>;
+			/* WLAN card specific delay */
+			startup-delay-us = <70000>;
+			enable-active-high;
+		};
+
 	};
 
 	leds {
@@ -296,6 +309,17 @@
 			>;
 		};
 
+		pinctrl_uart3_1: uart3grp-1 {
+			fsl,pins = <
+				MX6SX_PAD_CSI_MCLK__OSC32K_32K_OUT	0x10059
+				MX6SX_PAD_SD3_DATA4__UART3_RX		0x13059
+				MX6SX_PAD_SD3_DATA5__UART3_TX		0x13059
+				MX6SX_PAD_SD3_DATA6__UART3_RTS_B	0x13059
+				MX6SX_PAD_SD3_DATA7__UART3_CTS_B	0x13059
+				MX6SX_PAD_KEY_ROW2__GPIO2_IO_17		0x15059
+			>;
+		};
+
 		pinctrl_usbotg1_1: usbotg1grp-1 {
 			fsl,pins = <
 				MX6SX_PAD_GPIO1_IO10__ANATOP_OTG1_ID	0x17059
@@ -333,6 +357,19 @@
 				MX6SX_PAD_SD2_DATA1__USDHC2_DATA1	0x17059
 				MX6SX_PAD_SD2_DATA2__USDHC2_DATA2	0x17059
 				MX6SX_PAD_SD2_DATA3__USDHC2_DATA3	0x17059
+			>;
+		};
+
+		pinctrl_usdhc3_wifi: usdhc3grp-wifi {
+			fsl,pins = <
+				MX6SX_PAD_SD3_CMD__USDHC3_CMD		0x17069
+				MX6SX_PAD_SD3_CLK__USDHC3_CLK		0x10069
+				MX6SX_PAD_SD3_DATA0__USDHC3_DATA0	0x17069
+				MX6SX_PAD_SD3_DATA1__USDHC3_DATA1	0x17069
+				MX6SX_PAD_SD3_DATA2__USDHC3_DATA2	0x17069
+				MX6SX_PAD_SD3_DATA3__USDHC3_DATA3	0x17069
+				MX6SX_PAD_KEY_COL2__GPIO2_IO_12		0x15059
+				MX6SX_PAD_KEY_ROW1__GPIO2_IO_16		0x13059
 			>;
 		};
 
@@ -426,6 +463,13 @@
 	status = "disabled";
 };
 
+&uart3 { /* for bluetooth */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3_1>;
+	fsl,uart-has-rtscts;
+	status = "okay";
+};
+
 &usbotg1 {
 	vbus-supply = <&reg_usb_otg1_vbus>;
 	pinctrl-names = "default";
@@ -449,6 +493,27 @@
 	keep-power-in-suspend;
 	enable-sdio-wakeup;
 	status = "okay";
+};
+
+&usdhc3 { /* WiFi */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc3_wifi>;
+	enable-sdio-wakeup;
+	non-removable;	// non-removable is not a variable, the fact it is listed is all that is used by driver
+	vmmc-supply = <&wlan_en_reg>;
+	cap-power-off-card;
+	keep-power-in-suspend;
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	wlcore: wlcore@0 {
+		compatible = "ti,wl1831";
+		reg = <2>;
+		interrupt-parent = <&gpio2>;
+		interrupts = <16 IRQ_TYPE_EDGE_RISING>;
+		ref-clock-frequency = <38400000>;
+		tcxo-clock-frequency = <26000000>;
+	};
 };
 
 &pxp {
