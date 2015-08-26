@@ -170,6 +170,10 @@ if [ "$ARCH" != "um" ]; then
 	$MAKE headers_install KBUILD_SRC= INSTALL_HDR_PATH="$libc_headers_dir/usr"
 fi
 
+# Firmware
+$MAKE firmware_install KBUILD_SRC= INSTALL_FW_PATH="$tmpdir/lib/firmware"
+
+
 # Install the maintainer scripts
 # Note: hook scripts under /etc/kernel are also executed by official Debian
 # kernel packages, as well as kernel packages built using make-kpkg.
