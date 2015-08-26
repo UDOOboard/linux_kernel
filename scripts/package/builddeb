@@ -104,7 +104,7 @@ parisc|mips|powerpc)
 	installed_image_path="boot/vmlinux-$version"
 	;;
 *)
-	installed_image_path="boot/vmlinuz-$version"
+	installed_image_path="boot/"
 esac
 
 BUILD_DEBUG="$(grep -s '^CONFIG_DEBUG_INFO=y' $KCONFIG_CONFIG || true)"
@@ -213,14 +213,6 @@ exit 0
 EOF
 	chmod 755 "$tmpdir/DEBIAN/$script"
 done
-
-##
-## Create sym link to kernel image
-##
-kernel_tmp_version="${installed_image_path////\\/}"
-sed -e "s/exit 0/ln -sf \/$kernel_tmp_version \/boot\/zImage/g" -i $tmpdir/DEBIAN/postinst
-echo "exit 0" >> $tmpdir/DEBIAN/postinst
-
 
 # Try to determine maintainer and email values
 if [ -n "$DEBEMAIL" ]; then
