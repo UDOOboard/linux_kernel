@@ -640,10 +640,9 @@ static int tda19988_fb_event(struct notifier_block *nb, unsigned long val, void 
 			reg_write(data,REG_ENA_VP_2, 0xff);
 
 		    /* Setup RGB Muxing for MCIMX28LCD */
-			reg_write(data,REG_VIP_CNTRL_0,0x20);
+			reg_write(data,REG_VIP_CNTRL_0,0x23);
 			reg_write(data,REG_VIP_CNTRL_1,0x01);
 			reg_write(data,REG_VIP_CNTRL_2,0x45);
-			reg_write(data,REG_VIP_CNTRL_3,0x23);
  
 		} else {
 			dev_dbg(&data->cec->dev, "FB_BLANK_BLANK\n");
