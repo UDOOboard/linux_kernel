@@ -273,6 +273,14 @@
 			>;
 		};
 
+		pinctrl_audmux: audmuxgrp {
+			fsl,pins = <
+				MX6SX_PAD_KEY_COL0__AUDMUX_AUD5_TXC     0x130b0
+				MX6SX_PAD_KEY_COL1__AUDMUX_AUD5_TXFS    0x130b0
+				MX6SX_PAD_KEY_ROW0__AUDMUX_AUD5_TXD     0x120b0
+			>;
+		};
+
 		pinctrl_uart1_1: uart1grp-1 {
 			fsl,pins = <
 				MX6SX_PAD_GPIO1_IO04__UART1_TX 0x1b0b1

@@ -40,6 +40,7 @@
 #include <linux/reset.h>
 #include <linux/hdmi.h>
 #include <asm/mach-types.h>
+#include <sound/asoundef.h>
 
 #define REG(page, addr) (((page) << 8) | (addr))
 #define REG2ADDR(reg)   ((reg) & 0xff)
@@ -318,7 +319,12 @@
 # define CEC_ENAMODS_EN_HDMI      (1 << 1)
 # define CEC_ENAMODS_EN_CEC       (1 << 0)
 
+#define REG_AVI_IF                REG(0x10, 0x40)   /* AVI Infoframe packet */
+#define REG_AUDIO_IF              REG(0x10, 0x80)   /* AVI Infoframe packet */
+#define SEL_AIP_I2S              (1 << 3)  /* I2S Clk */
+
 #define DRV_NAME "tda19988"
+
 
 struct tda19988_data {
 	struct i2c_client *hdmi;
@@ -335,6 +341,47 @@ struct tda19988_data {
 
 static struct tda19988_data *data = NULL;
 
+extern const struct fb_videomode mxc_cea_mode[64];
+
+/*
+ * Ignore sync value when matching
+ */
+int mxc_lcd_fb_mode_is_equal(const struct fb_videomode *mode1,
+			const struct fb_videomode *mode2)
+{
+	return (mode1->xres         == mode2->xres &&
+		mode1->yres         == mode2->yres &&
+		mode1->hsync_len    == mode2->hsync_len &&
+		mode1->vsync_len    == mode2->vsync_len &&
+		mode1->left_margin  == mode2->left_margin &&
+		mode1->right_margin == mode2->right_margin &&
+		mode1->upper_margin == mode2->upper_margin &&
+		mode1->lower_margin == mode2->lower_margin &&
+		/* refresh check, 59.94Hz and 60Hz have the same parameter
+		 * in struct of mxc_cea_mode */
+		abs(mode1->refresh - mode2->refresh) <= 1
+	);
+};
+
+/*
+ * Crude attempt at matching LCD mode to CEA mode
+ */
+int mxc_lcd_fb_var_to_vic(struct fb_var_screeninfo *var)
+{
+	int i;
+	struct fb_videomode m;
+
+	for (i = 0; i < ARRAY_SIZE(mxc_cea_mode); i++) {
+		fb_var_to_videomode(&m, var);
+		if (mxc_lcd_fb_mode_is_equal(&m, &mxc_cea_mode[i]))
+			break;
+	}
+
+	if (i == ARRAY_SIZE(mxc_cea_mode))
+		return 0;
+
+	return i;
+}
 
 static void cec_write(struct tda19988_data *data, uint16_t addr, uint8_t val)
 {
@@ -407,12 +454,12 @@ static void reg_write(struct tda19988_data *data, uint16_t reg, uint8_t val)
 	struct i2c_client *client = data->hdmi;
     uint8_t buf[] = {REG2ADDR(reg), val};
 	int ret;
- 
+
     mutex_lock(&data->mutex);
 	ret = set_page(data, reg);
 	if (ret < 0)
 		goto out;
- 
+
     ret = i2c_master_send(client, buf, sizeof(buf));
     if (ret < 0)
 		dev_err(&client->dev, "Error %d writing to 0x%x\n", ret, reg);
@@ -456,6 +503,163 @@ static void reg_clear(struct tda19988_data *data, uint16_t reg, uint8_t val)
 		reg_write(data, reg, old_val & ~val);
 }
 
+static void reg_write_range(struct tda19988_data *data, uint16_t reg, uint8_t *p, int cnt)
+{
+	struct i2c_client *client = data->hdmi;
+    uint8_t buf[cnt+1];
+    int ret;
+
+    buf[0] = REG2ADDR(reg);
+    memcpy(&buf[1], p, cnt);
+
+    mutex_lock(&data->mutex);
+    ret = set_page(data, reg);
+    if (ret < 0)
+		goto out;
+
+   ret = i2c_master_send(client, buf, cnt + 1);
+   if (ret < 0)
+		dev_err(&client->dev, "Error %d writing to 0x%x\n", ret, reg);
+out:
+   mutex_unlock(&data->mutex);
+}
+
+#define HB(x) (x)
+#define PB(x) (HB(2) + 1 + (x))
+
+static uint8_t tda19988_cksum(uint8_t *buf, size_t bytes)
+{
+	int sum = 0;
+
+	while (bytes--)
+		sum -= *buf++;
+    return sum;
+}
+
+static void tda19988_write_if(struct tda19988_data *data, uint8_t bit, uint16_t addr,
+			uint8_t *buf, size_t size)
+{
+	buf[PB(0)] = tda19988_cksum(buf, size);
+
+    reg_clear(data, REG_DIP_IF_FLAGS, bit);
+    reg_write_range(data, addr, buf, size);
+    reg_set(data, REG_DIP_IF_FLAGS, bit);
+}
+
+static void tda19988_write_avi(int cea_mode, struct fb_var_screeninfo *var)
+{
+	u8 buf[PB(HDMI_AVI_INFOFRAME_SIZE) + 1];
+
+	memset(buf, 0, sizeof(buf));
+	buf[HB(0)] = HDMI_INFOFRAME_TYPE_AVI;
+	buf[HB(1)] = 0x02;
+	buf[HB(2)] = HDMI_AVI_INFOFRAME_SIZE;
+	buf[PB(1)] = HDMI_SCAN_MODE_UNDERSCAN;
+	buf[PB(2)] = HDMI_ACTIVE_ASPECT_PICTURE;
+	buf[PB(3)] = HDMI_QUANTIZATION_RANGE_FULL << 2;
+	buf[PB(4)] = cea_mode;
+
+	tda19988_write_if(data, DIP_IF_FLAGS_IF2, REG_IF2_HB0, buf,sizeof(buf));
+}
+
+static void tda19988_write_aif(struct tda19988_data *data)
+{
+	u8 buf[PB(HDMI_AUDIO_INFOFRAME_SIZE) + 1];
+
+    memset(buf, 0, sizeof(buf));
+    buf[HB(0)] = HDMI_INFOFRAME_TYPE_AUDIO;
+    buf[HB(1)] = 0x01;
+    buf[HB(2)] = HDMI_AUDIO_INFOFRAME_SIZE;
+    buf[PB(1)] = 1 & 0x07; /* CC */
+    buf[PB(2)] = 0 & 0x1c; /* SF */
+    buf[PB(4)] = 0;
+    buf[PB(5)] = 0 & 0xf8; /* DM_INH + LSV */
+
+    tda19988_write_if(data, DIP_IF_FLAGS_IF4, REG_IF4_HB0, buf, sizeof(buf));
+}
+
+static void tda19988_audio_mute(struct tda19988_data *data, bool on)
+{
+	if (on) {
+		reg_set(data, REG_SOFTRESET, SOFTRESET_AUDIO);
+		reg_clear(data, REG_SOFTRESET, SOFTRESET_AUDIO);
+		reg_set(data, REG_AIP_CNTRL_0, AIP_CNTRL_0_RST_FIFO);
+	} else {
+		reg_clear(data, REG_AIP_CNTRL_0, AIP_CNTRL_0_RST_FIFO);
+    }
+}
+
+static void tda19988_configure_audio(struct tda19988_data *data,
+           struct fb_var_screeninfo var)
+{
+	uint8_t buf[6], clksel_aip, clksel_fs, cts_n, adiv;
+	uint32_t n;
+
+	/* Enable audio ports for I2S */
+	reg_write(data, REG_ENA_AP, 0x03);
+	reg_write(data, REG_ENA_ACLK, 0x01);
+
+	/* Set audio input source to I2S */
+	reg_write(data, REG_MUX_AP, MUX_AP_SELECT_I2S);
+	clksel_aip = AIP_CLKSEL_AIP_I2S;
+	clksel_fs = AIP_CLKSEL_FS_ACLK;
+	cts_n = CTS_N_M(3) | CTS_N_K(3);
+
+    reg_write(data, REG_AIP_CLKSEL, clksel_aip);
+    reg_clear(data, REG_AIP_CNTRL_0, AIP_CNTRL_0_LAYOUT | AIP_CNTRL_0_ACR_MAN);   /* auto CTS */
+    reg_write(data, REG_CTS_N, cts_n);
+
+    /*
+	 * Audio input somehow depends on HDMI line rate which is
+	 * related to pixclk. Testing showed that modes with pixclk
+	 * >100MHz need a larger divider while <40MHz need the default.
+	 * There is no detailed info in the datasheet, so we just
+	 * assume 100MHz requires larger divider.
+	 */
+	adiv = AUDIO_DIV_SERCLK_8;
+	if (PICOS2KHZ(var.pixclock)> 100000)
+		adiv++;                 /* AUDIO_DIV_SERCLK_16 */
+
+	reg_write(data, REG_AUDIO_DIV, adiv);
+
+	/*
+	 * This is the approximate value of N, which happens to be
+	 * the recommended values for non-coherent clocks.
+	 */
+    n = 128 * 48000 / 1000; // Default Sample rate is 48000
+
+    /* Write the CTS and N values */
+    buf[0] = 0x44;
+    buf[1] = 0x42;
+    buf[2] = 0x01;
+	buf[3] = n;
+    buf[4] = n >> 8;
+    buf[5] = n >> 16;
+    reg_write_range(data, REG_ACR_CTS_0, buf, 6);
+
+    /* Set CTS clock reference */
+    reg_write(data, REG_AIP_CLKSEL, clksel_aip | clksel_fs);
+
+	/* Reset CTS generator */
+    reg_set(data, REG_AIP_CNTRL_0, AIP_CNTRL_0_RST_CTS);
+	reg_clear(data, REG_AIP_CNTRL_0, AIP_CNTRL_0_RST_CTS);
+
+    /* Write the channel status */
+    buf[0] = IEC958_AES0_CON_NOT_COPYRIGHT;
+    buf[1] = 0x00;
+    buf[2] = IEC958_AES3_CON_FS_NOTID;
+    buf[3] = IEC958_AES4_CON_ORIGFS_NOTID |
+		IEC958_AES4_CON_MAX_WORDLEN_24;
+	reg_write_range(data, REG_CH_STAT_B(0), buf, 4);
+
+	tda19988_audio_mute(data, true);
+	msleep(20);
+	tda19988_audio_mute(data, false);
+
+    /* Write the audio information packet */
+    tda19988_write_aif(data);
+}
+
 static void tda19988_reset(struct tda19988_data *data)
 {
 	/* reset audio and i2c master: */
@@ -485,6 +689,11 @@ static void tda19988_reset(struct tda19988_data *data)
  
     /* Write the default value MUX register */
     reg_write(data, REG_MUX_VP_VIP_OUT, 0x24);  
+
+	/* Setup RGB Muxing for MCIMX28LCD */
+	reg_write(data,REG_VIP_CNTRL_0,0x23);
+	reg_write(data,REG_VIP_CNTRL_1,0x01);
+	reg_write(data,REG_VIP_CNTRL_2,0x45);
 }
 
 static void tda19988_fb_var(struct tda19988_data *data, struct fb_var_screeninfo var) {
@@ -496,6 +705,8 @@ static void tda19988_fb_var(struct tda19988_data *data, struct fb_var_screeninfo
 	uint ref_pix, ref_line, vwin1_line_s, vwin1_line_e, vs1_pix_s, vs1_pix_e;
 	uint vs1_line_s, vs1_line_e, vwin2_line_s,vwin2_line_e;
 	uint vs2_pix_s, vs2_pix_e, vs2_line_s, vs2_line_e;
+	int cea_mode;
+	struct fb_videomode mode;
 
     reg_write(data,REG_DDC_DISABLE, 0x00);
      /* set clock on DDC channel: */
@@ -615,6 +826,21 @@ static void tda19988_fb_var(struct tda19988_data *data, struct fb_var_screeninfo
 
     /* must be last register set: */
     reg_write(data,REG_TBG_CNTRL_0, 0);
+
+	/* We need to turn HDMI HDCP stuff on to get audio through */
+	value &= ~TBG_CNTRL_1_DWIN_DIS;
+	reg_write(data, REG_TBG_CNTRL_1, value);
+	reg_write(data, REG_ENC_CNTRL, ENC_CNTRL_CTL_CODE(1));
+	reg_set(data, REG_TX33, TX33_HDMI);
+
+	fb_var_to_videomode(&mode,&var);
+	cea_mode=mxc_lcd_fb_var_to_vic(&var);
+	dev_info(&data->cec->dev,"Matching CEA mode is %d for fb mode %dx%d-%d",
+		cea_mode,var.xres,var.yres,mode.refresh);
+
+	tda19988_write_avi(cea_mode, &var);
+	tda19988_configure_audio(data,var);
+
 }
 
 static int tda19988_fb_event(struct notifier_block *nb, unsigned long val, void *v)
@@ -638,12 +864,6 @@ static int tda19988_fb_event(struct notifier_block *nb, unsigned long val, void 
 			reg_write(data,REG_ENA_VP_0, 0xff);
 			reg_write(data,REG_ENA_VP_1, 0xff);
 			reg_write(data,REG_ENA_VP_2, 0xff);
-
-		    /* Setup RGB Muxing for MCIMX28LCD */
-			reg_write(data,REG_VIP_CNTRL_0,0x23);
-			reg_write(data,REG_VIP_CNTRL_1,0x01);
-			reg_write(data,REG_VIP_CNTRL_2,0x45);
- 
 		} else {
 			dev_dbg(&data->cec->dev, "FB_BLANK_BLANK\n");
 			/* Disable video ports */
@@ -686,9 +906,9 @@ static int tda19988_probe(struct i2c_client *client,
 	}
 
 	mutex_init(&data->mutex);
-	
+
     tda19988_reset(data);
-  
+
 	/* read version: */
 	rev_lo = reg_read(data, REG_VERSION_LSB);
 	rev_hi = reg_read(data, REG_VERSION_MSB);
