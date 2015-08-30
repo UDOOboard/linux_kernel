@@ -220,6 +220,18 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c3>;
 	status = "okay";
+	touchscreen: st1232@55 {
+		compatible = "sitronix,st1232";
+		reg = <0x55>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <13 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-0 = <&pinctrl_st1232>;
+		pinctrl-names = "default";
+		gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
+		/* udoo poweroff driver */
+		lcd_panel_on_gpio = <&gpio1 2 1>;
+		lcd_backlight_gpio = <&gpio1 4 1>;
+	};
 };
 
 &fec { //ethernet
@@ -241,8 +253,7 @@
 			// Internal GPIOs
 			MX6QDL_PAD_NANDF_D4__GPIO2_IO04			0x80000000  // 5v enable
 			MX6QDL_PAD_NANDF_CS0__GPIO6_IO11		0x80000000  // Vtt enable
-			MX6QDL_PAD_SD2_DAT0__GPIO1_IO15			0x80000000  // Touch panel reset
-			MX6QDL_PAD_SD2_DAT2__GPIO1_IO13			0x80000000  // Touch panel interrupt
+
 			MX6QDL_PAD_DISP0_DAT5__GPIO4_IO26		0x80000000  // Debug UART (J18)
 			
 			MX6QDL_PAD_GPIO_17__GPIO7_IO12			0x80000000  // USB hub reset
@@ -363,6 +374,13 @@
 			fsl,pins = <
 			MX6QDL_PAD_GPIO_5__I2C3_SCL		0x4001b8b1
 			MX6QDL_PAD_GPIO_6__I2C3_SDA		0x4001b8b1
+			>;
+		};
+		
+		pinctrl_st1232: st1232grp {
+			fsl,pins = <
+			MX6QDL_PAD_SD2_DAT0__GPIO1_IO15			0x80000000  // Touch panel reset
+			MX6QDL_PAD_SD2_DAT2__GPIO1_IO13			0x80000000  // Touch panel interrupt
 			>;
 		};
 		
