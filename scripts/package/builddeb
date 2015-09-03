@@ -119,7 +119,7 @@ mkdir -m 755 -p "$libc_headers_dir/DEBIAN"
 mkdir -p "$libc_headers_dir/usr/share/doc/$libc_headers_packagename"
 
 mkdir -m 755 -p "$dtb_dir/DEBIAN"
-mkdir -p "$dtb_dir/boot/dtb" "$dtb_dir/usr/share/doc/$dtb_packagename"
+mkdir -p "$dtb_dir/boot/dts" "$dtb_dir/usr/share/doc/$dtb_packagename"
 
 mkdir -m 755 -p "$kernel_headers_dir/DEBIAN"
 mkdir -p "$kernel_headers_dir/usr/share/doc/$kernel_headers_packagename"
