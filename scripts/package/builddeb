@@ -69,13 +69,26 @@ create_package() {
 }
 
 # Some variables and settings used throughout the script
-version=$KERNELRELEASE
 revision=$(cat .version)
+
+#e.g. 3.14.28-xxxx for version and package name
+if grep -q '^CONFIG_LOCALVERSION_AUTO=y' $KCONFIG_CONFIG 
+then
+  version=`echo $KERNELRELEASE | sed -e 's/\(.*\)-\(.*-.*\)$/\1/'`
+else
+  version=$KERNELRELEASE
+fi
+
+#e.g take commit sha for package version
 if [ -n "$KDEB_PKGVERSION" ]; then
 	packageversion=$KDEB_PKGVERSION
+elif grep -q '^CONFIG_LOCALVERSION_AUTO=y' $KCONFIG_CONFIG
+then
+  packageversion=`echo $KERNELRELEASE | sed -e 's/\(.*\)-\(.*-.*\)$/\2/'`
 else
-	packageversion=$version-$revision
+  packageversion=$version-$revision
 fi
+
 tmpdir="$objtree/debian/tmp"
 fwdir="$objtree/debian/fwtmp"
 kernel_headers_dir="$objtree/debian/hdrtmp"
