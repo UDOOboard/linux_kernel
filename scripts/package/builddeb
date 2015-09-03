@@ -104,7 +104,7 @@ parisc|mips|powerpc)
 	installed_image_path="boot/vmlinux-$version"
 	;;
 *)
-	installed_image_path="boot/vmlinux-$version"
+	installed_image_path="boot/"
 esac
 
 BUILD_DEBUG="$(grep -s '^CONFIG_DEBUG_INFO=y' $KCONFIG_CONFIG || true)"
