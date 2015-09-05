@@ -127,7 +127,7 @@ rm -rf "$tmpdir" "$fwdir" "$kernel_headers_dir" "$libc_headers_dir" "$dbg_dir" "
 mkdir -m 755 -p "$tmpdir/DEBIAN"
 mkdir -p  "$tmpdir/lib" "$tmpdir/boot" "$tmpdir/usr/share/doc/$packagename"
 mkdir -m 755 -p "$fwdir/DEBIAN"
-mkdir -p "$fwdir/lib/firmware/$version/" "$fwdir/usr/share/doc/$fwpackagename"
+mkdir -p "$fwdir/lib/firmware/$KERNELRELEASE/" "$fwdir/usr/share/doc/$fwpackagename"
 mkdir -m 755 -p "$libc_headers_dir/DEBIAN"
 mkdir -p "$libc_headers_dir/usr/share/doc/$libc_headers_packagename"
 
@@ -136,9 +136,9 @@ mkdir -p "$dtb_dir/boot/dts" "$dtb_dir/usr/share/doc/$dtb_packagename"
 
 mkdir -m 755 -p "$kernel_headers_dir/DEBIAN"
 mkdir -p "$kernel_headers_dir/usr/share/doc/$kernel_headers_packagename"
-mkdir -p "$kernel_headers_dir/lib/modules/$version/"
+mkdir -p "$kernel_headers_dir/lib/modules/$KERNELRELEASE/"
 if [ "$ARCH" = "um" ] ; then
-	mkdir -p "$tmpdir/usr/lib/uml/modules/$version" "$tmpdir/usr/bin"
+	mkdir -p "$tmpdir/usr/lib/uml/modules/$KERNELRELEASE" "$tmpdir/usr/bin"
 fi
 if [ -n "$BUILD_DEBUG" ] ; then
 	mkdir -p "$dbg_dir/usr/share/doc/$dbg_packagename"
@@ -148,12 +148,12 @@ fi
 # Build and install the kernel
 if [ "$ARCH" = "um" ] ; then
 	$MAKE linux
-	cp System.map "$tmpdir/usr/lib/uml/modules/$version/System.map"
+	cp System.map "$tmpdir/usr/lib/uml/modules/$KERNELRELEASE/System.map"
 	cp $KCONFIG_CONFIG "$tmpdir/usr/share/doc/$packagename/config"
 	gzip "$tmpdir/usr/share/doc/$packagename/config"
 else
-	cp System.map "$tmpdir/boot/System.map-$version"
-	cp $KCONFIG_CONFIG "$tmpdir/boot/config-$version"
+	cp System.map "$tmpdir/boot/System.map-$KERNELRELEASE"
+	cp $KCONFIG_CONFIG "$tmpdir/boot/config-$KERNELRELEASE"
 fi
 # Not all arches include the boot path in KBUILD_IMAGE
 if [ -e $KBUILD_IMAGE ]; then
@@ -164,11 +164,11 @@ fi
 
 if grep -q '^CONFIG_MODULES=y' $KCONFIG_CONFIG ; then
 	INSTALL_MOD_PATH="$tmpdir" $MAKE KBUILD_SRC= modules_install
-	rm -f "$tmpdir/lib/modules/$version/build"
-	rm -f "$tmpdir/lib/modules/$version/source"
+	rm -f "$tmpdir/lib/modules/$KERNELRELEASE/build"
+	rm -f "$tmpdir/lib/modules/$KERNELRELEASE/source"
 	if [ "$ARCH" = "um" ] ; then
-		mv "$tmpdir/lib/modules/$version"/* "$tmpdir/usr/lib/uml/modules/$version/"
-		rmdir "$tmpdir/lib/modules/$version"
+		mv "$tmpdir/lib/modules/$KERNELRELEASE"/* "$tmpdir/usr/lib/uml/modules/$KERNELRELEASE/"
+		rmdir "$tmpdir/lib/modules/$KERNELRELEASE"
 	fi
 	if [ -n "$BUILD_DEBUG" ] ; then
 		for module in $(find $tmpdir/lib/modules/ -name *.ko -printf '%P\n'); do
@@ -225,7 +225,7 @@ export DEB_MAINT_PARAMS="\$*"
 
 export INITRD=$want_initrd
 
-test -d $debhookdir/$script.d && run-parts --arg="$version" --arg="/$installed_image_path" $debhookdir/$script.d
+test -d $debhookdir/$script.d && run-parts --arg="$KERNELRELEASE" --arg="/$installed_image_path" $debhookdir/$script.d
 exit 0
 EOF
 	chmod 755 "$tmpdir/DEBIAN/$script"
@@ -252,7 +252,7 @@ maintainer="$name <$email>"
 cat <<EOF > debian/changelog
 linux-upstream ($packageversion) unstable; urgency=low
 
-  * Custom built Linux kernel.
+  * Custom built Linux kernel for UDOO.
 
  -- $maintainer  $(date -R)
 EOF
@@ -285,6 +285,7 @@ Priority: optional
 Maintainer: $maintainer
 Standards-Version: 3.8.4
 Homepage: http://www.kernel.org/
+Vcs-Git: https://github.com/UDOOboard/linux_kernel
 EOF
 
 if [ "$ARCH" = "um" ]; then
@@ -309,7 +310,7 @@ else
 
 Package: $packagename
 Provides: linux-image, linux-image-2.6, linux-modules-$version
-Suggests: $fwpackagename
+Suggests: $fwpackagename, $dtb_packagename
 Architecture: any
 Description: Linux kernel, version $version
  This package contains the Linux kernel, modules and corresponding other
@@ -331,7 +332,7 @@ if [ -n "$BUILD_HEADERS" ] ; then
   (cd $srctree; tar -c -f - -T -) < "$objtree/debian/hdrsrcfiles" | (cd $destdir; tar -xf -)
   (cd $objtree; tar -c -f - -T -) < "$objtree/debian/hdrobjfiles" | (cd $destdir; tar -xf -)
   (cd $objtree; cp $KCONFIG_CONFIG $destdir/.config) # copy .config manually to be where it's expected to be
-  ln -sf "/usr/src/linux-headers-$version" "$kernel_headers_dir/lib/modules/$version/build"
+  ln -sf "/usr/src/linux-headers-$version" "$kernel_headers_dir/lib/modules/$KERNELRELEASE/build"
   rm -f "$objtree/debian/hdrsrcfiles" "$objtree/debian/hdrobjfiles"
 
   cat <<EOF >> debian/control
@@ -364,7 +365,7 @@ fi
 
 # Do we have firmware? Move it out of the way and build it into a package.
 if [ -e "$tmpdir/lib/firmware" ]; then
-	mv "$tmpdir/lib/firmware"/* "$fwdir/lib/firmware/$version/"
+	mv "$tmpdir/lib/firmware"/* "$fwdir/lib/firmware/$KERNELRELEASE/"
 	rmdir "$tmpdir/lib/firmware"
 
 	cat <<EOF >> debian/control
@@ -395,13 +396,13 @@ if [ -n "$BUILD_DEBUG" ] ; then
 	# Build debug package
 	# Different tools want the image in different locations
 	# perf
-	mkdir -p $dbg_dir/usr/lib/debug/lib/modules/$version/
-	cp vmlinux $dbg_dir/usr/lib/debug/lib/modules/$version/
+	mkdir -p $dbg_dir/usr/lib/debug/lib/modules/$KERNELRELEASE/
+	cp vmlinux $dbg_dir/usr/lib/debug/lib/modules/$KERNELRELEASE/
 	# systemtap
 	mkdir -p $dbg_dir/usr/lib/debug/boot/
-	ln -s ../lib/modules/$version/vmlinux $dbg_dir/usr/lib/debug/boot/vmlinux-$version
+	ln -s ../lib/modules/$KERNELRELEASE/vmlinux $dbg_dir/usr/lib/debug/boot/vmlinux-$version
 	# kdump-tools
-	ln -s lib/modules/$version/vmlinux $dbg_dir/usr/lib/debug/vmlinux-$version
+	ln -s lib/modules/$KERNELRELEASE/vmlinux $dbg_dir/usr/lib/debug/vmlinux-$version
 
 	cat <<EOF >> debian/control
 
