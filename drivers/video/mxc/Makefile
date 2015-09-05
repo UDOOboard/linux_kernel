@@ -10,4 +10,4 @@ obj-$(CONFIG_FB_MXC_EINK_V2_PANEL)             += mxc_epdc_v2_fb.o
 obj-$(CONFIG_FB_MXS_SII902X) += mxsfb_sii902x.o
 obj-$(CONFIG_FB_MXC_DCIC) += mxc_dcic.o
 obj-$(CONFIG_HANNSTAR_CABC) += hannstar_cabc.o
-obj-$(CONFIG_FB_UDOO_TDA19988)	+= udoo_tda19988.o
+obj-$(CONFIG_FB_MXS_TDA19988)	+= mxsfb_tda19988.o

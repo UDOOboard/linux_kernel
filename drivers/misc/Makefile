@@ -60,3 +60,4 @@ obj-$(CONFIG_GENWQE)		+= genwqe/
 obj-$(CONFIG_FXOS8700_ACC_MAG_I2C)      += udooneo/
 obj-$(CONFIG_FXAS2100X_GYRO_I2C)        += udooneo/
 obj-$(CONFIG_UDOO_ARD)		+= udoo_ard.o
+obj-$(CONFIG_UDOO_NEO_M4)		+= udoo_neo_m4.o
