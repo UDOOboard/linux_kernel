@@ -334,7 +334,7 @@ config SND_SOC_IMX_SI476X
 
 config SND_SOC_IMX_TDA19988
 	tristate "SoC Audio support for i.MX boards with TDA19988"
-	select SND_SOC_TDA19988
+	select SND_SOC_TDA19988_CODEC
 	select SND_SOC_IMX_PCM_DMA
 	select SND_SOC_IMX_AUDMUX
 	select SND_SOC_FSL_SSI
