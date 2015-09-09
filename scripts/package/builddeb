@@ -74,7 +74,7 @@ revision=$(cat .version)
 #e.g. 3.14.28-xxxx for version and package name
 if grep -q '^CONFIG_LOCALVERSION_AUTO=y' $KCONFIG_CONFIG 
 then
-  version=`echo $KERNELRELEASE | sed -e 's/\(.*\)-\(.*-.*\)$/\1/'`
+  version=`echo $KERNELRELEASE | cut -f -2 -d- 
 else
   version=$KERNELRELEASE
 fi
@@ -84,7 +84,7 @@ if [ -n "$KDEB_PKGVERSION" ]; then
 	packageversion=$KDEB_PKGVERSION
 elif grep -q '^CONFIG_LOCALVERSION_AUTO=y' $KCONFIG_CONFIG
 then
-  packageversion=`echo $KERNELRELEASE | sed -e 's/\(.*\)-\(.*-.*\)$/\2/'`
+  packageversion=`echo $KERNELRELEASE | cut -f -2 -d- --complement
 else
   packageversion=$version-$revision
 fi
