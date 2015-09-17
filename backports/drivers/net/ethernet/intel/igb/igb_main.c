@@ -232,7 +232,11 @@ static pci_ers_result_t igb_io_error_detected(struct pci_dev *,
 static pci_ers_result_t igb_io_slot_reset(struct pci_dev *);
 static void igb_io_resume(struct pci_dev *);
 
-static const struct pci_error_handlers igb_err_handler = {
+static
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)
+const
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0) */
+struct pci_error_handlers igb_err_handler = {
 	.error_detected = igb_io_error_detected,
 	.slot_reset = igb_io_slot_reset,
 	.resume = igb_io_resume,
