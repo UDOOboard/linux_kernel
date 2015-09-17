@@ -40,8 +40,10 @@ struct v4l2_clk *v4l2_clk_get(struct device *dev, const char *id)
 	struct v4l2_clk *clk;
 	struct clk *ccf_clk = clk_get(dev, id);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,4,0)
 	if (PTR_ERR(ccf_clk) == -EPROBE_DEFER)
 		return ERR_PTR(-EPROBE_DEFER);
+#endif
 
 	if (!IS_ERR_OR_NULL(ccf_clk)) {
 		clk = kzalloc(sizeof(*clk), GFP_KERNEL);
