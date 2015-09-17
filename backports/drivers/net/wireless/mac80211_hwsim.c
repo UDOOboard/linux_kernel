@@ -2193,7 +2193,7 @@ static void hwsim_mcast_config_msg(struct sk_buff *mcast_skb,
 {
 	if (info)
 		genl_notify(&hwsim_genl_family, mcast_skb,
-			    genl_info_net(info), info->snd_portid,
+			    genl_info_net(info), genl_info_snd_portid(info),
 			    HWSIM_MCGRP_CONFIG, info->nlhdr, GFP_KERNEL);
 	else
 		genlmsg_multicast(&hwsim_genl_family, mcast_skb, 0,
@@ -2355,7 +2355,7 @@ static int mac80211_hwsim_new_radio(struct genl_info *info,
 	data->idx = idx;
 	data->destroy_on_close = param->destroy_on_close;
 	if (info)
-		data->portid = info->snd_portid;
+		data->portid = genl_info_snd_portid(info);
 
 	if (data->use_chanctx) {
 		hw->wiphy->max_scan_ssids = 255;
@@ -2718,7 +2718,7 @@ static int hwsim_tx_info_frame_received_nl(struct sk_buff *skb_2,
 	int i;
 	bool found = false;
 
-	if (info->snd_portid != wmediumd_portid)
+	if (genl_info_snd_portid(info) != wmediumd_portid)
 		return -EINVAL;
 
 	if (!info->attrs[HWSIM_ATTR_ADDR_TRANSMITTER] ||
@@ -2793,7 +2793,7 @@ static int hwsim_cloned_frame_received_nl(struct sk_buff *skb_2,
 	void *frame_data;
 	struct sk_buff *skb = NULL;
 
-	if (info->snd_portid != wmediumd_portid)
+	if (genl_info_snd_portid(info) != wmediumd_portid)
 		return -EINVAL;
 
 	if (!info->attrs[HWSIM_ATTR_ADDR_RECEIVER] ||
@@ -2871,10 +2871,11 @@ static int hwsim_register_received_nl(struct sk_buff *skb_2,
 	if (wmediumd_portid)
 		return -EBUSY;
 
-	wmediumd_portid = info->snd_portid;
+	wmediumd_portid = genl_info_snd_portid(info);
 
 	printk(KERN_DEBUG "mac80211_hwsim: received a REGISTER, "
-	       "switching to wmediumd mode with pid %d\n", info->snd_portid);
+	       "switching to wmediumd mode with pid %d\n",
+	       genl_info_snd_portid(info));
 
 	return 0;
 }
@@ -2973,7 +2974,8 @@ static int hwsim_get_radio_nl(struct sk_buff *msg, struct genl_info *info)
 			goto out_err;
 		}
 
-		res = mac80211_hwsim_get_radio(skb, data, info->snd_portid,
+		res = mac80211_hwsim_get_radio(skb, data,
+					       genl_info_snd_portid(info),
 					       info->snd_seq, NULL, 0);
 		if (res < 0) {
 			nlmsg_free(skb);
@@ -3007,7 +3009,7 @@ static int hwsim_dump_radio_nl(struct sk_buff *skb,
 			continue;
 
 		res = mac80211_hwsim_get_radio(skb, data,
-					       NETLINK_CB(cb->skb).portid,
+					       NETLINK_CB_PORTID(cb->skb),
 					       cb->nlh->nlmsg_seq, cb,
 					       NLM_F_MULTI);
 		if (res < 0)
@@ -3093,9 +3095,9 @@ static int mac80211_hwsim_netlink_notify(struct notifier_block *nb,
 	if (state != NETLINK_URELEASE)
 		return NOTIFY_DONE;
 
-	remove_user_radios(notify->portid);
+	remove_user_radios(netlink_notify_portid(notify));
 
-	if (notify->portid == wmediumd_portid) {
+	if (netlink_notify_portid(notify) == wmediumd_portid) {
 		printk(KERN_INFO "mac80211_hwsim: wmediumd released netlink"
 		       " socket, switching to perfect channel medium\n");
 		wmediumd_portid = 0;
