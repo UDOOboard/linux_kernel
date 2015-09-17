@@ -1666,7 +1666,9 @@ static const struct v4l2_ioctl_ops video_ioctl_ops = {
 	.vidioc_querybuf            = vb2_ioctl_querybuf,
 	.vidioc_qbuf                = vb2_ioctl_qbuf,
 	.vidioc_dqbuf               = vb2_ioctl_dqbuf,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 	.vidioc_expbuf               = vb2_ioctl_expbuf,
+#endif
 
 	.vidioc_s_std               = vidioc_s_std,
 	.vidioc_g_std               = vidioc_g_std,

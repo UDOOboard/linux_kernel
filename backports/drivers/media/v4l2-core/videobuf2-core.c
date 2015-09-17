@@ -252,6 +252,7 @@ static void __vb2_buf_userptr_put(struct vb2_buffer *vb)
 	}
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 /**
  * __vb2_plane_dmabuf_put() - release memory associated with
  * a DMABUF shared plane
@@ -280,6 +281,7 @@ static void __vb2_buf_dmabuf_put(struct vb2_buffer *vb)
 	for (plane = 0; plane < vb->num_planes; ++plane)
 		__vb2_plane_dmabuf_put(vb, &vb->planes[plane]);
 }
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 
 /**
  * __setup_lengths() - setup initial lengths for every plane in
@@ -423,8 +425,10 @@ static void __vb2_free_mem(struct vb2_queue *q, unsigned int buffers)
 		/* Free MMAP buffers or release USERPTR buffers */
 		if (q->memory == V4L2_MEMORY_MMAP)
 			__vb2_buf_mem_free(vb);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 		else if (q->memory == V4L2_MEMORY_DMABUF)
 			__vb2_buf_dmabuf_put(vb);
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 		else
 			__vb2_buf_userptr_put(vb);
 	}
@@ -783,6 +787,7 @@ static int __verify_mmap_ops(struct vb2_queue *q)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 /**
  * __verify_dmabuf_ops() - verify that all memory operations required for
  * DMABUF queue type have been provided
@@ -796,6 +801,7 @@ static int __verify_dmabuf_ops(struct vb2_queue *q)
 
 	return 0;
 }
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 
 /**
  * __verify_memory_type() - Check whether the memory type and buffer type
@@ -829,10 +835,12 @@ static int __verify_memory_type(struct vb2_queue *q,
 		return -EINVAL;
 	}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 	if (memory == V4L2_MEMORY_DMABUF && __verify_dmabuf_ops(q)) {
 		dprintk(1, "DMABUF for current setup unsupported\n");
 		return -EINVAL;
 	}
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 
 	/*
 	 * Place the busy tests at the end: -EBUSY can be ignored when
@@ -1494,6 +1502,7 @@ err:
 	return ret;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 /**
  * __qbuf_dmabuf() - handle qbuf of a DMABUF buffer
  */
@@ -1612,6 +1621,7 @@ err:
 
 	return ret;
 }
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 
 /**
  * __enqueue_in_driver() - enqueue a vb2_buffer in driver for processing
@@ -1674,9 +1684,11 @@ static int __buf_prepare(struct vb2_buffer *vb, const struct v4l2_buffer *b)
 		ret = __qbuf_userptr(vb, b);
 		up_read(&current->mm->mmap_sem);
 		break;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 	case V4L2_MEMORY_DMABUF:
 		ret = __qbuf_dmabuf(vb, b);
 		break;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 	default:
 		WARN(1, "Invalid queue type\n");
 		ret = -EINVAL;
@@ -2062,8 +2074,10 @@ EXPORT_SYMBOL_GPL(vb2_wait_for_all_buffers);
  */
 static void __vb2_dqbuf(struct vb2_buffer *vb)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 	struct vb2_queue *q = vb->vb2_queue;
 	unsigned int i;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 
 	/* nothing to do if the buffer is already dequeued */
 	if (vb->state == VB2_BUF_STATE_DEQUEUED)
@@ -2071,6 +2085,7 @@ static void __vb2_dqbuf(struct vb2_buffer *vb)
 
 	vb->state = VB2_BUF_STATE_DEQUEUED;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 	/* unmap DMABUF buffer */
 	if (q->memory == V4L2_MEMORY_DMABUF)
 		for (i = 0; i < vb->num_planes; ++i) {
@@ -2079,6 +2094,7 @@ static void __vb2_dqbuf(struct vb2_buffer *vb)
 			call_void_memop(vb, unmap_dmabuf, vb->planes[i].mem_priv);
 			vb->planes[i].dbuf_mapped = 0;
 		}
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 }
 
 static int vb2_internal_dqbuf(struct vb2_queue *q, struct v4l2_buffer *b, bool nonblocking)
@@ -2385,6 +2401,7 @@ static int __find_plane_by_offset(struct vb2_queue *q, unsigned long off,
 	return -EINVAL;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 /**
  * vb2_expbuf() - Export a buffer as a file descriptor
  * @q:		videobuf2 queue
@@ -2462,6 +2479,7 @@ int vb2_expbuf(struct vb2_queue *q, struct v4l2_exportbuffer *eb)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(vb2_expbuf);
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 
 /**
  * vb2_mmap() - map video buffers into application address space
@@ -3399,6 +3417,7 @@ int vb2_ioctl_streamoff(struct file *file, void *priv, enum v4l2_buf_type i)
 }
 EXPORT_SYMBOL_GPL(vb2_ioctl_streamoff);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 int vb2_ioctl_expbuf(struct file *file, void *priv, struct v4l2_exportbuffer *p)
 {
 	struct video_device *vdev = video_devdata(file);
@@ -3408,6 +3427,7 @@ int vb2_ioctl_expbuf(struct file *file, void *priv, struct v4l2_exportbuffer *p)
 	return vb2_expbuf(vdev->queue, p);
 }
 EXPORT_SYMBOL_GPL(vb2_ioctl_expbuf);
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0) */
 
 /* v4l2_file_operations helpers */
 

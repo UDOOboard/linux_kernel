@@ -1249,7 +1249,9 @@ static const struct v4l2_ioctl_ops vpbe_ioctl_ops = {
 	.vidioc_dqbuf		 = vb2_ioctl_dqbuf,
 	.vidioc_streamon	 = vb2_ioctl_streamon,
 	.vidioc_streamoff	 = vb2_ioctl_streamoff,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
 	.vidioc_expbuf		 = vb2_ioctl_expbuf,
+#endif
 
 	.vidioc_cropcap		 = vpbe_display_cropcap,
 	.vidioc_g_crop		 = vpbe_display_g_crop,
