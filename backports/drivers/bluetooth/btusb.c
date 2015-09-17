@@ -2159,8 +2159,12 @@ static void btusb_intel_bootup(struct btusb_data *data, const void *ptr,
 		return;
 
 	if (test_and_clear_bit(BTUSB_BOOTING, &data->flags)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 		smp_mb__after_atomic();
 		wake_up_bit(&data->flags, BTUSB_BOOTING);
+#else
+		wake_up_interruptible(&data->hdev->req_wait_q);
+#endif
 	}
 }
 
@@ -2177,8 +2181,12 @@ static void btusb_intel_secure_send_result(struct btusb_data *data,
 
 	if (test_and_clear_bit(BTUSB_DOWNLOADING, &data->flags) &&
 	    test_bit(BTUSB_FIRMWARE_LOADED, &data->flags)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 		smp_mb__after_atomic();
 		wake_up_bit(&data->flags, BTUSB_DOWNLOADING);
+#else
+		wake_up_interruptible(&data->hdev->req_wait_q);
+#endif
 	}
 }
 
@@ -2587,6 +2595,7 @@ static int btusb_setup_intel_new(struct hci_dev *hdev)
 	 * and thus just timeout if that happens and fail the setup
 	 * of this device.
 	 */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 	err = wait_on_bit_timeout(&data->flags, BTUSB_DOWNLOADING,
 				  TASK_INTERRUPTIBLE,
 				  msecs_to_jiffies(5000));
@@ -2601,6 +2610,31 @@ static int btusb_setup_intel_new(struct hci_dev *hdev)
 		err = -ETIMEDOUT;
 		goto done;
 	}
+#else
+	if (test_bit(BTUSB_DOWNLOADING, &data->flags)) {
+		DECLARE_WAITQUEUE(wait, current);
+		signed long timeout;
+
+		add_wait_queue(&hdev->req_wait_q, &wait);
+		set_current_state(TASK_INTERRUPTIBLE);
+
+		timeout = schedule_timeout(msecs_to_jiffies(5000));
+
+		remove_wait_queue(&hdev->req_wait_q, &wait);
+
+		if (signal_pending(current)) {
+			BT_ERR("%s: Firmware loading interrupted", hdev->name);
+			err = -EINTR;
+			goto done;
+		}
+
+		if (!timeout) {
+			BT_ERR("%s: Firmware loading timeout", hdev->name);
+			err = -ETIMEDOUT;
+			goto done;
+		}
+	}
+#endif
 
 	if (test_bit(BTUSB_FIRMWARE_FAILED, &data->flags)) {
 		BT_ERR("%s: Firmware loading failed", hdev->name);
@@ -2640,6 +2674,7 @@ done:
 	 */
 	BT_INFO("%s: Waiting for device to boot", hdev->name);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 	err = wait_on_bit_timeout(&data->flags, BTUSB_BOOTING,
 				  TASK_INTERRUPTIBLE,
 				  msecs_to_jiffies(1000));
@@ -2653,6 +2688,33 @@ done:
 		BT_ERR("%s: Device boot timeout", hdev->name);
 		return -ETIMEDOUT;
 	}
+#else
+	if (test_bit(BTUSB_BOOTING, &data->flags)) {
+		DECLARE_WAITQUEUE(wait, current);
+		signed long timeout;
+
+		add_wait_queue(&hdev->req_wait_q, &wait);
+		set_current_state(TASK_INTERRUPTIBLE);
+
+		/* Booting into operational firmware should not take
+		 * longer than 1 second. However if that happens, then
+		 * just fail the setup since something went wrong.
+		 */
+		timeout = schedule_timeout(msecs_to_jiffies(1000));
+
+		remove_wait_queue(&hdev->req_wait_q, &wait);
+
+		if (signal_pending(current)) {
+			BT_ERR("%s: Device boot interrupted", hdev->name);
+			return -EINTR;
+		}
+
+		if (!timeout) {
+			BT_ERR("%s: Device boot timeout", hdev->name);
+			return -ETIMEDOUT;
+		}
+	}
+#endif
 
 	rettime = ktime_get();
 	delta = ktime_sub(rettime, calltime);
