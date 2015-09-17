@@ -95,10 +95,10 @@ config BACKPORT_VIDEO_OMAP3
 	depends on !VIDEO_OMAP3
 	depends on VIDEO_V4L2 && I2C && BACKPORT_VIDEO_V4L2_SUBDEV_API && ARCH_OMAP3
 	depends on HAS_DMA
-	select ARM_DMA_USE_IOMMU
-	select OMAP_IOMMU
+	depends on ARM_DMA_USE_IOMMU
+	depends on OMAP_IOMMU
 	select BACKPORT_VIDEOBUF2_DMA_CONTIG
-	select MFD_SYSCON
+	depends on MFD_SYSCON
 	---help---
 	  Driver for an OMAP 3 camera controller.
 
@@ -151,11 +151,11 @@ config BACKPORT_VIDEO_CODA
 	depends on !VIDEO_CODA
 	depends on BACKPORT_VIDEO_DEV && VIDEO_V4L2 && ARCH_MXC
 	depends on HAS_DMA
-	select SRAM
+	depends on SRAM
 	select BACKPORT_VIDEOBUF2_DMA_CONTIG
 	select BACKPORT_VIDEOBUF2_VMALLOC
 	select BACKPORT_V4L2_MEM2MEM_DEV
-	select GENERIC_ALLOCATOR
+	depends on GENERIC_ALLOCATOR
 	---help---
 	   Coda is a range of video codec IPs that supports
 	   H.264, MPEG-4, and other video formats.
