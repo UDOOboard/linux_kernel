@@ -19,6 +19,7 @@ menuconfig BACKPORT_WLAN
 if BACKPORT_WLAN
 
 config BACKPORT_PCMCIA_RAYCS
+	depends on n
 	tristate "Aviator/Raytheon 2.4GHz wireless support"
 	depends on !PCMCIA_RAYCS
 	depends on PCMCIA
@@ -148,6 +149,7 @@ config BACKPORT_AIRO_CS
 	  Cisco Linux utilities can be used to configure the card.
 
 config BACKPORT_PCMCIA_WL3501
+	depends on n
 	tristate "Planet WL3501 PCMCIA cards"
 	depends on !PCMCIA_WL3501
 	depends on BACKPORT_CFG80211 && PCMCIA
@@ -159,6 +161,7 @@ config BACKPORT_PCMCIA_WL3501
 	  micro support for ethtool.
 
 config BACKPORT_PRISM54
+	depends on n
 	tristate 'Intersil Prism GT/Duette/Indigo PCI/Cardbus (DEPRECATED)'
 	depends on !PRISM54
 	depends on PCI
