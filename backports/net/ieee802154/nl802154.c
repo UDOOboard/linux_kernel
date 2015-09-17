@@ -26,10 +26,12 @@
 #include "rdev-ops.h"
 #include "core.h"
 
-static int nl802154_pre_doit(const struct genl_ops *ops, struct sk_buff *skb,
+static int nl802154_pre_doit(__genl_const struct genl_ops *ops,
+			     struct sk_buff *skb,
 			     struct genl_info *info);
 
-static void nl802154_post_doit(const struct genl_ops *ops, struct sk_buff *skb,
+static void nl802154_post_doit(__genl_const struct genl_ops *ops,
+			       struct sk_buff *skb,
 			       struct genl_info *info);
 
 /* the netlink family */
@@ -49,7 +51,7 @@ enum nl802154_multicast_groups {
 	NL802154_MCGRP_CONFIG,
 };
 
-static const struct genl_multicast_group nl802154_mcgrps[] = {
+static __genl_const struct genl_multicast_group nl802154_mcgrps[] = {
 	[NL802154_MCGRP_CONFIG] = { .name = "config", },
 };
 
@@ -804,7 +806,8 @@ static int nl802154_set_lbt_mode(struct sk_buff *skb, struct genl_info *info)
 #define NL802154_FLAG_NEED_WPAN_DEV_UP	(NL802154_FLAG_NEED_WPAN_DEV |\
 					 NL802154_FLAG_CHECK_NETDEV_UP)
 
-static int nl802154_pre_doit(const struct genl_ops *ops, struct sk_buff *skb,
+static int nl802154_pre_doit(__genl_const struct genl_ops *ops,
+			     struct sk_buff *skb,
 			     struct genl_info *info)
 {
 	struct cfg802154_registered_device *rdev;
@@ -866,7 +869,8 @@ static int nl802154_pre_doit(const struct genl_ops *ops, struct sk_buff *skb,
 	return 0;
 }
 
-static void nl802154_post_doit(const struct genl_ops *ops, struct sk_buff *skb,
+static void nl802154_post_doit(__genl_const struct genl_ops *ops,
+			       struct sk_buff *skb,
 			       struct genl_info *info)
 {
 	if (info->user_ptr[1]) {
@@ -884,7 +888,7 @@ static void nl802154_post_doit(const struct genl_ops *ops, struct sk_buff *skb,
 		rtnl_unlock();
 }
 
-static const struct genl_ops nl802154_ops[] = {
+static __genl_const struct genl_ops nl802154_ops[] = {
 	{
 		.cmd = NL802154_CMD_GET_WPAN_PHY,
 		.doit = nl802154_get_wpan_phy,
