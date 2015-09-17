@@ -918,8 +918,13 @@ static void hci_sock_cmsg(struct sock *sk, struct msghdr *msg,
 	}
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int hci_sock_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
 			    int flags)
+#else
+static int hci_sock_recvmsg(struct kiocb *iocb, struct socket *sock,
+			    struct msghdr *msg, size_t len, int flags)
+#endif
 {
 	int noblock = flags & MSG_DONTWAIT;
 	struct sock *sk = sock->sk;
@@ -1077,8 +1082,13 @@ done:
 	return err;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int hci_sock_sendmsg(struct socket *sock, struct msghdr *msg,
 			    size_t len)
+#else
+static int hci_sock_sendmsg(struct kiocb *iocb, struct socket *sock,
+			    struct msghdr *msg, size_t len)
+#endif
 {
 	struct sock *sk = sock->sk;
 	struct hci_mgmt_chan *chan;

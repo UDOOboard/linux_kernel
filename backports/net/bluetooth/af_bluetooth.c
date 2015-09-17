@@ -210,8 +210,13 @@ struct sock *bt_accept_dequeue(struct sock *parent, struct socket *newsock)
 }
 EXPORT_SYMBOL(bt_accept_dequeue);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 int bt_sock_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
 		    int flags)
+#else
+int bt_sock_recvmsg(struct kiocb *iocb, struct socket *sock,
+				struct msghdr *msg, size_t len, int flags)
+#endif
 {
 	int noblock = flags & MSG_DONTWAIT;
 	struct sock *sk = sock->sk;
@@ -283,8 +288,13 @@ static long bt_sock_data_wait(struct sock *sk, long timeo)
 	return timeo;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 int bt_sock_stream_recvmsg(struct socket *sock, struct msghdr *msg,
 			   size_t size, int flags)
+#else
+int bt_sock_stream_recvmsg(struct kiocb *iocb, struct socket *sock,
+			       struct msghdr *msg, size_t size, int flags)
+#endif
 {
 	struct sock *sk = sock->sk;
 	int err = 0;
