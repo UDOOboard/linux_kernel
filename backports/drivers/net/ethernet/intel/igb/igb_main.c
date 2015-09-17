@@ -7897,6 +7897,7 @@ static int igb_ndo_set_vf_bw(struct net_device *netdev, int vf,
 	if (hw->mac.type != e1000_82576)
 		return -EOPNOTSUPP;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0)
 	if (min_tx_rate)
 		return -EINVAL;
 
@@ -7910,7 +7911,17 @@ static int igb_ndo_set_vf_bw(struct net_device *netdev, int vf,
 	adapter->vf_rate_link_speed = actual_link_speed;
 	adapter->vf_data[vf].tx_rate = (u16)max_tx_rate;
 	igb_set_vf_rate_limit(hw, vf, max_tx_rate, actual_link_speed);
+#else
+	actual_link_speed = igb_link_mbps(adapter->link_speed);
+	if ((vf >= adapter->vfs_allocated_count) ||
+	    (!(rd32(E1000_STATUS) & E1000_STATUS_LU)) ||
+	    (tx_rate < 0) || (tx_rate > actual_link_speed))
+		return -EINVAL;
 
+	adapter->vf_rate_link_speed = actual_link_speed;
+	adapter->vf_data[vf].tx_rate = (u16)tx_rate;
+	igb_set_vf_rate_limit(hw, vf, tx_rate, actual_link_speed);
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0) */
 	return 0;
 }
 
