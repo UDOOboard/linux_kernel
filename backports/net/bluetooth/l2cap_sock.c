@@ -944,8 +944,13 @@ static int l2cap_sock_setsockopt(struct socket *sock, int level, int optname,
 	return err;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int l2cap_sock_sendmsg(struct socket *sock, struct msghdr *msg,
 			      size_t len)
+#else
+static int l2cap_sock_sendmsg(struct kiocb *iocb, struct socket *sock,
+			      struct msghdr *msg, size_t len)
+#endif
 {
 	struct sock *sk = sock->sk;
 	struct l2cap_chan *chan = l2cap_pi(sk)->chan;
@@ -976,8 +981,13 @@ static int l2cap_sock_sendmsg(struct socket *sock, struct msghdr *msg,
 	return err;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int l2cap_sock_recvmsg(struct socket *sock, struct msghdr *msg,
 			      size_t len, int flags)
+#else
+static int l2cap_sock_recvmsg(struct kiocb *iocb, struct socket *sock,
+			      struct msghdr *msg, size_t len, int flags)
+#endif
 {
 	struct sock *sk = sock->sk;
 	struct l2cap_pinfo *pi = l2cap_pi(sk);
@@ -1004,9 +1014,17 @@ static int l2cap_sock_recvmsg(struct socket *sock, struct msghdr *msg,
 	release_sock(sk);
 
 	if (sock->type == SOCK_STREAM)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		err = bt_sock_stream_recvmsg(sock, msg, len, flags);
+#else
+		err = bt_sock_stream_recvmsg(iocb, sock, msg, len, flags);
+#endif
 	else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		err = bt_sock_recvmsg(sock, msg, len, flags);
+#else
+		err = bt_sock_recvmsg(iocb, sock, msg, len, flags);
+#endif
 
 	if (pi->chan->mode != L2CAP_MODE_ERTM)
 		return err;

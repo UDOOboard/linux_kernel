@@ -688,8 +688,13 @@ static int sco_sock_getname(struct socket *sock, struct sockaddr *addr, int *len
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int sco_sock_sendmsg(struct socket *sock, struct msghdr *msg,
 			    size_t len)
+#else
+static int sco_sock_sendmsg(struct kiocb *iocb, struct socket *sock,
+			    struct msghdr *msg, size_t len)
+#endif
 {
 	struct sock *sk = sock->sk;
 	int err;
@@ -758,8 +763,13 @@ static void sco_conn_defer_accept(struct hci_conn *conn, u16 setting)
 	}
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int sco_sock_recvmsg(struct socket *sock, struct msghdr *msg,
 			    size_t len, int flags)
+#else
+static int sco_sock_recvmsg(struct kiocb *iocb, struct socket *sock,
+			    struct msghdr *msg, size_t len, int flags)
+#endif
 {
 	struct sock *sk = sock->sk;
 	struct sco_pinfo *pi = sco_pi(sk);
@@ -777,7 +787,11 @@ static int sco_sock_recvmsg(struct socket *sock, struct msghdr *msg,
 
 	release_sock(sk);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 	return bt_sock_recvmsg(sock, msg, len, flags);
+#else
+	return bt_sock_recvmsg(iocb, sock, msg, len, flags);
+#endif
 }
 
 static int sco_sock_setsockopt(struct socket *sock, int level, int optname, char __user *optval, unsigned int optlen)
