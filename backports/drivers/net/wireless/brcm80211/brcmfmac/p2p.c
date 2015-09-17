@@ -2312,7 +2312,9 @@ struct wireless_dev *brcmf_p2p_add_vif(struct wiphy *wiphy, const char *name,
 	}
 
 	strncpy(ifp->ndev->name, name, sizeof(ifp->ndev->name) - 1);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 	ifp->ndev->name_assign_type = name_assign_type;
+#endif /* >= 3.17.0 */
 	err = brcmf_net_attach(ifp, true);
 	if (err) {
 		brcmf_err("Registering netdevice failed\n");
