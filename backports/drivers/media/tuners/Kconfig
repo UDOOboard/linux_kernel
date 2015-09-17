@@ -231,7 +231,7 @@ config BACKPORT_MEDIA_TUNER_TDA18212
 	tristate "NXP TDA18212 silicon tuner"
 	depends on !MEDIA_TUNER_TDA18212
 	depends on BACKPORT_MEDIA_SUPPORT && I2C
-	select REGMAP_I2C
+	depends on REGMAP_I2C
 	default m if !MEDIA_SUBDRV_AUTOSELECT
 	help
 	  NXP TDA18212 silicon tuner driver.
@@ -240,7 +240,7 @@ config BACKPORT_MEDIA_TUNER_E4000
 	tristate "Elonics E4000 silicon tuner"
 	depends on !MEDIA_TUNER_E4000
 	depends on BACKPORT_MEDIA_SUPPORT && I2C
-	select REGMAP_I2C
+	depends on REGMAP_I2C
 	default m if !MEDIA_SUBDRV_AUTOSELECT
 	help
 	  Elonics E4000 silicon tuner driver.
@@ -257,7 +257,7 @@ config BACKPORT_MEDIA_TUNER_M88RS6000T
 	tristate "Montage M88RS6000 internal tuner"
 	depends on !MEDIA_TUNER_M88RS6000T
 	depends on BACKPORT_MEDIA_SUPPORT && I2C
-	select REGMAP_I2C
+	depends on REGMAP_I2C
 	default m if !MEDIA_SUBDRV_AUTOSELECT
 	help
 	  Montage M88RS6000 internal tuner.
@@ -282,7 +282,7 @@ config BACKPORT_MEDIA_TUNER_IT913X
 	tristate "ITE Tech IT913x silicon tuner"
 	depends on !MEDIA_TUNER_IT913X
 	depends on BACKPORT_MEDIA_SUPPORT && I2C
-	select REGMAP_I2C
+	depends on REGMAP_I2C
 	default m if !MEDIA_SUBDRV_AUTOSELECT
 	help
 	  ITE Tech IT913x silicon tuner driver.
