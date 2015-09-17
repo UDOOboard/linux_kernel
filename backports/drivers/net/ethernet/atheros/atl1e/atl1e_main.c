@@ -2556,7 +2556,11 @@ static void atl1e_io_resume(struct pci_dev *pdev)
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)
-static const struct pci_error_handlers atl1e_err_handler = {
+static
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)
+const
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0) */
+struct pci_error_handlers atl1e_err_handler = {
 #else
 static struct pci_error_handlers atl1e_err_handler = {
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0) */
