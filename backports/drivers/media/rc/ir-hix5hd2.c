@@ -15,6 +15,7 @@
 #include <linux/of_device.h>
 #include <linux/regmap.h>
 #include <media/rc-core.h>
+#include <linux/of.h>
 
 #define IR_ENABLE		0x00
 #define IR_CONFIG		0x04
