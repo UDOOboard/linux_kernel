@@ -637,7 +637,11 @@ static void igb_ptp_overflow_check(struct work_struct *work)
 		container_of(work, struct igb_adapter, ptp_overflow_work.work);
 	struct timespec64 ts;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 	igb->ptp_caps.gettime64(&igb->ptp_caps, &ts);
+#else
+	igb->ptp_caps.gettime(&igb->ptp_caps, &ts);
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0) */
 
 	pr_debug("igb overflow check at %lld.%09lu\n",
 		 (long long) ts.tv_sec, ts.tv_nsec);
@@ -1000,8 +1004,16 @@ void igb_ptp_init(struct igb_adapter *adapter)
 		adapter->ptp_caps.pps = 0;
 		adapter->ptp_caps.adjfreq = igb_ptp_adjfreq_82576;
 		adapter->ptp_caps.adjtime = igb_ptp_adjtime_82576;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		adapter->ptp_caps.gettime64 = igb_ptp_gettime_82576;
+#else
+		adapter->ptp_caps.gettime = igb_ptp_gettime_82576;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0) */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		adapter->ptp_caps.settime64 = igb_ptp_settime_82576;
+#else
+		adapter->ptp_caps.settime = igb_ptp_settime_82576;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0) */
 		adapter->ptp_caps.enable = igb_ptp_feature_enable;
 		adapter->cc.read = igb_ptp_read_82576;
 		adapter->cc.mask = CYCLECOUNTER_MASK(64);
@@ -1020,8 +1032,16 @@ void igb_ptp_init(struct igb_adapter *adapter)
 		adapter->ptp_caps.pps = 0;
 		adapter->ptp_caps.adjfreq = igb_ptp_adjfreq_82580;
 		adapter->ptp_caps.adjtime = igb_ptp_adjtime_82576;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		adapter->ptp_caps.gettime64 = igb_ptp_gettime_82576;
+#else
+		adapter->ptp_caps.gettime = igb_ptp_gettime_82576;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0) */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		adapter->ptp_caps.settime64 = igb_ptp_settime_82576;
+#else
+		adapter->ptp_caps.settime = igb_ptp_settime_82576;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0) */
 		adapter->ptp_caps.enable = igb_ptp_feature_enable;
 		adapter->cc.read = igb_ptp_read_82580;
 		adapter->cc.mask = CYCLECOUNTER_MASK(IGB_NBITS_82580);
@@ -1050,8 +1070,16 @@ void igb_ptp_init(struct igb_adapter *adapter)
 		adapter->ptp_caps.pin_config = adapter->sdp_config;
 		adapter->ptp_caps.adjfreq = igb_ptp_adjfreq_82580;
 		adapter->ptp_caps.adjtime = igb_ptp_adjtime_i210;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		adapter->ptp_caps.gettime64 = igb_ptp_gettime_i210;
+#else
+		adapter->ptp_caps.gettime = igb_ptp_gettime_i210;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0) */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 		adapter->ptp_caps.settime64 = igb_ptp_settime_i210;
+#else
+		adapter->ptp_caps.settime = igb_ptp_settime_i210;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0) */
 		adapter->ptp_caps.enable = igb_ptp_feature_enable_i210;
 		adapter->ptp_caps.verify = igb_ptp_verify_pin;
 		/* Enable the timer functions by clearing bit 31. */
