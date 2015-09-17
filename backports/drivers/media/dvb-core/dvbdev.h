@@ -31,8 +31,8 @@
 
 #define DVB_MAJOR 212
 
-#if defined(CONFIG_DVB_MAX_ADAPTERS) && CONFIG_DVB_MAX_ADAPTERS > 0
-  #define DVB_MAX_ADAPTERS CONFIG_DVB_MAX_ADAPTERS
+#if defined(CONFIG_BACKPORT_DVB_MAX_ADAPTERS) && CONFIG_BACKPORT_DVB_MAX_ADAPTERS > 0
+  #define DVB_MAX_ADAPTERS CONFIG_BACKPORT_DVB_MAX_ADAPTERS
 #else
   #define DVB_MAX_ADAPTERS 8
 #endif
@@ -73,7 +73,7 @@ struct dvb_adapter {
 	struct dvb_device *mfe_dvbdev;	/* frontend device in use */
 	struct mutex mfe_lock;		/* access lock for thread creation */
 
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 	struct media_device *mdev;
 #endif
 };
@@ -98,7 +98,7 @@ struct dvb_device {
 	int (*kernel_ioctl)(struct file *file, unsigned int cmd, void *arg);
 
 	/* Needed for media controller register/unregister */
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 	const char *name;
 
 	/* Allocated and filled inside dvbdev.c */
@@ -123,7 +123,7 @@ extern int dvb_register_device (struct dvb_adapter *adap,
 
 extern void dvb_unregister_device (struct dvb_device *dvbdev);
 
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 void dvb_create_media_graph(struct dvb_adapter *adap);
 static inline void dvb_register_media_controller(struct dvb_adapter *adap,
 						 struct media_device *mdev)
@@ -149,7 +149,7 @@ extern int dvb_usercopy(struct file *file, unsigned int cmd, unsigned long arg,
 			    int (*func)(struct file *file, unsigned int cmd, void *arg));
 
 /** generic DVB attach function. */
-#ifdef CONFIG_MEDIA_ATTACH
+#ifdef CONFIG_BACKPORT_MEDIA_ATTACH
 #define dvb_attach(FUNCTION, ARGS...) ({ \
 	void *__r = NULL; \
 	typeof(&FUNCTION) __a = symbol_request(FUNCTION); \

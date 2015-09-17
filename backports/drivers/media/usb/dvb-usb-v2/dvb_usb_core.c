@@ -102,7 +102,7 @@ static int dvb_usbv2_i2c_exit(struct dvb_usb_device *d)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_RC_CORE)
+#if IS_ENABLED(CONFIG_BACKPORT_RC_CORE)
 static void dvb_usb_read_remote_control(struct work_struct *work)
 {
 	struct dvb_usb_device *d = container_of(work,
@@ -402,7 +402,7 @@ skip_feed_stop:
 
 static void dvb_usbv2_media_device_register(struct dvb_usb_adapter *adap)
 {
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	struct media_device *mdev;
 	struct dvb_usb_device *d = adap_to_d(adap);
 	struct usb_device *udev = d->udev;
@@ -438,7 +438,7 @@ static void dvb_usbv2_media_device_register(struct dvb_usb_adapter *adap)
 
 static void dvb_usbv2_media_device_unregister(struct dvb_usb_adapter *adap)
 {
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 
 	if (!adap->dvb_adap.mdev)
 		return;

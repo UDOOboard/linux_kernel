@@ -611,7 +611,7 @@ static int smsdvb_onresponse(void *context, struct smscore_buffer_t *cb)
 
 static void smsdvb_media_device_unregister(struct smsdvb_client_t *client)
 {
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	struct smscore_device_t *coredev = client->coredev;
 
 	if (!coredev->media_dev)

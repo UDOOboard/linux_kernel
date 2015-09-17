@@ -20,7 +20,7 @@
    SOFTWARE IS DISCLAIMED.
 */
 
-#if IS_ENABLED(CONFIG_BT_DEBUGFS)
+#if IS_ENABLED(CONFIG_BACKPORT_BT_DEBUGFS)
 
 void hci_debugfs_create_common(struct hci_dev *hdev);
 void hci_debugfs_create_bredr(struct hci_dev *hdev);

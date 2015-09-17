@@ -164,7 +164,7 @@ struct v4l2_subdev_core_ops {
 	long (*compat_ioctl32)(struct v4l2_subdev *sd, unsigned int cmd,
 			       unsigned long arg);
 #endif
-#ifdef CONFIG_VIDEO_ADV_DEBUG
+#ifdef CONFIG_BACKPORT_VIDEO_ADV_DEBUG
 	int (*g_register)(struct v4l2_subdev *sd, struct v4l2_dbg_register *reg);
 	int (*s_register)(struct v4l2_subdev *sd, const struct v4l2_dbg_register *reg);
 #endif
@@ -526,11 +526,11 @@ struct v4l2_subdev_pad_ops {
 			      struct v4l2_dv_timings_cap *cap);
 	int (*enum_dv_timings)(struct v4l2_subdev *sd,
 			       struct v4l2_enum_dv_timings *timings);
-#ifdef CONFIG_MEDIA_CONTROLLER
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER
 	int (*link_validate)(struct v4l2_subdev *sd, struct media_link *link,
 			     struct v4l2_subdev_format *source_fmt,
 			     struct v4l2_subdev_format *sink_fmt);
-#endif /* CONFIG_MEDIA_CONTROLLER */
+#endif /* CONFIG_BACKPORT_MEDIA_CONTROLLER */
 	int (*get_frame_desc)(struct v4l2_subdev *sd, unsigned int pad,
 			      struct v4l2_mbus_frame_desc *fd);
 	int (*set_frame_desc)(struct v4l2_subdev *sd, unsigned int pad,
@@ -595,7 +595,7 @@ struct v4l2_subdev_platform_data {
    stand-alone or embedded in a larger struct.
  */
 struct v4l2_subdev {
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	struct media_entity entity;
 #endif
 	struct list_head list;
@@ -639,7 +639,7 @@ struct v4l2_subdev {
  */
 struct v4l2_subdev_fh {
 	struct v4l2_fh vfh;
-#if defined(CONFIG_VIDEO_V4L2_SUBDEV_API)
+#if defined(CONFIG_BACKPORT_VIDEO_V4L2_SUBDEV_API)
 	struct v4l2_subdev_pad_config *pad;
 #endif
 };
@@ -647,7 +647,7 @@ struct v4l2_subdev_fh {
 #define to_v4l2_subdev_fh(fh)	\
 	container_of(fh, struct v4l2_subdev_fh, vfh)
 
-#if defined(CONFIG_VIDEO_V4L2_SUBDEV_API)
+#if defined(CONFIG_BACKPORT_VIDEO_V4L2_SUBDEV_API)
 #define __V4L2_SUBDEV_MK_GET_TRY(rtype, fun_name, field_name)		\
 	static inline struct rtype *					\
 	fun_name(struct v4l2_subdev *sd,				\
@@ -685,13 +685,13 @@ static inline void *v4l2_get_subdev_hostdata(const struct v4l2_subdev *sd)
 	return sd->host_priv;
 }
 
-#ifdef CONFIG_MEDIA_CONTROLLER
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER
 int v4l2_subdev_link_validate_default(struct v4l2_subdev *sd,
 				      struct media_link *link,
 				      struct v4l2_subdev_format *source_fmt,
 				      struct v4l2_subdev_format *sink_fmt);
 int v4l2_subdev_link_validate(struct media_link *link);
-#endif /* CONFIG_MEDIA_CONTROLLER */
+#endif /* CONFIG_BACKPORT_MEDIA_CONTROLLER */
 void v4l2_subdev_init(struct v4l2_subdev *sd,
 		      const struct v4l2_subdev_ops *ops);
 

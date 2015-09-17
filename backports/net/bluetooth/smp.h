@@ -193,7 +193,7 @@ int smp_generate_oob(struct hci_dev *hdev, u8 hash[16], u8 rand[16]);
 int smp_register(struct hci_dev *hdev);
 void smp_unregister(struct hci_dev *hdev);
 
-#if IS_ENABLED(CONFIG_BT_SELFTEST_SMP)
+#if IS_ENABLED(CONFIG_BACKPORT_BT_SELFTEST_SMP)
 
 int bt_selftest_smp(void);
 

@@ -33,7 +33,7 @@ struct wl1251_platform_data {
 	bool use_eeprom;
 };
 
-#ifdef CONFIG_WILINK_PLATFORM_DATA
+#ifdef CONFIG_BACKPORT_WILINK_PLATFORM_DATA
 
 int wl1251_set_platform_data(const struct wl1251_platform_data *data);
 

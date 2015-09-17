@@ -294,13 +294,13 @@ static int hci_uart_setup(struct hci_dev *hdev)
 	ver = (struct hci_rp_read_local_version *)skb->data;
 
 	switch (le16_to_cpu(ver->manufacturer)) {
-#ifdef CONFIG_BT_HCIUART_INTEL
+#ifdef CONFIG_BACKPORT_BT_HCIUART_INTEL
 	case 2:
 		hdev->set_bdaddr = btintel_set_bdaddr;
 		btintel_check_bdaddr(hdev);
 		break;
 #endif
-#ifdef CONFIG_BT_HCIUART_BCM
+#ifdef CONFIG_BACKPORT_BT_HCIUART_BCM
 	case 15:
 		hdev->set_bdaddr = btbcm_set_bdaddr;
 		btbcm_check_bdaddr(hdev);
@@ -666,22 +666,22 @@ static int __init hci_uart_init(void)
 		return err;
 	}
 
-#ifdef CONFIG_BT_HCIUART_H4
+#ifdef CONFIG_BACKPORT_BT_HCIUART_H4
 	h4_init();
 #endif
-#ifdef CONFIG_BT_HCIUART_BCSP
+#ifdef CONFIG_BACKPORT_BT_HCIUART_BCSP
 	bcsp_init();
 #endif
-#ifdef CONFIG_BT_HCIUART_LL
+#ifdef CONFIG_BACKPORT_BT_HCIUART_LL
 	ll_init();
 #endif
-#ifdef CONFIG_BT_HCIUART_ATH3K
+#ifdef CONFIG_BACKPORT_BT_HCIUART_ATH3K
 	ath_init();
 #endif
-#ifdef CONFIG_BT_HCIUART_3WIRE
+#ifdef CONFIG_BACKPORT_BT_HCIUART_3WIRE
 	h5_init();
 #endif
-#ifdef CONFIG_BT_HCIUART_BCM
+#ifdef CONFIG_BACKPORT_BT_HCIUART_BCM
 	bcm_init();
 #endif
 
@@ -692,22 +692,22 @@ static void __exit hci_uart_exit(void)
 {
 	int err;
 
-#ifdef CONFIG_BT_HCIUART_H4
+#ifdef CONFIG_BACKPORT_BT_HCIUART_H4
 	h4_deinit();
 #endif
-#ifdef CONFIG_BT_HCIUART_BCSP
+#ifdef CONFIG_BACKPORT_BT_HCIUART_BCSP
 	bcsp_deinit();
 #endif
-#ifdef CONFIG_BT_HCIUART_LL
+#ifdef CONFIG_BACKPORT_BT_HCIUART_LL
 	ll_deinit();
 #endif
-#ifdef CONFIG_BT_HCIUART_ATH3K
+#ifdef CONFIG_BACKPORT_BT_HCIUART_ATH3K
 	ath_deinit();
 #endif
-#ifdef CONFIG_BT_HCIUART_3WIRE
+#ifdef CONFIG_BACKPORT_BT_HCIUART_3WIRE
 	h5_deinit();
 #endif
-#ifdef CONFIG_BT_HCIUART_BCM
+#ifdef CONFIG_BACKPORT_BT_HCIUART_BCM
 	bcm_deinit();
 #endif
 
