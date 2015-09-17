@@ -98,12 +98,21 @@ static int ieee802154_sock_release(struct socket *sock)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int ieee802154_sock_sendmsg(struct socket *sock, struct msghdr *msg,
 				   size_t len)
+#else
+static int ieee802154_sock_sendmsg(struct kiocb *iocb, struct socket *sock,
+				   struct msghdr *msg, size_t len)
+#endif
 {
 	struct sock *sk = sock->sk;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 	return sk->sk_prot->sendmsg(sk, msg, len);
+#else
+	return sk->sk_prot->sendmsg(iocb, sk, msg, len);
+#endif
 }
 
 static int ieee802154_sock_bind(struct socket *sock, struct sockaddr *uaddr,
@@ -255,7 +264,12 @@ static int raw_disconnect(struct sock *sk, int flags)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int raw_sendmsg(struct sock *sk, struct msghdr *msg, size_t size)
+#else
+static int raw_sendmsg(struct kiocb *iocb, struct sock *sk,
+		       struct msghdr *msg, size_t size)
+#endif
 {
 	struct net_device *dev;
 	unsigned int mtu;
@@ -326,8 +340,13 @@ out:
 	return err;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int raw_recvmsg(struct sock *sk, struct msghdr *msg, size_t len,
 		       int noblock, int flags, int *addr_len)
+#else
+static int raw_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
+		       size_t len, int noblock, int flags, int *addr_len)
+#endif
 {
 	size_t copied = 0;
 	int err = -EOPNOTSUPP;
@@ -614,7 +633,12 @@ static int dgram_disconnect(struct sock *sk, int flags)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int dgram_sendmsg(struct sock *sk, struct msghdr *msg, size_t size)
+#else
+static int dgram_sendmsg(struct kiocb *iocb, struct sock *sk,
+			 struct msghdr *msg, size_t size)
+#endif
 {
 	struct net_device *dev;
 	unsigned int mtu;
@@ -713,8 +737,14 @@ out:
 	return err;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int dgram_recvmsg(struct sock *sk, struct msghdr *msg, size_t len,
 			 int noblock, int flags, int *addr_len)
+#else
+static int dgram_recvmsg(struct kiocb *iocb, struct sock *sk,
+			 struct msghdr *msg, size_t len, int noblock,
+			 int flags, int *addr_len)
+#endif
 {
 	size_t copied = 0;
 	int err = -EOPNOTSUPP;
