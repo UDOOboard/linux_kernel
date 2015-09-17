@@ -211,7 +211,12 @@ static void rawsock_tx_work(struct work_struct *work)
 	}
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int rawsock_sendmsg(struct socket *sock, struct msghdr *msg, size_t len)
+#else
+static int rawsock_sendmsg(struct kiocb *iocb, struct socket *sock,
+			   struct msghdr *msg, size_t len)
+#endif
 {
 	struct sock *sk = sock->sk;
 	struct nfc_dev *dev = nfc_rawsock(sk)->dev;
@@ -247,8 +252,13 @@ static int rawsock_sendmsg(struct socket *sock, struct msghdr *msg, size_t len)
 	return len;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int rawsock_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
 			   int flags)
+#else
+static int rawsock_recvmsg(struct kiocb *iocb, struct socket *sock,
+			   struct msghdr *msg, size_t len, int flags)
+#endif
 {
 	int noblock = flags & MSG_DONTWAIT;
 	struct sock *sk = sock->sk;

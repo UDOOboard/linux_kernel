@@ -750,8 +750,13 @@ error:
 	return ret;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int llcp_sock_sendmsg(struct socket *sock, struct msghdr *msg,
 			     size_t len)
+#else
+static int llcp_sock_sendmsg(struct kiocb *iocb, struct socket *sock,
+			     struct msghdr *msg, size_t len)
+#endif
 {
 	struct sock *sk = sock->sk;
 	struct nfc_llcp_sock *llcp_sock = nfc_llcp_sock(sk);
@@ -793,8 +798,13 @@ static int llcp_sock_sendmsg(struct socket *sock, struct msghdr *msg,
 	return nfc_llcp_send_i_frame(llcp_sock, msg, len);
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
 static int llcp_sock_recvmsg(struct socket *sock, struct msghdr *msg,
 			     size_t len, int flags)
+#else
+static int llcp_sock_recvmsg(struct kiocb *iocb, struct socket *sock,
+			     struct msghdr *msg, size_t len, int flags)
+#endif
 {
 	int noblock = flags & MSG_DONTWAIT;
 	struct sock *sk = sock->sk;
