@@ -3243,12 +3243,12 @@ struct wiphy {
 
 static inline struct net *wiphy_net(struct wiphy *wiphy)
 {
-	return read_pnet(&wiphy->_net);
+	return possible_read_pnet(&wiphy->_net);
 }
 
 static inline void wiphy_net_set(struct wiphy *wiphy, struct net *net)
 {
-	write_pnet(&wiphy->_net, net);
+	possible_write_pnet(&wiphy->_net, net);
 }
 
 /**
