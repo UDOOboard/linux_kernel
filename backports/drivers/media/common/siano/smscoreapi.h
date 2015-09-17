@@ -220,7 +220,7 @@ struct smscore_device_t {
 
 	int led_state;
 
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 	struct media_device *media_dev;
 #endif
 };

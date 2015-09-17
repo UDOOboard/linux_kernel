@@ -50,7 +50,7 @@ static const char * const dnames[] = {
 	"net", "osd"
 };
 
-#ifdef CONFIG_DVB_DYNAMIC_MINORS
+#ifdef CONFIG_BACKPORT_DVB_DYNAMIC_MINORS
 #define MAX_DVB_MINORS		256
 #define DVB_MAX_IDS		MAX_DVB_MINORS
 #else
@@ -183,7 +183,7 @@ skip:
 static void dvb_register_media_device(struct dvb_device *dvbdev,
 				      int type, int minor)
 {
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 	int ret = 0, npads;
 
 	if (!dvbdev->adapter->mdev)
@@ -315,7 +315,7 @@ int dvb_register_device(struct dvb_adapter *adap, struct dvb_device **pdvbdev,
 	list_add_tail (&dvbdev->list_head, &adap->device_list);
 
 	down_write(&minor_rwsem);
-#ifdef CONFIG_DVB_DYNAMIC_MINORS
+#ifdef CONFIG_BACKPORT_DVB_DYNAMIC_MINORS
 	for (minor = 0; minor < MAX_DVB_MINORS; minor++)
 		if (dvb_minors[minor] == NULL)
 			break;
@@ -366,7 +366,7 @@ void dvb_unregister_device(struct dvb_device *dvbdev)
 
 	device_destroy(dvb_class, MKDEV(DVB_MAJOR, dvbdev->minor));
 
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 	if (dvbdev->entity) {
 		media_device_unregister_entity(dvbdev->entity);
 		kfree(dvbdev->entity);
@@ -381,7 +381,7 @@ void dvb_unregister_device(struct dvb_device *dvbdev)
 EXPORT_SYMBOL(dvb_unregister_device);
 
 
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 void dvb_create_media_graph(struct dvb_adapter *adap)
 {
 	struct media_device *mdev = adap->mdev;

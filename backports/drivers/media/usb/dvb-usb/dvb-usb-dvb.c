@@ -97,7 +97,7 @@ static int dvb_usb_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 
 static void dvb_usb_media_device_register(struct dvb_usb_adapter *adap)
 {
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	struct media_device *mdev;
 	struct dvb_usb_device *d = adap->dev;
 	struct usb_device *udev = d->udev;
@@ -131,7 +131,7 @@ static void dvb_usb_media_device_register(struct dvb_usb_adapter *adap)
 
 static void dvb_usb_media_device_unregister(struct dvb_usb_adapter *adap)
 {
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	if (!adap->dvb_adap.mdev)
 		return;
 

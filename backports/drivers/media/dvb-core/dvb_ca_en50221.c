@@ -1643,7 +1643,7 @@ static const struct dvb_device dvbdev_ca = {
 	.users = 1,
 	.readers = 1,
 	.writers = 1,
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 	.name = "dvb-ca-en50221",
 #endif
 	.fops = &dvb_ca_fops,

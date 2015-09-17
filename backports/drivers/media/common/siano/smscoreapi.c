@@ -663,7 +663,7 @@ int smscore_register_device(struct smsdevice_params_t *params,
 	if (!dev)
 		return -ENOMEM;
 
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	dev->media_dev = mdev;
 #endif
 

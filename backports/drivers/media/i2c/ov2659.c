@@ -1423,7 +1423,7 @@ static int ov2659_probe(struct i2c_client *client,
 	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE |
 		     V4L2_SUBDEV_FL_HAS_EVENTS;
 
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	ov2659->pad.flags = MEDIA_PAD_FL_SOURCE;
 	sd->entity.type = MEDIA_ENT_T_V4L2_SUBDEV_SENSOR;
 	ret = media_entity_init(&sd->entity, 1, &ov2659->pad, 0);
@@ -1456,7 +1456,7 @@ static int ov2659_probe(struct i2c_client *client,
 
 error:
 	v4l2_ctrl_handler_free(&ov2659->ctrls);
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	media_entity_cleanup(&sd->entity);
 #endif
 	mutex_destroy(&ov2659->lock);
@@ -1470,7 +1470,7 @@ static int ov2659_remove(struct i2c_client *client)
 
 	v4l2_ctrl_handler_free(&ov2659->ctrls);
 	v4l2_async_unregister_subdev(sd);
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	media_entity_cleanup(&sd->entity);
 #endif
 	mutex_destroy(&ov2659->lock);

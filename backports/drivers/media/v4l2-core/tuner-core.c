@@ -134,7 +134,7 @@ struct tuner {
 	unsigned int        type; /* chip type id */
 	void                *config;
 	const char          *name;
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	struct media_pad	pad;
 #endif
 };
@@ -151,7 +151,7 @@ static void set_radio_freq(struct i2c_client *c, unsigned int freq);
  */
 
 /* This macro allows us to probe dynamically, avoiding static links */
-#ifdef CONFIG_MEDIA_ATTACH
+#ifdef CONFIG_BACKPORT_MEDIA_ATTACH
 #define tuner_symbol_probe(FUNCTION, ARGS...) ({ \
 	int __r = -EINVAL; \
 	typeof(&FUNCTION) __a = symbol_request(FUNCTION); \
@@ -437,7 +437,7 @@ static void set_type(struct i2c_client *c, unsigned int type,
 		t->name = analog_ops->info.name;
 	}
 
-#ifdef CONFIG_MEDIA_CONTROLLER
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER
 	t->sd.entity.name = t->name;
 #endif
 
@@ -599,7 +599,7 @@ static int tuner_probe(struct i2c_client *client,
 	struct tuner *t;
 	struct tuner *radio;
 	struct tuner *tv;
-#ifdef CONFIG_MEDIA_CONTROLLER
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER
 	int ret;
 #endif
 
@@ -694,7 +694,7 @@ static int tuner_probe(struct i2c_client *client,
 
 	/* Should be just before return */
 register_client:
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	t->pad.flags = MEDIA_PAD_FL_SOURCE;
 	t->sd.entity.type = MEDIA_ENT_T_V4L2_SUBDEV_TUNER;
 	t->sd.entity.name = t->name;

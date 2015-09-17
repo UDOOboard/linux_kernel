@@ -207,7 +207,7 @@ struct pci_dev;
 struct bcma_drv_pci;
 struct bcma_bus;
 
-#ifdef CONFIG_BCMA_DRIVER_PCI_HOSTMODE
+#ifdef CONFIG_BACKPORT_BCMA_DRIVER_PCI_HOSTMODE
 struct bcma_drv_pci_host {
 	struct bcma_drv_pci *pdev;
 
@@ -227,7 +227,7 @@ struct bcma_drv_pci {
 	u8 setup_done:1;
 	u8 hostmode:1;
 
-#ifdef CONFIG_BCMA_DRIVER_PCI_HOSTMODE
+#ifdef CONFIG_BACKPORT_BCMA_DRIVER_PCI_HOSTMODE
 	struct bcma_drv_pci_host *host_controller;
 #endif
 };
@@ -238,7 +238,7 @@ struct bcma_drv_pci {
 #define pcicore_write16(pc, offset, val)	bcma_write16((pc)->core, offset, val)
 #define pcicore_write32(pc, offset, val)	bcma_write32((pc)->core, offset, val)
 
-#ifdef CONFIG_BCMA_DRIVER_PCI
+#ifdef CONFIG_BACKPORT_BCMA_DRIVER_PCI
 extern void bcma_core_pci_power_save(struct bcma_bus *bus, bool up);
 #else
 static inline void bcma_core_pci_power_save(struct bcma_bus *bus, bool up)

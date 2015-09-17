@@ -132,7 +132,7 @@ struct dvb_frontend_private {
 	unsigned int check_wrapped;
 	enum dvbfe_search algo_status;
 
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 	struct media_pipeline pipe;
 	struct media_entity *pipe_start_entity;
 #endif
@@ -613,7 +613,7 @@ static void dvb_frontend_wakeup(struct dvb_frontend *fe)
  * or 0 if everything is OK, if no tuner is linked to the frontend or if the
  * mdev is NULL.
  */
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 static int dvb_enable_media_tuner(struct dvb_frontend *fe)
 {
 	struct dvb_frontend_private *fepriv = fe->frontend_priv;
@@ -692,7 +692,7 @@ static int dvb_frontend_thread(void *data)
 	struct dvb_frontend_private *fepriv = fe->frontend_priv;
 	fe_status_t s;
 	enum dvbfe_algo algo;
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	int ret;
 #endif
 
@@ -708,7 +708,7 @@ static int dvb_frontend_thread(void *data)
 	fepriv->wakeup = 0;
 	fepriv->reinitialise = 0;
 
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	ret = dvb_enable_media_tuner(fe);
 	if (ret) {
 		/* FIXME: return an error if it fails */
@@ -831,7 +831,7 @@ restart:
 		}
 	}
 
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	if (fepriv->pipe_start_entity)
 		media_entity_pipeline_stop(fepriv->pipe_start_entity);
 	fepriv->pipe_start_entity = NULL;
@@ -2736,7 +2736,7 @@ int dvb_register_frontend(struct dvb_adapter* dvb,
 		.writers = 1,
 		.readers = (~0)-1,
 		.fops = &dvb_frontend_fops,
-#if defined(CONFIG_MEDIA_CONTROLLER_DVB)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB)
 		.name = fe->ops.info.name,
 #endif
 		.kernel_ioctl = dvb_frontend_ioctl
@@ -2804,7 +2804,7 @@ int dvb_unregister_frontend(struct dvb_frontend* fe)
 }
 EXPORT_SYMBOL(dvb_unregister_frontend);
 
-#ifdef CONFIG_MEDIA_ATTACH
+#ifdef CONFIG_BACKPORT_MEDIA_ATTACH
 void dvb_frontend_detach(struct dvb_frontend* fe)
 {
 	void *ptr;

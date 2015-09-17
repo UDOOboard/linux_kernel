@@ -145,7 +145,7 @@ EXPORT_SYMBOL_GPL(v4l2_device_unregister);
 int v4l2_device_register_subdev(struct v4l2_device *v4l2_dev,
 				struct v4l2_subdev *sd)
 {
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	struct media_entity *entity = &sd->entity;
 #endif
 	int err;
@@ -182,7 +182,7 @@ int v4l2_device_register_subdev(struct v4l2_device *v4l2_dev,
 	if (err)
 		goto error_unregister;
 
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	/* Register the entity. */
 	if (v4l2_dev->mdev) {
 		err = media_device_register_entity(v4l2_dev->mdev, entity);
@@ -246,7 +246,7 @@ int v4l2_device_register_subdev_nodes(struct v4l2_device *v4l2_dev)
 			kfree(vdev);
 			goto clean_up;
 		}
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 		sd->entity.info.dev.major = VIDEO_MAJOR;
 		sd->entity.info.dev.minor = vdev->minor;
 #endif
@@ -283,7 +283,7 @@ void v4l2_device_unregister_subdev(struct v4l2_subdev *sd)
 		sd->internal_ops->unregistered(sd);
 	sd->v4l2_dev = NULL;
 
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	if (v4l2_dev->mdev) {
 		media_entity_remove_links(&sd->entity);
 		media_device_unregister_entity(&sd->entity);

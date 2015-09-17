@@ -102,7 +102,7 @@ static struct cx231xx_fmt format[] = {
 
 static int cx231xx_enable_analog_tuner(struct cx231xx *dev)
 {
-#ifdef CONFIG_MEDIA_CONTROLLER
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER
 	struct media_device *mdev = dev->media_dev;
 	struct media_entity  *entity, *decoder = NULL, *source;
 	struct media_link *link, *found_link = NULL;
@@ -1299,7 +1299,7 @@ int cx231xx_s_frequency(struct file *file, void *priv,
 	return rc;
 }
 
-#ifdef CONFIG_VIDEO_ADV_DEBUG
+#ifdef CONFIG_BACKPORT_VIDEO_ADV_DEBUG
 
 int cx231xx_g_chip_info(struct file *file, void *fh,
 			struct v4l2_dbg_chip_info *chip)
@@ -2060,7 +2060,7 @@ static const struct v4l2_ioctl_ops video_ioctl_ops = {
 	.vidioc_s_tuner                = cx231xx_s_tuner,
 	.vidioc_g_frequency            = cx231xx_g_frequency,
 	.vidioc_s_frequency            = cx231xx_s_frequency,
-#ifdef CONFIG_VIDEO_ADV_DEBUG
+#ifdef CONFIG_BACKPORT_VIDEO_ADV_DEBUG
 	.vidioc_g_chip_info            = cx231xx_g_chip_info,
 	.vidioc_g_register             = cx231xx_g_register,
 	.vidioc_s_register             = cx231xx_s_register,
@@ -2092,7 +2092,7 @@ static const struct v4l2_ioctl_ops radio_ioctl_ops = {
 	.vidioc_s_tuner     = radio_s_tuner,
 	.vidioc_g_frequency = cx231xx_g_frequency,
 	.vidioc_s_frequency = cx231xx_s_frequency,
-#ifdef CONFIG_VIDEO_ADV_DEBUG
+#ifdef CONFIG_BACKPORT_VIDEO_ADV_DEBUG
 	.vidioc_g_chip_info = cx231xx_g_chip_info,
 	.vidioc_g_register  = cx231xx_g_register,
 	.vidioc_s_register  = cx231xx_s_register,
@@ -2171,7 +2171,7 @@ int cx231xx_register_analog_devices(struct cx231xx *dev)
 
 	/* allocate and fill video video_device struct */
 	cx231xx_vdev_init(dev, &dev->vdev, &cx231xx_video_template, "video");
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	dev->video_pad.flags = MEDIA_PAD_FL_SINK;
 	ret = media_entity_init(&dev->vdev.entity, 1, &dev->video_pad, 0);
 	if (ret < 0)
@@ -2198,7 +2198,7 @@ int cx231xx_register_analog_devices(struct cx231xx *dev)
 	/* Allocate and fill vbi video_device struct */
 	cx231xx_vdev_init(dev, &dev->vbi_dev, &cx231xx_vbi_template, "vbi");
 
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	dev->vbi_pad.flags = MEDIA_PAD_FL_SINK;
 	ret = media_entity_init(&dev->vbi_dev.entity, 1, &dev->vbi_pad, 0);
 	if (ret < 0)

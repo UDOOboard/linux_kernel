@@ -69,7 +69,7 @@ struct intel_secure_send_result {
 	__u8     status;
 } __packed;
 
-#if IS_ENABLED(CONFIG_BT_INTEL)
+#if IS_ENABLED(CONFIG_BACKPORT_BT_INTEL)
 
 int btintel_check_bdaddr(struct hci_dev *hdev);
 int btintel_set_bdaddr(struct hci_dev *hdev, const bdaddr_t *bdaddr);

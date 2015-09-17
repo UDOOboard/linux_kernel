@@ -343,7 +343,7 @@ static void smsusb_term_device(struct usb_interface *intf)
 static void *siano_media_device_register(struct smsusb_device_t *dev,
 					int board_id)
 {
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 	struct media_device *mdev;
 	struct usb_device *udev = dev->udev;
 	struct sms_board *board = sms_get_board(board_id);
@@ -440,7 +440,7 @@ static int smsusb_init_device(struct usb_interface *intf, int board_id)
 	if (rc < 0) {
 		pr_err("smscore_register_device(...) failed, rc %d\n", rc);
 		smsusb_term_device(intf);
-#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+#ifdef CONFIG_BACKPORT_MEDIA_CONTROLLER_DVB
 		media_device_unregister(mdev);
 #endif
 		kfree(mdev);

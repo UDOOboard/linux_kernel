@@ -659,7 +659,7 @@ struct cx231xx {
 	struct video_device vbi_dev;
 	struct video_device radio_dev;
 
-#if defined(CONFIG_MEDIA_CONTROLLER)
+#if defined(CONFIG_BACKPORT_MEDIA_CONTROLLER)
 	struct media_device *media_dev;
 	struct media_pad video_pad, vbi_pad;
 #endif
@@ -974,7 +974,7 @@ extern void cx231xx_417_unregister(struct cx231xx *dev);
 
 /* cx23885-input.c                                             */
 
-#if defined(CONFIG_VIDEO_CX231XX_RC)
+#if defined(CONFIG_BACKPORT_VIDEO_CX231XX_RC)
 int cx231xx_ir_init(struct cx231xx *dev);
 void cx231xx_ir_exit(struct cx231xx *dev);
 #else
