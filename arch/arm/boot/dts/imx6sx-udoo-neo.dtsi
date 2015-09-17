@@ -89,6 +89,17 @@
 //		};
 	};
 
+	kim {
+	        compatible = "kim";
+	        nshutdown_gpio = <49>;  // GPIO2_17 The wl8 driver expects gpio to be an integer, so gpio2_17 is (2-1)*32+17=49
+	        dev_name = "/dev/ttymxc2";
+	        flow_cntrl = <1>;
+	        baud_rate = <3000000>;
+	};
+
+	btwilink {
+	        compatible = "btwilink";
+	};
 };
 
 &cpu0 {
