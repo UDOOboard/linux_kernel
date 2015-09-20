@@ -70,8 +70,8 @@
 
 				hsync-active = <0>;
 				vsync-active = <1>;				
-				de-active = <1>;
-				pixelclk-active = <0>;				
+				de-active = <0>;
+				pixelclk-active = <1>;
 			};
 		};
 	};
