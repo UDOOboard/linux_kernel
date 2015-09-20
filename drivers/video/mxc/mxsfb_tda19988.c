@@ -817,7 +817,7 @@ static void tda19988_fb_var(struct tda19988_data *data, struct fb_var_screeninfo
     reg_write16(data,REG_DE_START_MSB, de_pix_s);
     reg_write16(data,REG_DE_STOP_MSB, de_pix_e);
 
-    reg_write(data,REG_ENABLE_SPACE, 0x01);
+    reg_write(data,REG_ENABLE_SPACE, 0x00);
 
     /* For MX28 LCD controller invert Hsync */
     value =  TBG_CNTRL_1_DWIN_DIS | TBG_CNTRL_1_TGL_EN;
