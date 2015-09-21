@@ -211,10 +211,32 @@ extern int of_property_read_u32_array(const struct device_node *np,
 				      size_t sz);
 extern int of_property_read_u64(const struct device_node *np,
 				const char *propname, u64 *out_value);
-
 extern int of_property_read_string(struct device_node *np,
 				   const char *propname,
 				   const char **out_string);
+
+
+
+extern int of_property_write_u32_index(const struct device_node *np,
+				       const char *propname,
+				       u32 index, u32 *in_value);
+extern int of_property_write_u8_array(const struct device_node *np,
+			const char *propname, u8 *in_values, size_t sz);
+extern int of_property_write_u16_array(const struct device_node *np,
+			const char *propname, u16 *in_values, size_t sz);
+extern int of_property_write_u32_array(const struct device_node *np,
+				      const char *propname,
+				      u32 *in_values,
+				      size_t sz);
+extern int of_property_write_u64(const struct device_node *np,
+				const char *propname, u64 *in_value);
+extern int of_property_write_string(struct device_node *np,
+				   const char *propname,
+				   const char *in_string);
+
+
+
+
 extern int of_property_match_string(struct device_node *np,
 				    const char *propname,
 				    const char *string);
@@ -255,6 +277,7 @@ extern int of_alias_max_index(const char *stem);
 
 extern int of_machine_is_compatible(const char *compat);
 
+extern int of_concat_property (struct device_node *dest, struct device_node *source);
 extern int of_add_property(struct device_node *np, struct property *prop);
 extern int of_remove_property(struct device_node *np, struct property *prop);
 extern int of_update_property(struct device_node *np, struct property *newprop);
@@ -414,6 +437,12 @@ static inline int of_property_read_u32_array(const struct device_node *np,
 	return -ENOSYS;
 }
 
+static inline int of_property_write_u64 (const struct device_node *np,
+			const char *propname, u64 *in_value)
+{
+	return -ENOSYS;
+}
+
 static inline int of_property_read_string(struct device_node *np,
 					  const char *propname,
 					  const char **out_string)
@@ -427,6 +456,52 @@ static inline int of_property_read_string_helper(struct device_node *np,
 {
 	return -ENOSYS;
 }
+
+
+
+static inline int of_property_write_u32_index(const struct device_node *np,
+			const char *propname, u32 index, u32 *in_value)
+{
+	return -ENOSYS;
+}
+
+static inline int of_property_write_u8_array(const struct device_node *np,
+			const char *propname, u8 *in_values, size_t sz)
+{
+	return -ENOSYS;
+}
+
+static inline int of_property_write_u16_array(const struct device_node *np,
+			const char *propname, u16 *in_values, size_t sz)
+{
+	return -ENOSYS;
+}
+
+static inline int of_property_write_u32_array(const struct device_node *np,
+					     const char *propname,
+					     u32 *in_values, size_t sz)
+{
+	return -ENOSYS;
+}
+
+static inline int of_property_write_u64 (const struct device_node *np,
+			const char *propname, u64 *in_value)
+{
+	return -ENOSYS;
+}
+
+static inline int of_property_write_string(struct device_node *np,
+					  const char *propname,
+					  const char *in_string)
+{
+	return -ENOSYS;
+}
+
+
+
+
+
+
 
 static inline const void *of_get_property(const struct device_node *node,
 				const char *name,
@@ -634,6 +709,26 @@ static inline int of_property_read_u32(const struct device_node *np,
 	return of_property_read_u32_array(np, propname, out_value, 1);
 }
 
+static inline int of_property_write_u8(const struct device_node *np,
+				       const char *propname,
+				       u8 *out_value)
+{
+	return of_property_write_u8_array(np, propname, out_value, 1);
+}
+
+static inline int of_property_write_u16(const struct device_node *np,
+				       const char *propname,
+				       u16 *out_value)
+{
+	return of_property_write_u16_array(np, propname, out_value, 1);
+}
+
+static inline int of_property_write_u32(const struct device_node *np,
+				       const char *propname,
+				       u32 *in_value)
+{
+	return of_property_write_u32_array(np, propname, in_value, 1);
+}
 #define of_property_for_each_u32(np, propname, prop, p, u)	\
 	for (prop = of_find_property(np, propname, NULL),	\
 		p = of_prop_next_u32(prop, NULL, &u);		\

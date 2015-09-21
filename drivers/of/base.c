@@ -962,6 +962,35 @@ int of_property_read_u32_index(const struct device_node *np,
 EXPORT_SYMBOL_GPL(of_property_read_u32_index);
 
 /**
+ * of_property_write_u32_index - Find and write a u32 to a multi-value property.
+ *
+ * @np:		device node from which the property value is to be read.
+ * @propname:	name of the property to be searched.
+ * @index:	index of the u32 in the list of values
+ * @in_value:	pointer to value to write.
+ *
+ * Search for a property in a device node and write nth 32-bit value to
+ * it. Returns 0 on success, -EINVAL if the property does not exist,
+ * -ENODATA if property does not have a value, and -EOVERFLOW if the
+ * property data isn't large enough.
+ *
+ */
+int of_property_write_u32_index(const struct device_node *np,
+				       const char *propname,
+				       u32 index, u32 *in_value)
+{
+	u32 *val = of_find_property_value_of_size(np, propname,
+					((index + 1) * sizeof(*in_value)));
+
+	if (IS_ERR(val))
+		return PTR_ERR(val);
+
+	*(((__be32 *)val) + index) = *in_value;
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_property_write_u32_index);
+
+/**
  * of_property_read_u8_array - Find and read an array of u8 from a property.
  *
  * @np:		device node from which the property value is to be read.
@@ -993,6 +1022,38 @@ int of_property_read_u8_array(const struct device_node *np,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(of_property_read_u8_array);
+
+/**
+ * of_property_write_u8_array - Find and write an array of u8 to a property.
+ *
+ * @np:		device node from which the property value is to be read.
+ * @propname:	name of the property to be searched.
+ * @in_values:	pointer to value to write.
+ * @sz:		number of array elements to read
+ *
+ * Search for a property in a device node and write 8-bit value(s) to
+ * it. Returns 0 on success, -EINVAL if the property does not exist,
+ * -ENODATA if property does not have a value, and -EOVERFLOW if the
+ * property data isn't large enough.
+ *
+ * dts entry of array should be like:
+ *	property = /bits/ 8 <0x50 0x60 0x70>;
+ *
+ */
+int of_property_write_u8_array(const struct device_node *np,
+			const char *propname, u8 *in_values, size_t sz)
+{
+	u8 *val = of_find_property_value_of_size(np, propname,
+						(sz * sizeof(*in_values)));
+
+	if (IS_ERR(val))
+		return PTR_ERR(val);
+
+	while (sz--)
+		*val++ = *in_values++;
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_property_write_u8_array);
 
 /**
  * of_property_read_u16_array - Find and read an array of u16 from a property.
@@ -1028,6 +1089,38 @@ int of_property_read_u16_array(const struct device_node *np,
 EXPORT_SYMBOL_GPL(of_property_read_u16_array);
 
 /**
+ * of_property_write_u16_array - Find and write an array of u16 to a property.
+ *
+ * @np:		device node from which the property value is to be write.
+ * @propname:	name of the property to be searched.
+ * @in_values:	pointer to value to write.
+ * @sz:		number of array elements to write
+ *
+ * Search for a property in a device node and write 16-bit value(s) to
+ * it. Returns 0 on success, -EINVAL if the property does not exist,
+ * -ENODATA if property does not have a value, and -EOVERFLOW if the
+ * property data isn't large enough.
+ *
+ * dts entry of array should be like:
+ *	property = /bits/ 16 <0x5000 0x6000 0x7000>;
+ *
+ */
+int of_property_write_u16_array(const struct device_node *np,
+			const char *propname, u16 *in_values, size_t sz)
+{
+	__be16 *val = of_find_property_value_of_size(np, propname,
+						(sz * sizeof(*in_values)));
+
+	if (IS_ERR(val))
+		return PTR_ERR(val);
+
+	while (sz--)
+		*((u16 *)val++) = *in_values++;
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_property_write_u16_array);
+
+/**
  * of_property_read_u32_array - Find and read an array of 32 bit integers
  * from a property.
  *
@@ -1060,6 +1153,37 @@ int of_property_read_u32_array(const struct device_node *np,
 EXPORT_SYMBOL_GPL(of_property_read_u32_array);
 
 /**
+ * of_property_write_u32_array - Find and write an array of 32 bit integers
+ * to a property.
+ *
+ * @np:		device node from which the property value is to be write.
+ * @propname:	name of the property to be searched.
+ * @out_values:	pointer to value to write.
+ * @sz:		number of array elements to write
+ *
+ * Search for a property in a device node and write 32-bit value(s) to
+ * it. Returns 0 on success, -EINVAL if the property does not exist,
+ * -ENODATA if property does not have a value, and -EOVERFLOW if the
+ * property data isn't large enough.
+ *
+ */
+int of_property_write_u32_array(const struct device_node *np,
+			       const char *propname, u32 *in_values,
+			       size_t sz)
+{
+	__be32 *val = of_find_property_value_of_size(np, propname,
+						(sz * sizeof(*in_values)));
+
+	if (IS_ERR(val))
+		return PTR_ERR(val);
+
+	while (sz--)
+		*((u32 *)val++) = *in_values++;
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_property_write_u32_array);
+
+/**
  * of_property_read_u64 - Find and read a 64 bit integer from a property
  * @np:		device node from which the property value is to be read.
  * @propname:	name of the property to be searched.
@@ -1085,6 +1209,33 @@ int of_property_read_u64(const struct device_node *np, const char *propname,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(of_property_read_u64);
+
+/**
+ * of_property_write_u64 - Find and write a 64 bit integer to a property
+ * @np:		device node from which the property value is to be write.
+ * @propname:	name of the property to be searched.
+ * @in_value:	pointer to value to write.
+ *
+ * Search for a property in a device node and write a 64-bit value to
+ * it. Returns 0 on success, -EINVAL if the property does not exist,
+ * -ENODATA if property does not have a value, and -EOVERFLOW if the
+ * property data isn't large enough.
+ *
+ */
+int of_property_write_u64(const struct device_node *np, const char *propname,
+			 u64 *in_value)
+{
+	__be32 *val = of_find_property_value_of_size(np, propname,
+						sizeof(*in_value));
+
+	if (IS_ERR(val))
+		return PTR_ERR(val);
+
+	*((u32 *)val++) = (u32)((u32)(*in_value >> 32) & 0xFFFFFFFF);
+	*((u32 *)val++) = (u32)((u32)(*in_value) & 0xFFFFFFFF);
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_property_write_u64);
 
 /**
  * of_property_read_string - Find and read a string from a property
@@ -1115,6 +1266,35 @@ int of_property_read_string(struct device_node *np, const char *propname,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(of_property_read_string);
+
+/**
+ * of_property_write_string - Find and write a string to a property
+ * @np:		device node from which the property value is to be write.
+ * @propname:	name of the property to be searched.
+ * @in_string:	pointer to string to write.
+ *
+ * Search for a property in a device tree node and retrieve a null
+ * terminated string value (pointer to data, not a copy). Returns 0 on
+ * success, -EINVAL if the property does not exist, -ENODATA if property
+ * does not have a value, and -EILSEQ if the string is not null-terminated
+ * within the length of the property data.
+ *
+ * The out_string pointer is modified only if a valid string can be decoded.
+ */
+int of_property_write_string(struct device_node *np, const char *propname,
+				const char *in_string)
+{
+	struct property *prop = of_find_property(np, propname, NULL);
+	if (!prop)
+		return -EINVAL;
+	if (!prop->value)
+		return -ENODATA;
+	if (strnlen(prop->value, prop->length) >= prop->length)
+		return -EILSEQ;
+	strcpy ((char *)prop->value, in_string);
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_property_write_string);
 
 /**
  * of_property_match_string() - Find string in a list and return index
@@ -1465,6 +1645,26 @@ static int of_property_notify(int action, struct device_node *np,
 	return 0;
 }
 #endif
+
+
+int of_concat_property (struct device_node *dest, struct device_node *source) {
+	struct property **next;
+	unsigned long flags;
+	int rc;
+
+	rc = of_property_notify(OF_RECONFIG_ADD_PROPERTY, dest, source->properties);
+	if (rc)
+		return rc;
+
+	raw_spin_lock_irqsave(&devtree_lock, flags);
+	next = &dest->properties;
+	while (*next) {
+		next = &(*next)->next;
+	}
+	*next = source->properties;
+	raw_spin_unlock_irqrestore(&devtree_lock, flags);
+
+}
 
 /**
  * of_add_property - Add a property to a node

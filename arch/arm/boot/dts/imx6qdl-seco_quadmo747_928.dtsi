@@ -26,6 +26,8 @@
 		reg = <0x10000000 0x40000000>;
 	};
 
+	dynamic_choice: dynamic_choice {};
+
 	clocks {
 		codec_osc: anaclk2 {
 			compatible = "fixed-clock";
@@ -58,7 +60,90 @@
 			gpio = <&gpio7 12 0>;
 			enable-active-high;
 		};
+
+		reg_2p5v_sgtl5000: regulator@2 {
+			compatible = "regulator-fixed";
+			reg = <2>;
+			regulator-name = "2P5V_sgtl5000";
+			regulator-min-microvolt = <2500000>;
+			regulator-max-microvolt = <2500000>;
+			regulator-always-on;
+			status = "disabled";
+		};
+
+		reg_3p3v_sgtl5000: regulator@3 {
+			compatible = "regulator-fixed";
+			reg = <3>;
+			regulator-name = "3P3V_sgtl5000";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-always-on;
+			status = "disabled";
+		};
+
 	};
+
+
+
+/*  __________________________________________________________________________
+ * |____________________________ AUDIO VT1613 ________________________________|
+ */
+    codec_vt1613: codec_vt1613 {
+		compatible = "via,vt1613";
+		status = "disabled";
+	};
+
+	sound_vt1613: sound_vt1613 {
+		compatible = "fsl,imx-vt1613-audio";
+		model = "fsl,imx-vt1613-audio";
+		ssi-controller = <&ssi1>;
+		audio-codec = <&codec_vt1613>;
+		mux-int-port = <1>;
+		mux-ext-port = <6>;
+		status = "disabled";
+	};
+
+	ssi_vt1613: ssi_vt1613 {
+		fsl,mode = "ac97-slave";
+		pinctrl-names = "default", "ac97-running", "ac97-reset", "ac97-warm-reset";
+		pinctrl-0 = <&ac97link_running>;
+		pinctrl-1 = <&ac97link_running>;
+		pinctrl-2 = <&ac97link_reset>;
+		pinctrl-3 = <&ac97link_warm_reset>;
+		/* sync, sdata (output), reset */
+		ac97-gpios = <&gpio4 19 0 &gpio4 18 0 &gpio4 23 0>;
+	};
+
+
+/*  __________________________________________________________________________
+ * |___________________________ AUDIO SGTL5000 _______________________________|
+ */
+	sound_sgtl5000: sound_sgtl5000 {
+		compatible = "fsl,imx6q-seco-sgtl5000",
+					"fsl,imx-audio-sgtl5000";
+		model = "fsl,imx6q-seco-sgtl5000";
+		cpu-dai = <&ssi1>;
+		audio-codec = <&codec_sgtl5000>;
+		audio-routing =
+			"MIC_IN", "Mic Jack",
+			"Mic Jack", "Mic Bias",
+			"Headphone Jack", "HP_OUT";
+		mux-int-port = <1>;
+		mux-ext-port = <6>;
+		status = "disabled";
+	};
+
+	ssi_sgtl5000: ssi_sgtl5000 {
+		fsl,mode = "i2s-slave";
+	};
+
+	audmux_sgtl5000: audmux_sgtl5000 {
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_audmux>;
+	};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
 
 	sound-hdmi {
 		compatible = "fsl,imx6q-audio-hdmi",
@@ -67,7 +152,9 @@
 		hdmi-controller = <&hdmi_audio>;
 	};
 
-
+/*  __________________________________________________________________________
+ * |____________________________ FRAME BUFFER ________________________________|
+ */
 	mxcfb1: fb@0 {
 		compatible = "fsl,mxc_sdc_fb";
 		disp_dev = "ldb";
@@ -182,8 +269,10 @@
 				MX6QDL_PAD_GPIO_17__GPIO7_IO12          0x1f071
 				/*  ECTRL INTERRUPT  */
 				MX6QDL_PAD_SD4_DAT6__GPIO2_IO14         0x1f071
+
 			>;
 		};
+
 
 
 
@@ -413,8 +502,52 @@
 			>;
 		};
 
+
+/*  __________________________________________________________________________
+ * |_____________________________ AUDIO AC97 _________________________________|
+ */
+		ac97link_running: ac97link_runninggrp {
+			fsl,pins = <
+				MX6QDL_PAD_DI0_PIN2__AUD6_TXD              0x130b0
+				MX6QDL_PAD_DI0_PIN3__AUD6_TXFS             0x130b0
+				MX6QDL_PAD_DI0_PIN4__AUD6_RXD              0x130b0
+				MX6QDL_PAD_DI0_PIN15__AUD6_TXC             0x130b0
+			>;
+		};
+
+		ac97link_reset: ac97link_resetgrp {
+			fsl,pins = <
+				/*  AUD_SYNC  */
+				MX6QDL_PAD_DI0_PIN3__GPIO4_IO19            0x1f071
+				/*  AUD_SDO  */
+				MX6QDL_PAD_DI0_PIN2__GPIO4_IO18            0x1f071
+				/*  RESET  */
+				MX6QDL_PAD_DISP0_DAT2__GPIO4_IO23          0x1f071
+			>;
+		};
+
+		ac97link_warm_reset: ac97link_warm_resetgrp {
+			fsl,pins = <
+				MX6QDL_PAD_DI0_PIN3__GPIO4_IO19            0x80000000
+			>;
+		};
+
+		pinctrl_audmux: audmuxgrp {
+			fsl,pins = <
+				MX6QDL_PAD_DI0_PIN2__AUD6_TXD              0x130b0
+				MX6QDL_PAD_DI0_PIN3__AUD6_TXFS             0x130b0
+				MX6QDL_PAD_DI0_PIN4__AUD6_RXD              0x130b0
+				MX6QDL_PAD_DI0_PIN15__AUD6_TXC             0x130b0
+				MX6QDL_PAD_DISP0_DAT2__GPIO4_IO23          0x1f071
+			>;
+		};
+
 	};
 };
+
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
 
 
 
@@ -597,6 +730,16 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c3>;
 	status = "okay";
+
+	codec_sgtl5000: sgtl5000@0a {
+		compatible = "fsl,sgtl5000";
+		reg = <0x0a>;
+		clocks = <&clks IMX6QDL_CLK_CKO>;
+		VDDA-supply = <&reg_2p5v_sgtl5000>;
+		VDDIO-supply = <&reg_3p3v_sgtl5000>;
+		status = "disabled";
+	};
+
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -807,4 +950,47 @@
 
 
 
+/*  __________________________________________________________________________
+ * |                                                                          |
+ * |                             DYNAMIC COMPONENTS                           |
+ * |__________________________________________________________________________|
+ */
 
+
+&dynamic_choice {
+
+	chip_audio {
+		default_mode = <&audio_codec1>;
+
+		audio_codec0: sgtl5000 {
+			code_name = "sgtl5000";
+			phandle-num-enable = <6>;
+			phandle-list-enable = <&sound_sgtl5000>,
+								<&codec_sgtl5000>,
+								<&reg_2p5v_sgtl5000>,
+								<&reg_3p3v_sgtl5000>,
+								<&ssi1>,
+								<&audmux>;
+
+			phandle-num-set = <2>;
+			phandle-list-set = <&ssi1>,
+								<&audmux>;
+			phandle-list-source = <&ssi_sgtl5000>,
+								<&audmux_sgtl5000>;
+		};
+
+		audio_codec1: vt1613 {
+			code_name = "vt1613";
+			phandle-num-enable = <4>;
+			phandle-list-enable = <&sound_vt1613>,
+								<&codec_vt1613>,
+								<&ssi1>,
+								<&audmux>;
+
+			phandle-num-set = <1>;
+			phandle-list-set = <&ssi1>;
+			phandle-list-source = <&ssi_vt1613>;
+		};
+
+	};
+};

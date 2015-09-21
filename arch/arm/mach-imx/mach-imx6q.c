@@ -137,6 +137,129 @@ static int __init imx6q_flexcan_fixup_auto(void)
 	return 0;
 }
 
+static inline int __init set_device_mode (const char *node_name, const char *sel_mode) {
+	struct device_node *np, *entry;
+	struct device_node *def_mode;
+	struct device_node *phandle_enable = NULL;
+	struct device_node *phandle_set = NULL;
+	struct device_node *phandle_source = NULL;
+	int num_code, err, use_default, num_element, i;
+	const char *code_name, *def_code_name;
+	const char *en_code = "okay";
+
+	np = of_find_node_by_path(node_name);
+	if ( !np ) {
+		pr_warn ("%s: failed to get %s structure\n", __func__, node_name);
+		return -ENODEV;
+	}
+
+	entry = of_parse_phandle (np, "default_mode", 0);
+	if ( !entry ) {
+		pr_err ("%s: no default mode given!!!\n", of_node_full_name(np));
+		err = -1;
+		goto fail_device_def;
+	}
+	def_mode = entry;
+
+	if ( sel_mode )
+		use_default = 0;
+	else {
+		err = of_property_read_string (def_mode, "code_name", &def_code_name);
+		if ( err ) {
+			pr_err ("%s: error reading code_name string\n", of_node_full_name(def_mode));
+			goto fail_device_def;
+		}
+		pr_info ("%s, use default mode: %s\n", of_node_full_name(np),
+				def_code_name);
+		use_default = 1;
+	}
+
+	num_code = of_get_child_count (np);
+	if ( num_code == 0 ) {
+		pr_err ("%s: no device modes specified!!!\n", of_node_full_name(np));
+		goto fail_device_def;
+	}
+
+	for_each_child_of_node (np, entry) {
+
+		err = of_property_read_string (entry, "code_name", &code_name);
+		if ( err ) {
+			pr_err ("%s error reading codec element!!!\n",
+						of_node_full_name(entry));
+			goto fail_entry_codec;
+		}
+
+		pr_info ("%s, code name: %s\n",  of_node_full_name(np), code_name);
+
+		if ( !strcasecmp (code_name, use_default == 0 ?
+					sel_mode : def_code_name) ) {
+			pr_info ("%s, found selected mode\n", of_node_full_name(np));
+
+			err = of_property_read_u32 (entry, "phandle-num-enable",
+				   	(u32 *)&num_element);
+			if ( err ) {
+				pr_err ("%s error reading phanlde enable num element!!!\n",
+						of_node_full_name(entry));
+				goto fail_entry_codec;
+			}
+
+			for ( i = 0 ; i < num_element ; i++ ) {
+				phandle_enable = of_parse_phandle (entry, "phandle-list-enable", i);
+				if ( !phandle_enable ) {
+					pr_err ("%s, failed to obtain phandle\n", of_node_full_name(entry));
+					return -ENODEV;
+				}
+				err = of_property_write_string (phandle_enable, "status", en_code);
+				if ( err ) {
+					pr_err ("%s, phandle status enable error!!!\n",
+							of_node_full_name(phandle_enable));
+					goto fail_phandle_codec;
+				}
+				of_node_put (phandle_enable);
+			}
+
+
+			err = of_property_read_u32 (entry, "phandle-num-set",
+				  	(u32 *)&num_element);
+			if ( err ) {
+				pr_err ("%s error reading phanlde set num element!!!\n",
+						of_node_full_name(entry));
+					goto fail_phandle_set;
+			}
+
+			for ( i = 0 ; i < num_element ; i++ ) {
+				phandle_set = of_parse_phandle (entry, "phandle-list-set", i);
+				phandle_source = of_parse_phandle (entry, "phandle-list-source", i);
+				if ( !phandle_set || !phandle_source ) {
+					pr_err ("%s, failed to obtain phandle source/set\n", of_node_full_name(entry));
+					return -ENODEV;
+				}
+
+				of_concat_property (phandle_set, phandle_source);
+
+				of_node_put (phandle_source);
+				of_node_put (phandle_set);
+			}
+
+
+			break;
+		}
+	}
+
+	of_node_put (def_mode);
+	return 0;
+fail_phandle_set:
+	err = -1;
+fail_phandle_codec:
+	of_node_put (phandle_enable);
+fail_entry_codec:
+	of_node_put (entry);
+fail_device_def:
+	of_node_put (np);
+	return err;
+}
+
+
 /* For imx6q sabrelite board: set KSZ9021RN RGMII pad skew */
 static int ksz9021rn_phy_fixup(struct phy_device *phydev)
 {
@@ -650,7 +773,38 @@ static void __init imx6q_init_irq(void)
 }
 
 
+static char *audio_options __read_mostly;
+static int __init early_audio_codec (char *options) {
+	audio_options = options;
+}
+early_param("audio_codec", early_audio_codec);
+
+
+/*  For A75, selection between UART1 and CAN1 interface */
+static char *serial_options __read_mostly;
+static int __init early_serial_device (char *options) {
+	serial_options = options;
+}
+early_param("serial_dev", early_serial_device);
+
+
 static void __init imx6q_init_early (void) {
+	if (of_machine_is_compatible("fsl,imx6q-quadmo747_928")
+		|| of_machine_is_compatible("fsl,imx6dl-quadmo747_928")
+		|| of_machine_is_compatible("fsl,imx6q-uq7_962")
+		|| of_machine_is_compatible("fsl,imx6dl-uq7_962")
+		|| of_machine_is_compatible("fsl,imx6q-uq7-j_A75")
+		|| of_machine_is_compatible("fsl,imx6dl-uq7-j_A75"))
+
+	{
+		set_device_mode ("/dynamic_choice/chip_audio", audio_options);
+	}
+
+	if ( of_machine_is_compatible("fsl,imx6q-uq7-j_A75")
+		|| of_machine_is_compatible("fsl,imx6dl-uq7-j_A75"))
+	{
+		set_device_mode ("/dynamic_choice/serial_device", serial_options);
+	}
 }
 
 
