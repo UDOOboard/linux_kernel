@@ -607,8 +607,8 @@
 		primary;
 
 		display-timings {
-			native-mode = <&timing3>;
-			
+			native-mode = <&timing0>;
+
 			timing0: LDB-WVGA {
 				clock-frequency = <38000000>;
 				hactive = <800>;
@@ -620,7 +620,7 @@
 				hsync-len = <180>;
 				vsync-len = <30>;
 			};
-			
+
 			timing1: LDB-SVGA {
 				clock-frequency = <40000000>;
 				hactive = <800>;

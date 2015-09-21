@@ -52,3 +52,24 @@ int of_get_videomode(struct device_node *np, struct videomode *vm,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(of_get_videomode);
+
+
+int of_search_and_get_videomode (struct device_node *np,
+			const char *mode_str, struct videomode *vm, int index) {
+
+	int ret = 1;
+	struct display_timing *dt;
+
+	dt = of_get_display_timing_by_name (np, mode_str);
+	if ( dt != NULL ) {
+		pr_info ("display timing with name %s found!!!\n", mode_str);
+		videomode_from_timing (dt, vm);
+	} else {
+		ret = 0; 
+		pr_warn ("display timing with name %s not found!!!\n", mode_str);
+	}
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(of_search_and_get_videomode);
+

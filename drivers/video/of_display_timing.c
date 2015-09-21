@@ -131,6 +131,53 @@ int of_get_display_timing(struct device_node *np, const char *name,
 }
 EXPORT_SYMBOL_GPL(of_get_display_timing);
 
+
+struct display_timing *of_get_display_timing_by_name(struct device_node *np,
+		const char *name) {
+
+	struct device_node *timings_np;
+	struct device_node *timing_np;
+	struct display_timing *dt = NULL;
+	int ret = 1;
+
+	if (!np) {
+		pr_err("%s: no device node given\n", of_node_full_name(np));
+		return NULL;
+	}
+
+	timings_np = of_get_child_by_name (np, "display-timings");
+	if ( !timings_np ) {
+		pr_err("%s: could not find display-timings node\n",
+			of_node_full_name(np));
+		return NULL;
+	}
+
+	for_each_child_of_node (timings_np, timing_np) {
+		if ( strcmp (timing_np->name, name) == 0 ) {
+
+			dt =  kzalloc(sizeof(*dt), GFP_KERNEL);
+			if ( !dt ) {
+				pr_err("could not allocate display_timing structure\n");
+				goto dispfail;
+			}
+
+			of_parse_display_timing(timing_np, dt);
+		}
+	}
+
+	if ( !dt )
+		pr_warn ("display timing not found...!!!\n");
+
+	return dt;
+
+dispfail:
+	of_node_put(timings_np);
+	return NULL;
+
+}
+EXPORT_SYMBOL_GPL(of_get_display_timing_by_name);
+
+
 /**
  * of_get_display_timings - parse all display_timing entries from a device_node
  * @np: device_node with the subnodes

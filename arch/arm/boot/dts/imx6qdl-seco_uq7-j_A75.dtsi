@@ -546,6 +546,108 @@
 	fsl,phy_reg_cksymtx = <0x800d>;
 	status = "okay";
 };
+
+&ldb {
+	status = "okay";
+
+	lvds-channel@0 {
+		reg = <0>;
+		fsl,data-mapping = "spwg";
+		fsl,data-width = <18>;
+		status = "okay";
+		primary;
+
+		display-timings {
+			native-mode = <&timing0>;
+
+			timing0: LDB-WVGA {
+				clock-frequency = <38000000>;
+				hactive = <800>;
+				vactive = <480>;
+				hback-porch = <56>;
+				hfront-porch = <50>;
+				vback-porch = <20>;
+				vfront-porch = <53>;
+				hsync-len = <180>;
+				vsync-len = <30>;
+			};
+
+			timing1: LDB-SVGA {
+				clock-frequency = <40000000>;
+				hactive = <800>;
+				vactive = <600>;
+				hback-porch = <40>;
+				hfront-porch = <60>;
+				vback-porch = <10>;
+				vfront-porch = <10>;
+				hsync-len = <20>;
+				vsync-len = <10>;
+			};
+
+			timing2: LDB-WXGA {
+				clock-frequency = <72000000>;
+				hactive = <1368>;
+				vactive = <768>;
+				hback-porch = <93>;
+				hfront-porch = <33>;
+				vback-porch = <22>;
+				vfront-porch = <7>;
+				hsync-len = <40>;
+				vsync-len = <4>;
+			};
+
+			timing3: LDB-XGA {
+				clock-frequency = <65000000>;
+				hactive = <1024>;
+				vactive = <768>;
+				hback-porch = <1230>;
+				hfront-porch = <40>;
+				vback-porch = <21>;
+				vfront-porch = <7>;
+				hsync-len = <60>;
+				vsync-len = <10>;
+			};
+
+			timing4: LDB-SXGA {
+				clock-frequency = <54000000>;
+				hactive = <1280>;
+				vactive = <1024>;
+				hback-porch = <220>;
+				hfront-porch = <40>;
+				vback-porch = <21>;
+				vfront-porch = <7>;
+				hsync-len = <60>;
+				vsync-len = <10>;
+			};
+
+		};
+	};
+
+	lvds-channel@1 {
+		reg = <1>;
+		fsl,data-mapping = "spwg";
+		fsl,data-width = <18>;
+		status = "okay";
+
+		crtc = "ipu2-di1";
+		display-timings {
+			native-mode = <&timing1>;
+			timing6: seco_lvds1 {
+				clock-frequency = <38000000>;
+				hactive = <800>;
+				vactive = <480>;
+				hback-porch = <56>;
+				hfront-porch = <50>;
+				vback-porch = <20>;
+				vfront-porch = <23>;
+				hsync-len = <150>;
+				vsync-len = <60>;
+			};
+		};
+	};
+
+};
+
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
