@@ -34,6 +34,11 @@
 		};
 	};
 
+	external_clocks {
+		clocks =  <&clks IMX6QDL_CLK_CKO2>;
+			#clock-cells = <0>;
+	};
+
 	regulators {
 		compatible = "simple-bus";
 		#address-cells = <1>;
@@ -58,6 +63,19 @@
 			gpio = <&gpio7 12 0>;
 			enable-active-high;
 		};
+
+		reg_panel_on: regulator@2 {
+			compatible = "regulator-fixed";
+			reg = <2>;
+			regulator-name = "reg_panel_on";
+			regulator-min-microvolt = <3000000>;
+			regulator-max-microvolt = <3000000>;
+			gpio = <&gpio1 2 0>;
+			enable-active-high;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
 	};
 
 	sound-hdmi {
@@ -112,14 +130,14 @@
 	};
 
 #include <dt-bindings/pwm/pwm.h>
-//	backlight {
-//		compatible = "pwm-backlight";
-//		pwms = <&pwm1 0 5000000>;
-//		brightness-levels = <0 4 8 16 32 64 128 255>;
-//		default-brightness-level = <7>;
-//		enable-gpios = <&gpio1 4 0>; 
-//		status = "okay";
-//	};
+	backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm1 0 5000000>;
+		brightness-levels = <0 4 8 16 32 64 128 255>;
+		default-brightness-level = <7>;
+		enable-gpios = <&gpio1 4 0>;
+		status = "okay";
+	};
 
 	v4l2_cap_0 {
 		compatible = "fsl,imx6q-v4l2-capture";
@@ -142,18 +160,13 @@
 		status = "okay";
 	};
 
-	mipi_dsi_reset: mipi-dsi-reset {
-		compatible = "gpio-reset";
-		reset-gpios = <&gpio6 11 GPIO_ACTIVE_LOW>;
-		reset-delay-us = <50>;
-		#reset-cells = <0>;
-	};
 };
 
 &clks {
 	assigned-clocks = <&clks IMX6QDL_PLL4_BYPASS_SRC>,
 			  <&clks IMX6QDL_PLL4_BYPASS>,
 			  <&clks IMX6QDL_CLK_PLL4_POST_DIV>;
+
 	assigned-clock-parents = <&clks IMX6QDL_CLK_LVDS2_IN>,
 				<&clks IMX6QDL_PLL4_BYPASS_SRC>;
 	assigned-clock-rates = <0>, <0>, <24576000>;
@@ -174,6 +187,17 @@
 
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
+				/*  Enable  */
+				MX6QDL_PAD_CSI0_DAT18__GPIO6_IO04          0x1f071
+				/*  Reset  */
+				MX6QDL_PAD_CSI0_DAT19__GPIO6_IO05          0x1f071
+
+				MX6QDL_PAD_CSI0_MCLK__CCM_CLKO1		       0x130b0
+
+				/*  LVDS  */
+				MX6QDL_PAD_GPIO_4__GPIO1_IO04           0x1f071
+				MX6QDL_PAD_GPIO_2__GPIO1_IO02           0x1f071
+
 			>;
 		};
 
@@ -202,7 +226,7 @@
 		pinctrl_i2c3: i2c3grp {
 			fsl,pins = <
 				MX6QDL_PAD_GPIO_5__I2C3_SCL             0x4001b8b1
-				MX6QDL_PAD_GPIO_16__I2C3_SDA            0x4001b8b1
+				MX6QDL_PAD_GPIO_6__I2C3_SDA             0x4001b8b1
 			>;
 		};
 /*  __________________________________________________________________________
@@ -288,6 +312,14 @@
 			>;
 		};
 
+/*  __________________________________________________________________________
+ * |__________________________________ USB ___________________________________|
+ */
+		pinctrl_pwm1: pwm1grp {
+			fsl,pins = <
+				MX6QDL_PAD_DISP0_DAT8__PWM1_OUT		0x1b0b1
+			>;
+		};
 
 /*  __________________________________________________________________________
  * |__________________________________ USB ___________________________________|
@@ -412,7 +444,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
-	
+
 	hdmi: edid@50 {
 		compatible = "fsl,imx6-hdmi-i2c";
 		reg = <0x50>;
@@ -425,6 +457,21 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c3>;
 	status = "okay";
+
+	ov5640_mipi: ov5640_mipi@3c {
+		compatible = "ovti,ov5640_mipi";
+		reg = <0x3c>;
+
+		clocks = <&clks IMX6QDL_CLK_CKO>;
+		clock-names = "csi_mclk";
+
+		pwn-gpios = <&gpio6 4 1>;   /* active low */
+		rst-gpios = <&gpio6 5 0>;   /* active high */
+
+		csi_id = <0>;
+		mclk = <24000000>;
+		mclk_source = <0>;
+	};
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -469,6 +516,38 @@
 	phy-reset-duration = <10>;
 	fsl,magic-packet;
 	status = "okay";
+};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+/*  __________________________________________________________________________
+ * |                                                                          |
+ * |                                     PWM                                  |
+ * |__________________________________________________________________________|
+ */
+&pwm1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pwm1>;
+	status = "okay";
+};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+/*  __________________________________________________________________________
+ * |                                                                          |
+ * |                                  CAMERA CSI                              |
+ * |__________________________________________________________________________|
+ */
+&mipi_csi {
+	status = "okay";
+	ipu_id = <0>;
+	csi_id = <0>;
+	v_channel = <0>;
+	lanes = <2>;
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|

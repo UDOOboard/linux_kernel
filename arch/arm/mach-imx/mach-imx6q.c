@@ -611,10 +611,13 @@ static const struct apx_wdog_trigger_data apx_wdt __initconst = {
 static void __init imx6q_init_machine(void)
 {
 	struct device *parent;
+	struct device_node *np = NULL;
+	struct clk *p_clk = NULL;
+	int ret;
 
 	if ( of_machine_is_compatible("fsl,imx6q-SBC_A62") ||
 			of_machine_is_compatible("fsl,imx6dl-SBC_A62") ) {
-	
+
 		apx_wdog_trigger_early_init (&apx_wdt, 0);
 
 	}
@@ -638,10 +641,32 @@ static void __init imx6q_init_machine(void)
 
 	if ( of_machine_is_compatible("fsl,imx6q-SBC_A62") ||
 			of_machine_is_compatible("fsl,imx6dl-SBC_A62") ) {
-		
+
 		apx_wdog_trigger_work_init(0);
 
+		/*  set clock CKO2 to use the USBH1 with external clock  */
+		np = of_find_node_by_path("/external_clocks");
+		if ( !np ) {
+			pr_warn ("%s: failed to get %s structure\n", __func__, "/external_clocks");
+			goto put_node;
+		}
+		   p_clk = of_clk_get (np, 0);
+		if ( IS_ERR(p_clk) ) {
+			pr_warn("%s: failed to get clock\n", __func__);
+			goto put_node;
+		}
+		ret = clk_prepare_enable (p_clk);
+		if (ret) {
+			pr_err ("can't enable clock\n");
+		} else {
+			pr_info ("clock enabled\n");
+		}
 	}
+
+	clk_put (p_clk);
+put_node:
+	of_node_put(np);
+
 }
 
 #define OCOTP_CFG3			0x440
@@ -776,6 +801,7 @@ static void __init imx6q_init_irq(void)
 static char *audio_options __read_mostly;
 static int __init early_audio_codec (char *options) {
 	audio_options = options;
+	return 0;
 }
 early_param("audio_codec", early_audio_codec);
 
@@ -784,6 +810,7 @@ early_param("audio_codec", early_audio_codec);
 static char *serial_options __read_mostly;
 static int __init early_serial_device (char *options) {
 	serial_options = options;
+	return 0;
 }
 early_param("serial_dev", early_serial_device);
 
