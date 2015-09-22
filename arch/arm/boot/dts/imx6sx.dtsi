@@ -1401,6 +1401,11 @@
 				status = "okay";
 			};
 
+			m4debugger: m4debugger{
+				compatible = "fsl,imx6sx-m4-debugger";
+				status = "disabled";
+			};
+
 			mcctest: mcctest{
 				compatible = "fsl,imx6sx-mcc-test";
 				status = "disabled";
