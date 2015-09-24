@@ -2,23 +2,6 @@ config BACKPORT_BRCMUTIL
 	tristate
 	depends on !BRCMUTIL
 
-config BACKPORT_BRCMSMAC
-	tristate "Broadcom IEEE802.11n PCIe SoftMAC WLAN driver"
-	depends on !BRCMSMAC
-	depends on BACKPORT_MAC80211
-	depends on BACKPORT_BCMA_POSSIBLE
-	select BACKPORT_BCMA
-	select NEW_LEDS if BACKPORT_BCMA_DRIVER_GPIO
-	select LEDS_CLASS if BACKPORT_BCMA_DRIVER_GPIO
-	select BACKPORT_BRCMUTIL
-	depends on FW_LOADER
-	depends on CORDIC
-	---help---
-	  This module adds support for PCIe wireless adapters based on Broadcom
-	  IEEE802.11n SoftMAC chipsets. It also has BACKPORT_WLAN led support, which will
-	  be available if you select BACKPORT_BCMA_DRIVER_GPIO. If you choose to build a
-	  module, the driver will be called brcmsmac.ko.
-
 config BACKPORT_BRCMFMAC
 	tristate "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
 	depends on !BRCMFMAC
