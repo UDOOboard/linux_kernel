@@ -19,8 +19,6 @@ obj-$(CONFIG_BACKPORT_AT76C50X_USB)      += at76c50x-usb.o
 #obj-$(CONFIG_BACKPORT_PRISM54	+= prism54/
 #
 #obj-$(CONFIG_HOSTAP	+= hostap/
-obj-$(CONFIG_BACKPORT_B43)		+= b43/
-obj-$(CONFIG_BACKPORT_B43LEGACY)		+= b43legacy/
 obj-$(CONFIG_BACKPORT_ZD1211RW)		+= zd1211rw/
 obj-$(CONFIG_BACKPORT_RTL8180)		+= rtl818x/
 obj-$(CONFIG_BACKPORT_RTL8187)		+= rtl818x/
