@@ -60,8 +60,8 @@
 		status = "okay";
 
 		display-timings {
-                        native-mode = <&timing1>;
-                        timing1: hsd100pxn1 {
+			native-mode = <&timing1>;
+			timing1: hsd100pxn1 {
 				clock-frequency = <30000000>;
 				hactive = <800>;
 				vactive = <480>;
@@ -71,10 +71,26 @@
 				vfront-porch = <7>;
 				hsync-len = <60>;
 				vsync-len = <10>;
-                        };
-                };
+			};
+		};
 	};
 };
+
+&i2c1 {
+	touchscreen: st1232@55 {
+		compatible = "sitronix,st1232";
+		reg = <0x55>;
+		interrupt-parent = <&gpio6>;
+		interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-0 = <&pinctrl_st1232>;
+		pinctrl-names = "default";
+		gpios = <&gpio6 5 GPIO_ACTIVE_LOW>;
+		/* udoo poweroff driver */
+		lcd_backlight_gpio = <&gpio6 3 1>;
+		lcd_panel_on_gpio = <&gpio4 27 1>;
+	};
+};
+
 
 &dcic2 {
 	dcic_id = <1>;

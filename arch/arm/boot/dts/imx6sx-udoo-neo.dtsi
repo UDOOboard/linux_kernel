@@ -453,11 +453,17 @@
 
 		pinctrl_ldb_0: ldbctrlgrp-0 {
 			fsl,pins = <
-				MX6SX_PAD_SD1_DATA1__GPIO6_IO_3  	0x80000000
-				MX6SX_PAD_QSPI1B_DATA3__GPIO4_IO_27	0x80000000
+				MX6SX_PAD_SD1_DATA1__GPIO6_IO_3  	0x80000000	// BL_ON
+				MX6SX_PAD_QSPI1B_DATA3__GPIO4_IO_27	0x80000000	// PANEL_ON
 			>;
 		};
 
+		pinctrl_st1232: st1232grp-0 {
+			fsl,pins = <
+				MX6SX_PAD_SD1_DATA2__GPIO6_IO_4  	0x80000000	// TOUCH_INT
+				MX6SX_PAD_SD1_DATA3__GPIO6_IO_5  	0x80000000	// TOUCH_RST
+			>;
+		};
 
 	};
 };
