@@ -225,8 +225,8 @@
 		reg = <0x3c>;
 		clocks = <&clks IMX6QDL_CLK_CKO>;
 		clock-names = "csi_mclk";
-		pwn-gpios = <&gpio6 4 1>;   /* active low */
-		rst-gpios = <&gpio6 5 0>;   /* active high */
+		pwn-gpios = <&gpio6 4 GPIO_ACTIVE_LOW>;
+		rst-gpios = <&gpio6 5 GPIO_ACTIVE_HIGH>;
 		csi_id = <0>;
 		mclk = <24000000>;
 		mclk_source = <0>;
