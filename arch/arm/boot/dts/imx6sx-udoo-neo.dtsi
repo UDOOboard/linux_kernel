@@ -239,6 +239,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_1>;
 	status = "disabled";
+
+	barometer: mpl3115@60 {
+		compatible = "fsl,mpl3115";
+		reg = <0x60>;
+	};
 };
 
 
