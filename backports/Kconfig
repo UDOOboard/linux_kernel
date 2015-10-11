@@ -1,0 +1,36 @@
+config BACKPORT_INTEGRATE
+	bool
+	def_bool y
+
+config BACKPORT_DIR
+	string
+	default "backports/"
+
+config BACKPORT_VERSION
+	string
+	default "v4.1.1-1-0-g8286954"
+
+config BACKPORT_KERNEL_VERSION
+	string
+	default "v4.1.7-0-g0c5c1f1"
+
+config BACKPORT_KERNEL_NAME
+	string
+	default "Linux"
+
+menuconfig BACKPORT_LINUX
+	bool "Backport Linux v4.1.7-0-g0c5c1f1 (backports v4.1.1-1-0-g8286954)"
+	default n
+	---help---
+	  Enabling this will let give you the opportunity to use features and
+	  drivers backported from Linux v4.1.7-0-g0c5c1f1
+	  on the kernel your are using. This is experimental and you should
+	  say no unless you'd like to help test things or want to help debug
+	  this should we run into any issues.
+
+if BACKPORT_LINUX
+
+source "$BACKPORT_DIR/Kconfig.versions"
+source "$BACKPORT_DIR/Kconfig.sources"
+
+endif # BACKPORT_LINUX

@@ -1,0 +1,26 @@
+config BACKPORT_VIDEO_XILINX
+	tristate "Xilinx Video IP (EXPERIMENTAL)"
+	depends on !VIDEO_XILINX
+	depends on VIDEO_V4L2 && BACKPORT_VIDEO_V4L2_SUBDEV_API && OF
+	select BACKPORT_VIDEOBUF2_DMA_CONTIG
+	---help---
+	  Driver for Xilinx Video IP Pipelines
+
+if BACKPORT_VIDEO_XILINX
+
+config BACKPORT_VIDEO_XILINX_TPG
+	tristate "Xilinx Video Test Pattern Generator"
+	depends on !VIDEO_XILINX_TPG
+	depends on BACKPORT_VIDEO_XILINX
+	select BACKPORT_VIDEO_XILINX_VTC
+	---help---
+	   Driver for the Xilinx Video Test Pattern Generator
+
+config BACKPORT_VIDEO_XILINX_VTC
+	tristate "Xilinx Video Timing Controller"
+	depends on !VIDEO_XILINX_VTC
+	depends on BACKPORT_VIDEO_XILINX
+	---help---
+	   Driver for the Xilinx Video Timing Controller
+
+endif #VIDEO_XILINX
