@@ -66,17 +66,17 @@
 	status = "disabled";
 };
 
-&i2c2 {
+/*&i2c2 {
 	status = "disabled";
-};
+};*/
 
 &i2c3 {
 	status = "disabled";
 };
 
-&i2c4 {
+/*&i2c4 {
 	status = "disabled";
-};
+};*/
 
 &pwm1 {
 	status = "disabled";
