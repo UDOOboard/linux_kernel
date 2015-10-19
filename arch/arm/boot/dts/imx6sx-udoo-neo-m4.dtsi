@@ -42,7 +42,7 @@
 };
 
 &mcctty{
-	status = "disabled";
+	status = "okay";
 };
 
 
