@@ -325,7 +325,7 @@ int mcc_wait_for_buffer_queued(MCC_ENDPOINT *endpoint, unsigned int timeout)
 		imx_mcc_buffer_queued = 0;
 
 	if (tmp_list->head == null) {
-		pr_err("%s can't get queued buffer.\n", __func__);
+//		pr_err("%s can't get queued buffer.\n", __func__);
 		mcc_release_semaphore();
 		return MCC_ERR_TIMEOUT;
 	}
