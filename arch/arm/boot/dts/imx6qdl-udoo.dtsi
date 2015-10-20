@@ -55,18 +55,6 @@
 			status = "disabled";
 		};
 		
-		reg_lcd0_backlight: regulator@2 {
-			compatible = "regulator-fixed";
-			regulator-name = "LCD0 BACKLIGHT";
-			regulator-min-microvolt = <3300000>;
-			regulator-max-microvolt = <3300000>;
-			gpio = <&gpio1 4 0>;
-			enable-active-high;
-			regulator-boot-on;
-			regulator-always-on;
-			status = "disabled";
-		};
-		
 // 		reg_can_xcvr: regulator@3 {
 // 			compatible = "regulator-fixed";
 // 			reg = <3>;
@@ -100,6 +88,13 @@
 		compatible = "via,vt1613";
 	};
 
+	backlight_lcd {// enable, disable lvds
+		compatible = "gpio-backlight";
+		gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+		default-on;
+		status = "disabled";
+	};
+	
 	sound {
 		compatible = "udoo,imx-vt1613-audio";
 		ssi-controller = <&ssi1>; 

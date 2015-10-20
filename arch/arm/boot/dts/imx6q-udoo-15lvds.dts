@@ -23,12 +23,12 @@
 		reg_lcd0_pwr: regulator@1 {
 			status = "okay";
 		};
-		
-		reg_lcd0_backlight: regulator@2 {
-			status = "okay";
-		};   
 	};
 	
+	backlight_lcd {
+		status = "okay";
+	};
+
 	mxcfb1: fb@0 {
 		compatible = "fsl,mxc_sdc_fb";
 		disp_dev = "ldb";
