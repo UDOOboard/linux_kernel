@@ -21,9 +21,10 @@ Required properties for IPU:
 
 Required properties for fb:
 - compatible : should be "fsl,mxc_sdc_fb".
-- disp_dev : display device: "ldb", "lcd", "hdmi", "mipi_dsi".
-- mode_str : "CLAA-WVGA" for lcd, "TRULY-WVGA" for TRULY mipi_dsi lcd panel,
-  "1920x1080M@60" for hdmi.
+- disp_dev : display device: "ldb", "lcd", "hdmi", "mipi_dsi", "adv739x".
+- mode_str : video mode string: "LDB-XGA" or "LDB-1080P60" for ldb,
+  "CLAA-WVGA" for lcd, "TRULY-WVGA" for TRULY mipi_dsi lcd panel,
+  "1920x1080M@60" for hdmi, "BT656-NTSC" or "BT656-PAL" for adv739x.
 - default_bpp : default bits per pixel: 8/16/24/32
 - int_clk : use internal clock as pixel clock: 0 or 1
 - late_init : to avoid display channel being re-initialized
@@ -101,5 +102,17 @@ Example for mipi dsi display:
 			lcd_panel = "TRULY-WVGA";
 			disp-power-on-supply = <&reg_mipi_dsi_pwr_on>
 			resets = <&mipi_dsi_reset>;
+			status = "okay";
+		};
+
+Example for adv739x CVBS output:
+		fb0 {
+			compatible = "fsl,mxc_sdc_fb";
+			disp_dev = "adv739x";
+			interface_pix_fmt = "BT656";
+			mode_str ="BT656-NTSC";
+			default_bpp = <16>;
+			int_clk = <0>;
+			late_init = <0>;
 			status = "okay";
 		};
