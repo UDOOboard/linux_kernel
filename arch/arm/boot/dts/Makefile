@@ -191,6 +191,7 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6sx-udoo-neo.dtb \
 	imx6sx-udoo-neo-hdmi.dtb \
 	imx6sx-udoo-neo-m4.dtb \
+	imx6sx-udoo-neo-hdmi-m4.dts \
 	imx6q-wandboard.dtb \
 	imx6sl-evk.dtb \
 	imx6sl-evk-csi.dtb \
