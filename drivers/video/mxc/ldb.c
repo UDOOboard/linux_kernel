@@ -287,66 +287,36 @@ static const struct of_device_id ldb_dt_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, ldb_dt_ids);
 
-static int ldb_init(struct mxc_dispdrv_handle *mddh,
-		    struct mxc_dispdrv_setting *setting)
-{
-	struct ldb_data *ldb = mxc_dispdrv_getdata(mddh);
-	struct device *dev = ldb->dev;
-	struct fb_info *fbi = setting->fbi;
-	struct ldb_chan *chan;
-	struct fb_videomode fb_vm;
-	int chno, ret = 0;
 
-	chno = ldb->chan[ldb->primary_chno].is_used ?
-		!ldb->primary_chno : ldb->primary_chno;
+#define LDB_SPL_DI0 1
+#define LDB_SPL_DI1 2
+#define LDB_DUL_DI0 3
+#define LDB_DUL_DI1 4
+#define LDB_SIN0    5
+#define LDB_SIN1    6
+#define LDB_SEP0    7
+#define LDB_SEP1    8
 
-	chan = &ldb->chan[chno];
+static int g_ldb_mode;
 
-	if ( setting->dft_mode_str != NULL ) {
-		ret = of_search_and_get_videomode (chan->np_timings,
-				setting->dft_mode_str, &chan->vm, -1);
-
-		if ( ret ) {
-			dev_warn (dev, "using display timing with name %s.\n", setting->dft_mode_str);
-		} else {
-			ret = of_get_videomode(chan->np_timings, &chan->vm, -1);
-			if ( ret )
-				return -EINVAL;
-
-			dev_warn (dev, "using default display timing.\n");
-		}
-
-	} else {
-		ret = of_get_videomode(chan->np_timings, &chan->vm, -1);
-		if ( ret )
-			return -EINVAL;
-
-		dev_warn (dev, "using default display timing.\n");
+#include <uapi/linux/ipu.h>
+static int bits_per_pixel (int pixel_fmt) {
+	switch (pixel_fmt) {
+		case IPU_PIX_FMT_BGR24:
+		case IPU_PIX_FMT_RGB24:
+			return 24;
+			break;
+		case IPU_PIX_FMT_BGR666:
+		case IPU_PIX_FMT_RGB666:
+		case IPU_PIX_FMT_LVDS666:
+			return 18;
+			break;
+		default:
+			break;
 	}
-
-	if (chan->is_used) {
-		dev_err(dev, "LVDS channel%d is already used\n", chno);
-		return -EBUSY;
-	}
-	if (!chan->online) {
-		dev_err(dev, "LVDS channel%d is not online\n", chno);
-		return -ENODEV;
-	}
-
-	chan->is_used = true;
-
-	chan->fbi = fbi;
-
-	fb_videomode_from_videomode(&chan->vm, &fb_vm);
-
-	INIT_LIST_HEAD(&fbi->modelist);
-	fb_add_videomode(&fb_vm, &fbi->modelist);
-	fb_videomode_to_var(&fbi->var, &fb_vm);
-
-	setting->crtc = chan->crtc;
-
 	return 0;
 }
+
 
 static int get_di_clk_id(struct ldb_chan chan, int *id)
 {
@@ -577,14 +547,6 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
 	return;
 }
 
-static struct mxc_dispdrv_driver ldb_drv = {
-	.name		= DRIVER_NAME,
-	.init		= ldb_init,
-	.setup		= ldb_setup,
-	.enable		= ldb_enable,
-	.disable	= ldb_disable
-};
-
 enum {
 	LVDS_BIT_MAP_SPWG,
 	LVDS_BIT_MAP_JEIDA,
@@ -684,12 +646,181 @@ static bool is_valid_crtc(struct ldb_data *ldb, enum crtc crtc,
 	if (chno > ldb->bus_mux_num - 1)
 		return false;
 
-	for (; i < ldb->buses[chno].crtc_mux_num; i++)
+for (; i < ldb->buses[chno].crtc_mux_num; i++)
 		if (ldb->buses[chno].crtcs[i].crtc == crtc)
 			return true;
 
 	return false;
 }
+
+
+static int __init ldb_mode_setup (char *options) {
+	if (!strcmp(options, "spl0"))
+		g_ldb_mode = LDB_SPL_DI0;
+	else if (!strcmp(options, "spl1"))
+		g_ldb_mode = LDB_SPL_DI1;
+	else if (!strcmp(options, "dul0"))
+		g_ldb_mode = LDB_DUL_DI0;
+	else if (!strcmp(options, "dul1"))
+		g_ldb_mode = LDB_DUL_DI1;
+	else if (!strcmp(options, "sin0"))
+		g_ldb_mode = LDB_SIN0;
+	else if (!strcmp(options, "sin1"))
+		g_ldb_mode = LDB_SIN1;
+	else if (!strcmp(options, "sep0"))
+		g_ldb_mode = LDB_SEP0;
+	else if (!strcmp(options, "sep1"))
+		g_ldb_mode = LDB_SEP1;
+
+	return 1;
+}
+__setup("ldb=", ldb_mode_setup);
+
+
+static int ldb_init(struct mxc_dispdrv_handle *mddh,
+		    struct mxc_dispdrv_setting *setting)
+{
+	struct ldb_data *ldb = mxc_dispdrv_getdata(mddh);
+	struct device *dev = ldb->dev;
+	struct fb_info *fbi = setting->fbi;
+	struct ldb_chan *chan;
+	struct fb_videomode fb_vm;
+	enum crtc crtc;
+	int chno, data_width, mapping;
+	int ret = 0;
+	int i = 0;
+
+	chno = ldb->chan[ldb->primary_chno].is_used ?
+		!ldb->primary_chno : ldb->primary_chno;
+
+	chan = &ldb->chan[chno];
+
+	if ( bits_per_pixel(setting->if_fmt) != 18 &&
+			bits_per_pixel(setting->if_fmt) != 24 ) {
+		ret = of_property_read_u32 (chan->np_timings, "fsl,data-width",
+				&data_width);
+		if (ret || (data_width != 18 && data_width != 24)) {
+			dev_err(dev, "data width not specified or invalid\n");
+			return -EINVAL;
+		}
+	} else {
+		data_width = bits_per_pixel(setting->if_fmt);
+	}
+
+		mapping = of_get_data_mapping(chan->np_timings);
+		switch (mapping) {
+		case LVDS_BIT_MAP_SPWG:
+			if (data_width == 24) {
+				if (i == 0 || ldb->spl_mode || ldb->dual_mode)
+					ldb->ctrl |= LDB_DATA_WIDTH_CH0_24;
+				if (i == 1 || ldb->spl_mode || ldb->dual_mode)
+					ldb->ctrl |= LDB_DATA_WIDTH_CH1_24;
+			}
+			break;
+		case LVDS_BIT_MAP_JEIDA:
+			if (data_width == 18) {
+				dev_err(dev, "JEIDA only support 24bit\n");
+				return -EINVAL;
+			}
+			if (i == 0 || ldb->spl_mode || ldb->dual_mode)
+				ldb->ctrl |= LDB_DATA_WIDTH_CH0_24 |
+					     LDB_BIT_MAP_CH0_JEIDA;
+			if (i == 1 || ldb->spl_mode || ldb->dual_mode)
+				ldb->ctrl |= LDB_DATA_WIDTH_CH1_24 |
+					     LDB_BIT_MAP_CH1_JEIDA;
+			break;
+		default:
+			dev_err(dev, "data mapping not specified or invalid\n");
+			return -EINVAL;
+		}
+
+		crtc = of_get_crtc_mapping(chan->np_timings);
+		if (is_valid_crtc(ldb, crtc, chan->chno)) {
+			ldb->chan[i].crtc = crtc;
+		} else {
+			dev_err(dev, "crtc not specified or invalid\n");
+			return -EINVAL;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	if ( setting->dft_mode_str != NULL ) {
+		ret = of_search_and_get_videomode (chan->np_timings,
+				setting->dft_mode_str, &chan->vm, -1);
+
+		if ( ret ) {
+			dev_warn (dev, "using display timing with name %s.\n", setting->dft_mode_str);
+		} else {
+			ret = of_get_videomode(chan->np_timings, &chan->vm, -1);
+			if ( ret )
+				return -EINVAL;
+
+			dev_warn (dev, "using default display timing.\n");
+		}
+
+	} else {
+		ret = of_get_videomode(chan->np_timings, &chan->vm, -1);
+		if ( ret )
+			return -EINVAL;
+
+		dev_warn (dev, "using default display timing.\n");
+	}
+
+
+
+
+
+	if (chan->is_used) {
+		dev_err(dev, "LVDS channel%d is already used\n", chno);
+		return -EBUSY;
+	}
+	if (!chan->online) {
+		dev_err(dev, "LVDS channel%d is not online\n", chno);
+		return -ENODEV;
+	}
+
+	chan->is_used = true;
+
+	chan->fbi = fbi;
+
+	fb_videomode_from_videomode(&chan->vm, &fb_vm);
+
+	INIT_LIST_HEAD(&fbi->modelist);
+	fb_add_videomode(&fb_vm, &fbi->modelist);
+	fb_videomode_to_var(&fbi->var, &fb_vm);
+
+	setting->crtc = chan->crtc;
+
+	return 0;
+}
+
+
+static struct mxc_dispdrv_driver ldb_drv = {
+	.name		= DRIVER_NAME,
+	.init		= ldb_init,
+	.setup		= ldb_setup,
+	.enable		= ldb_enable,
+	.disable	= ldb_disable
+};
+
 
 static int ldb_probe(struct platform_device *pdev)
 {
@@ -701,7 +832,7 @@ static int ldb_probe(struct platform_device *pdev)
 	struct device_node *np = dev->of_node, *child;
 	struct ldb_data *ldb;
 	bool ext_ref;
-	int i, data_width, mapping, child_count = 0;
+	int i, child_count = 0;
 	char clkname[16];
 
 	ldb = devm_kzalloc(dev, sizeof(*ldb), GFP_KERNEL);
@@ -725,6 +856,12 @@ static int ldb_probe(struct platform_device *pdev)
 		ldb->ctrl |= LDB_BGREF_RMODE_INT;
 
 	ldb->spl_mode = of_property_read_bool(np, "split-mode");
+	if ( !ldb->spl_mode ) {
+		if ( (g_ldb_mode == LDB_SPL_DI0) || (g_ldb_mode == LDB_SPL_DI1)) {
+			ldb->spl_mode = 1;
+		}
+	}
+
 	if (ldb->spl_mode) {
 		if (ldb_info->split_cap) {
 			ldb->ctrl |= LDB_SPLIT_MODE_EN;
@@ -736,6 +873,12 @@ static int ldb_probe(struct platform_device *pdev)
 	}
 
 	ldb->dual_mode = of_property_read_bool(np, "dual-mode");
+	if ( !ldb->dual_mode ) {
+		if ( (g_ldb_mode == LDB_DUL_DI0) || (g_ldb_mode == LDB_DUL_DI1)) {
+			ldb->dual_mode = 1;
+		}
+	}
+
 	if (ldb->dual_mode) {
 		if (ldb_info->dual_cap) {
 			dev_info(dev, "dual mode\n");
@@ -762,7 +905,6 @@ static int ldb_probe(struct platform_device *pdev)
 
 	for_each_child_of_node(np, child) {
 		struct ldb_chan *chan;
-		enum crtc crtc;
 		bool is_primary;
 		int ret;
 
@@ -796,48 +938,6 @@ static int ldb_probe(struct platform_device *pdev)
 		if (ldb->bus_mux_num == 1 || (ldb->primary_chno == -1 &&
 		    (is_primary || ldb->spl_mode || ldb->dual_mode)))
 			ldb->primary_chno = chan->chno;
-
-		ret = of_property_read_u32(child, "fsl,data-width",
-					   &data_width);
-		if (ret || (data_width != 18 && data_width != 24)) {
-			dev_err(dev, "data width not specified or invalid\n");
-			return -EINVAL;
-		}
-
-		mapping = of_get_data_mapping(child);
-		switch (mapping) {
-		case LVDS_BIT_MAP_SPWG:
-			if (data_width == 24) {
-				if (i == 0 || ldb->spl_mode || ldb->dual_mode)
-					ldb->ctrl |= LDB_DATA_WIDTH_CH0_24;
-				if (i == 1 || ldb->spl_mode || ldb->dual_mode)
-					ldb->ctrl |= LDB_DATA_WIDTH_CH1_24;
-			}
-			break;
-		case LVDS_BIT_MAP_JEIDA:
-			if (data_width == 18) {
-				dev_err(dev, "JEIDA only support 24bit\n");
-				return -EINVAL;
-			}
-			if (i == 0 || ldb->spl_mode || ldb->dual_mode)
-				ldb->ctrl |= LDB_DATA_WIDTH_CH0_24 |
-					     LDB_BIT_MAP_CH0_JEIDA;
-			if (i == 1 || ldb->spl_mode || ldb->dual_mode)
-				ldb->ctrl |= LDB_DATA_WIDTH_CH1_24 |
-					     LDB_BIT_MAP_CH1_JEIDA;
-			break;
-		default:
-			dev_err(dev, "data mapping not specified or invalid\n");
-			return -EINVAL;
-		}
-
-		crtc = of_get_crtc_mapping(child);
-		if (is_valid_crtc(ldb, crtc, chan->chno)) {
-			ldb->chan[i].crtc = crtc;
-		} else {
-			dev_err(dev, "crtc not specified or invalid\n");
-			return -EINVAL;
-		}
 
 		chan->np_timings = child;
 

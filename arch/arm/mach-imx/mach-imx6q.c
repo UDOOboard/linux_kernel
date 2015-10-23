@@ -53,6 +53,28 @@ static int flexcan_stby_gpio;
 static int flexcan0_en;
 static int flexcan1_en;
 
+
+
+static char *audio_options __read_mostly;
+static int __init early_audio_codec (char *options) {
+	audio_options = options;
+	return 0;
+}
+early_param("audio_codec", early_audio_codec);
+
+
+/*  For 928, selection between UART4 and CAN1 interface */
+/*  For A75, selection between UART1 and CAN1 interface */
+static char *serial_options __read_mostly;
+static int __init early_serial_device (char *options) {
+	serial_options = options;
+	return 0;
+}
+early_param("serial_dev", early_serial_device);
+
+
+
+
 static void imx6q_fec_sleep_enable(int enabled)
 {
 	struct regmap *gpr;
@@ -454,7 +476,6 @@ static void __init imx6q_1588_init(void)
 	 * from pad (external OSC for both external PHY and Internal Controller)
 	 */
 	gpr = syscon_regmap_lookup_by_compatible("fsl,imx6q-iomuxc-gpr");
-	printk (KERN_INFO "davide sono passato di qui..... \n");
 	if (!IS_ERR(gpr)) {
 
 		if ( clk_out )
@@ -759,6 +780,8 @@ static struct platform_device imx6q_cpufreq_pdev = {
 
 static void __init imx6q_init_late(void)
 {
+	struct device_node *np;
+	int can_en_gpio;
 
 
 	/*
@@ -778,6 +801,29 @@ static void __init imx6q_init_late(void)
 	if (of_machine_is_compatible("fsl,imx6q-sabreauto")
 		|| of_machine_is_compatible("fsl,imx6dl-sabreauto"))
 		imx6q_flexcan_fixup_auto();
+
+
+	if ( of_machine_is_compatible("fsl,imx6q-quadmo747_928")
+		|| of_machine_is_compatible("fsl,imx6dl-quadmo747_928")
+		|| of_machine_is_compatible("fsl,imx6q-uq7_962")
+		|| of_machine_is_compatible("fsl,imx6dl-uq7_962"))
+	{
+		np = of_find_node_by_path ("/serial_switch");
+		if ( np ) {
+
+			can_en_gpio = of_get_named_gpio (np, "selector", 0);
+
+			if ( gpio_is_valid(can_en_gpio) &&
+				!gpio_request_one(can_en_gpio, GPIOF_DIR_OUT, "can-en") ) {
+
+				if ( strcmp (serial_options, "flexcan") == 0 )
+					gpio_set_value_cansleep(can_en_gpio, 0);
+				else
+					gpio_set_value_cansleep(can_en_gpio, 1);
+			}
+
+		}
+	}
 }
 
 static void __init imx6q_map_io(void)
@@ -798,24 +844,9 @@ static void __init imx6q_init_irq(void)
 }
 
 
-static char *audio_options __read_mostly;
-static int __init early_audio_codec (char *options) {
-	audio_options = options;
-	return 0;
-}
-early_param("audio_codec", early_audio_codec);
-
-
-/*  For A75, selection between UART1 and CAN1 interface */
-static char *serial_options __read_mostly;
-static int __init early_serial_device (char *options) {
-	serial_options = options;
-	return 0;
-}
-early_param("serial_dev", early_serial_device);
-
 
 static void __init imx6q_init_early (void) {
+
 	if (of_machine_is_compatible("fsl,imx6q-quadmo747_928")
 		|| of_machine_is_compatible("fsl,imx6dl-quadmo747_928")
 		|| of_machine_is_compatible("fsl,imx6q-uq7_962")
@@ -829,6 +860,14 @@ static void __init imx6q_init_early (void) {
 
 	if ( of_machine_is_compatible("fsl,imx6q-uq7-j_A75")
 		|| of_machine_is_compatible("fsl,imx6dl-uq7-j_A75"))
+	{
+		set_device_mode ("/dynamic_choice/serial_device", serial_options);
+	}
+
+	if ( of_machine_is_compatible("fsl,imx6q-quadmo747_928")
+		|| of_machine_is_compatible("fsl,imx6dl-quadmo747_928")
+		|| of_machine_is_compatible("fsl,imx6q-uq7_962")
+		|| of_machine_is_compatible("fsl,imx6dl-uq7_962"))
 	{
 		set_device_mode ("/dynamic_choice/serial_device", serial_options);
 	}

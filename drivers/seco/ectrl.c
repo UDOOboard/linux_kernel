@@ -177,7 +177,7 @@ static int board_nr_states [] = {
 };
 
 
-static char board_name [][20] = {
+static char board_name [][30] = {
 	[BOARD_928] = "Quadmo747 (Q7) - 928",
 	[BOARD_962] = "uQ7 - 962",
 	[BOARD_984] = "uSBC - 984",
