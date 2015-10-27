@@ -9,96 +9,11 @@
 
 /dts-v1/;
 
-#include "imx6sx-udoo-neo.dtsi"
+#include "imx6sx-udoo-neo-m4.dtsi"
+#include "imx6sx-udoo-neo-hdmi.dtsi"
 
 / {
 	model = "UDoo Neo (based on imx6 SoloX)";
    	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
-
-	reserved-memory {
-
-		#address-cells = <1>;
-		#size-cells = <1>;
-		ranges;
-
-		/* Reserved 8Mb for M4 */
-		m4_memory:  m4@0x84000000 {
-			no-map;
-			reg = <0x84000000 0x00800000>;
-		};
-	};
 };
 
-&i2c3 {
-	status = "okay";
-
-	tda19988: tda19988@34 {
-		compatible = "udoo,tda19988";
-		reg = <0x34>;
-		status = "okay";
-	};
-};
-
-&lcdif1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_lcdif_dat_0
-		     &pinctrl_lcdif_ctrl_0>;
-	lcd-supply = <&vgen5_reg>;
-	display = <&display0>;
-	status = "okay";
-
-	display0: display {
-		bits-per-pixel = <32>;
-		bus-width = <24>;
-
-		display-timings {
-			native-mode = <&timing0>;
-			timing0: timing0 {
-				clock-frequency = <74250000>;
-				hactive = <1280>;
-				vactive = <720>;
-				hback-porch = <220>;
-				hfront-porch = <110>;
-				vback-porch = <20>;
-				vfront-porch = <5>;
-				hsync-len = <40>;
-				vsync-len = <5>;
-
-				hsync-active = <0>;
-				vsync-active = <1>;				
-				de-active = <1>;
-				pixelclk-active = <0>;				
-			};
-		};
-	};
-};
-
-&dcic1 {
-	dcic_id = <0>;
-	dcic_mux = "dcic-lcdif1";
-	status = "okay";
-};
-
-&clks {
-	fsl,shared-clks-number = <0x23>;
-	fsl,shared-clks-index = <IMX6SX_CLK_PLL2_BUS IMX6SX_CLK_PLL2_PFD0
-			IMX6SX_CLK_PLL2_PFD2 IMX6SX_CLK_PLL3_USB_OTG
-			IMX6SX_CLK_PLL3_PFD1 IMX6SX_CLK_PLL3_PFD2
-			IMX6SX_CLK_PLL3_PFD3 IMX6SX_CLK_PLL4_AUDIO
-			IMX6SX_CLK_PLL5_VIDEO
-			IMX6SX_CLK_OCRAM IMX6SX_CLK_CAN1_SERIAL
-			IMX6SX_CLK_CAN1_IPG IMX6SX_CLK_CAN2_SERIAL
-			IMX6SX_CLK_CAN2_IPG IMX6SX_CLK_CANFD
-			IMX6SX_CLK_ECSPI1 IMX6SX_CLK_ECSPI2
-			IMX6SX_CLK_ECSPI3 IMX6SX_CLK_ECSPI4
-			IMX6SX_CLK_ECSPI5 IMX6SX_CLK_QSPI1
-			IMX6SX_CLK_QSPI2 IMX6SX_CLK_SSI1
-			IMX6SX_CLK_SSI2 IMX6SX_CLK_SSI3
-			IMX6SX_CLK_UART_SERIAL IMX6SX_CLK_UART_IPG
-			IMX6SX_CLK_PERIPH_CLK2_SEL IMX6SX_CLK_OCRAM_ALT_SEL
-			IMX6SX_CLK_I2C1 IMX6SX_CLK_I2C2
-			IMX6SX_CLK_I2C3 IMX6SX_CLK_I2C4
-			IMX6SX_CLK_EPIT1 IMX6SX_CLK_EPIT2>;
-	fsl,shared-mem-addr = <0x91F000>;
-	fsl,shared-mem-size = <0x1000>;
-};

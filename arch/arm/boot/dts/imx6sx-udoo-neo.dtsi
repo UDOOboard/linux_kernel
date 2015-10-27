@@ -80,6 +80,7 @@
 			label = "led0";
 			gpios = <&gpio6 0 0>;
 			default-state = "off";
+			linux,default-trigger = "mmc0";
 		};
 
 //		led1: led1 {
@@ -238,7 +239,12 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_1>;
-	status = "disabled";
+	status = "okay";
+
+	barometer: mpl3115@60 {
+		compatible = "fsl,mpl3115";
+		reg = <0x60>;
+	};
 };
 
 
@@ -293,7 +299,10 @@
 				MX6SX_PAD_QSPI1A_SS0_B__GPIO4_IO_22   0x80000000 // MUX_D
 				MX6SX_PAD_QSPI1A_DATA2__GPIO4_IO_18   0x80000000 // MUX_E
 				MX6SX_PAD_QSPI1A_DATA3__GPIO4_IO_19   0x80000000 // MUX_F
-
+				
+				// Model recognition GPIOs
+				MX6SX_PAD_NAND_READY_B__GPIO4_IO_13	0x80000000		// Connected to R184
+				MX6SX_PAD_NAND_ALE__GPIO4_IO_0		0x80000000		// Connected to R185	
 			>;
 		};
 
@@ -453,11 +462,17 @@
 
 		pinctrl_ldb_0: ldbctrlgrp-0 {
 			fsl,pins = <
-				MX6SX_PAD_SD1_DATA1__GPIO6_IO_3  	0x80000000
-				MX6SX_PAD_QSPI1B_DATA3__GPIO4_IO_27	0x80000000
+				MX6SX_PAD_SD1_DATA1__GPIO6_IO_3  	0x80000000	// BL_ON
+				MX6SX_PAD_QSPI1B_DATA3__GPIO4_IO_27	0x80000000	// PANEL_ON
 			>;
 		};
 
+		pinctrl_st1232: st1232grp-0 {
+			fsl,pins = <
+				MX6SX_PAD_SD1_DATA2__GPIO6_IO_4  	0x80000000	// TOUCH_INT
+				MX6SX_PAD_SD1_DATA3__GPIO6_IO_5  	0x80000000	// TOUCH_RST
+			>;
+		};
 
 	};
 };

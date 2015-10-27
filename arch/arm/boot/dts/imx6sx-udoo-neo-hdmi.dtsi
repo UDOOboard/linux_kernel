@@ -1,0 +1,89 @@
+/*
+ * Copyright (C) 2015 Jasbir Matharu
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+
+
+/ {
+	codec: hdmi-codec {
+		compatible = "udoo,tda19988-codec";
+		status = "okay";
+	};
+	
+	sound {
+		compatible = "udoo,imx-audio-tda19988";
+		model = "imx6sx-tda19988";
+		cpu-dai = <&ssi2>;
+		audio-codec = <&codec>;
+		mux-int-port = <2>;
+		mux-ext-port = <5>;
+		ssi-controller = <&ssi2>;
+		status = "okay";
+	};
+	
+};
+
+&i2c3 {
+	status = "okay";
+	
+	tda19988: tda19988@34 {
+		compatible = "udoo,tda19988";
+		reg = <0x34>;
+		status = "okay";
+	};
+};
+
+&lcdif1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lcdif_dat_0
+	&pinctrl_lcdif_ctrl_0>;
+	lcd-supply = <&vgen5_reg>;
+	display = <&display0>;
+	status = "okay";
+	
+	display0: display {
+		bits-per-pixel = <32>;
+		bus-width = <24>;
+		
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: timing0 {
+				clock-frequency = <74250000>;
+				hactive = <1280>;
+				vactive = <720>;
+				hback-porch = <220>;
+				hfront-porch = <110>;
+				vback-porch = <20>;
+				vfront-porch = <5>;
+				hsync-len = <40>;
+				vsync-len = <5>;
+				
+				hsync-active = <0>;
+				vsync-active = <1>;
+				de-active = <1>;
+				pixelclk-active = <0>;
+			};
+		};
+	};
+};
+
+&dcic1 {
+	dcic_id = <0>;
+	dcic_mux = "dcic-lcdif1";
+	status = "okay";
+};
+
+&ssi2 {
+	fsl,mode = "i2s-master";
+	status = "okay";
+};
+
+&audmux {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_audmux>;
+	status = "okay";
+};
