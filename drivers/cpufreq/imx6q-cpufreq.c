@@ -50,6 +50,7 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	unsigned long freq_hz, volt, volt_old;
 	unsigned int old_freq, new_freq;
 	int ret;
+	int tol = 25000; /* 25mv tollerance */
 
 	mutex_lock(&set_cpufreq_lock);
 
@@ -70,9 +71,9 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	rcu_read_unlock();
 	volt_old = regulator_get_voltage(arm_reg);
 
-	dev_dbg(cpu_dev, "%u MHz, %ld mV --> %u MHz, %ld mV\n",
+	dev_dbg(cpu_dev, "%u MHz, %ld mV --> %u MHz, %ld/%d mV\n",
 		old_freq / 1000, volt_old / 1000,
-		new_freq / 1000, volt / 1000);
+		new_freq / 1000, volt / 1000, imx6_soc_volt[index] / 1000);
 	/*
 	 * CPU freq is increasing, so need to ensure
 	 * that bus frequency is increased too.
@@ -84,7 +85,7 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	if (new_freq > old_freq) {
 		if (!IS_ERR(pu_reg) && regulator_is_enabled(pu_reg)) {
 			ret = regulator_set_voltage_tol(pu_reg,
-				imx6_soc_volt[index], 0);
+				imx6_soc_volt[index], tol);
 			if (ret) {
 				dev_err(cpu_dev,
 					"failed to scale vddpu up: %d\n", ret);
@@ -92,13 +93,13 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 				return ret;
 			}
 		}
-		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], 0);
+		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], tol);
 		if (ret) {
 			dev_err(cpu_dev, "failed to scale vddsoc up: %d\n", ret);
 			mutex_unlock(&set_cpufreq_lock);
 			return ret;
 		}
-		ret = regulator_set_voltage_tol(arm_reg, volt, 0);
+		ret = regulator_set_voltage_tol(arm_reg, volt, tol);
 		if (ret) {
 			dev_err(cpu_dev,
 				"failed to scale vddarm up: %d\n", ret);
@@ -137,27 +138,27 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	ret = clk_set_rate(arm_clk, new_freq * 1000);
 	if (ret) {
 		dev_err(cpu_dev, "failed to set clock rate: %d\n", ret);
-		regulator_set_voltage_tol(arm_reg, volt_old, 0);
+		regulator_set_voltage_tol(arm_reg, volt_old, tol);
 		mutex_unlock(&set_cpufreq_lock);
 		return ret;
 	}
 
 	/* scaling down?  scale voltage after frequency */
 	if (new_freq < old_freq) {
-		ret = regulator_set_voltage_tol(arm_reg, volt, 0);
+		ret = regulator_set_voltage_tol(arm_reg, volt, tol);
 		if (ret) {
 			dev_warn(cpu_dev,
 				 "failed to scale vddarm down: %d\n", ret);
 			ret = 0;
 		}
-		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], 0);
+		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], tol);
 		if (ret) {
 			dev_warn(cpu_dev, "failed to scale vddsoc down: %d\n", ret);
 			ret = 0;
 		}
 		if (!IS_ERR(pu_reg) && regulator_is_enabled(pu_reg)) {
 			ret = regulator_set_voltage_tol(pu_reg,
-				imx6_soc_volt[index], 0);
+				imx6_soc_volt[index], tol);
 			if (ret) {
 				dev_warn(cpu_dev,
 					"failed to scale vddpu down: %d\n",
@@ -406,13 +407,13 @@ soc_opp_out:
 	if (ret > 0)
 		transition_latency += ret * 1000;
 
+	mutex_init(&set_cpufreq_lock);
 	ret = cpufreq_register_driver(&imx6q_cpufreq_driver);
 	if (ret) {
 		dev_err(cpu_dev, "failed register driver: %d\n", ret);
 		goto free_freq_table;
 	}
 
-	mutex_init(&set_cpufreq_lock);
 	register_pm_notifier(&imx6_cpufreq_pm_notifier);
 
 	of_node_put(np);

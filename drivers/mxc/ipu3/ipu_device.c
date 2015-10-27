@@ -815,6 +815,7 @@ static void update_offset(unsigned int fmt,
 		break;
 	}
 	*stride = width * bytes_per_pixel(fmt);
+	*off &= ~0x7;
 }
 
 static int update_split_setting(struct ipu_task_entry *t, bool vdi_split)

@@ -1356,9 +1356,13 @@ static int mxc_v4l2_s_param(cam_data *cam, struct v4l2_streamparm *parm)
 	csi_param.mclk = 0;
 
 	pr_debug("   clock_curr=mclk=%d\n", ifparm.u.bt656.clock_curr);
-	if (ifparm.u.bt656.clock_curr == 0)
+	if (ifparm.u.bt656.clock_curr == 0) {
 		csi_param.clk_mode = IPU_CSI_CLK_MODE_CCIR656_INTERLACED;
-	else
+		/*protocol bt656 use 27Mhz pixel clock */
+		csi_param.mclk = 27000000;
+	} else if (ifparm.u.bt656.clock_curr == 1) {
+		csi_param.clk_mode = IPU_CSI_CLK_MODE_CCIR656_PROGRESSIVE;
+	} else
 		csi_param.clk_mode = IPU_CSI_CLK_MODE_GATED_CLK;
 
 	csi_param.pixclk_pol = ifparm.u.bt656.latch_clk_inv;
@@ -2803,6 +2807,8 @@ static DEVICE_ATTR(fsl_csi_property, S_IRUGO, show_csi, NULL);
  */
 static int mxc_v4l2_probe(struct platform_device *pdev)
 {
+	int err;
+
 	/* Create cam and initialize it. */
 	cam_data *cam = kmalloc(sizeof(cam_data), GFP_KERNEL);
 	if (cam == NULL) {
@@ -2810,7 +2816,9 @@ static int mxc_v4l2_probe(struct platform_device *pdev)
 		return -1;
 	}
 
-	init_camera_struct(cam, pdev);
+	err = init_camera_struct(cam, pdev);
+	if (err)
+		return err;
 	pdev->dev.release = camera_platform_release;
 
 	/* Set up the v4l2 device and register it*/
@@ -2825,8 +2833,11 @@ static int mxc_v4l2_probe(struct platform_device *pdev)
 		pr_err("ERROR: v4l2 capture: video_register_device failed\n");
 		return -1;
 	}
-	pr_debug("   Video device registered: %s #%d\n",
-		 cam->video_dev->name, cam->video_dev->minor);
+
+	pr_info("V4L2 device '%s' on IPU%d_CSI%d registered as %s\n",
+		cam->video_dev->name,
+		cam->ipu_id + 1, cam->csi,
+		video_device_node_name(cam->video_dev));
 
 	if (device_create_file(&cam->video_dev->dev,
 			&dev_attr_fsl_v4l2_capture_property))

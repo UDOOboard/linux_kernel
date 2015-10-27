@@ -9,6 +9,12 @@ config VIDEO_MXC_IPU_CAMERA
 	depends on VIDEO_MXC_CAPTURE && MXC_IPU
 	default y
 
+config MXC_TVIN_TDA1997X
+	tristate "NXP TDA1997x HDMI Receiver Input support"
+	depends on I2C
+	---help---
+	  If you plan to use the NXP tda1997x/tdf1997x HDMI reciever with your i
+
 config MXC_CAMERA_OV5640
         tristate "OmniVision ov5640 camera support"
         depends on !VIDEO_MXC_EMMA_CAMERA && I2C
