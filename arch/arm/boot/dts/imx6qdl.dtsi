@@ -48,8 +48,6 @@
 	intc: interrupt-controller@00a01000 {
 		compatible = "arm,cortex-a9-gic";
 		#interrupt-cells = <3>;
-		#address-cells = <1>;
-		#size-cells = <1>;
 		interrupt-controller;
 		reg = <0x00a01000 0x1000>,
 		      <0x00a00100 0x100>;
@@ -659,6 +657,7 @@
 					anatop-min-voltage = <725000>;
 					anatop-max-voltage = <1450000>;
 					regulator-allow-bypass;
+					linux,phandle = <&reg_arm>;
 				};
 
 				reg_pu: regulator-vddpu@140 {
@@ -696,6 +695,7 @@
 					anatop-min-voltage = <725000>;
 					anatop-max-voltage = <1450000>;
 					regulator-allow-bypass;
+					linux,phandle = <&reg_soc>;
 				};
 			};
 

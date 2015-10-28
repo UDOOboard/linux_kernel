@@ -276,6 +276,9 @@ static int imx6_pcie_assert_core_reset(struct pcie_port *pp)
 			val |= PCIE_PL_PFLR_FORCE_LINK;
 			writel(val, pp->dbi_base + PCIE_PL_PFLR);
 
+			usleep_range(30, 50);
+
+			/* clear GPR12.10: APP_LTSSM_ENABLE - hold LTSSM in detect state */
 			regmap_update_bits(imx6_pcie->iomuxc_gpr, IOMUXC_GPR12,
 					IMX6Q_GPR12_PCIE_CTL_2, 0);
 		}

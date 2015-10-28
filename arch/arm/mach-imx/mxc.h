@@ -158,10 +158,14 @@ extern unsigned int __mxc_cpu_type;
 #endif
 
 #ifndef __ASSEMBLY__
+#ifdef CONFIG_SOC_IMX6SL
 static inline bool cpu_is_imx6sl(void)
 {
 	return __mxc_cpu_type == MXC_CPU_IMX6SL;
 }
+#else
+# define cpu_is_imx6sl() (0)
+#endif
 
 static inline bool cpu_is_imx6dl(void)
 {
