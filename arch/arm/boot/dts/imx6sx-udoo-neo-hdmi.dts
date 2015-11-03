@@ -10,6 +10,7 @@
 /dts-v1/;
 
 #include "imx6sx-udoo-neo.dtsi"
+#include "imx6sx-udoo-neo-hdmi.dtsi"
 
 / {
 	model = "UDoo Neo (based on imx6 SoloX)";
