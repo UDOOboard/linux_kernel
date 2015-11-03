@@ -1,0 +1,498 @@
+/*
+ * Author: Francesco Montefoschi <francesco.monte@gmail.com> 
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ */
+ 
+&iomuxc {
+    imx6q-udoo {
+        // External Pinout GPIOs
+        external_hog: hoggrp-2 {
+        fsl,pins = <
+            MX6QDL_PAD_CSI0_DAT11__GPIO5_IO29    0x80000000  // {{external-gpio-0}}
+            MX6QDL_PAD_CSI0_DAT10__GPIO5_IO28    0x80000000  // {{external-gpio-1}}
+            MX6QDL_PAD_SD1_CLK__GPIO1_IO20       0x80000000  // {{external-gpio-2}}
+            MX6QDL_PAD_SD1_DAT0__GPIO1_IO16      0x80000000  // {{external-gpio-3}}
+            MX6QDL_PAD_SD1_DAT1__GPIO1_IO17      0x80000000  // {{external-gpio-4}}
+            MX6QDL_PAD_SD1_CMD__GPIO1_IO18       0x80000000  // {{external-gpio-5}}
+            MX6QDL_PAD_SD4_DAT1__GPIO2_IO09      0x80000000  // {{external-gpio-6}}
+            MX6QDL_PAD_SD4_DAT2__GPIO2_IO10      0x80000000  // {{external-gpio-7}}
+            MX6QDL_PAD_SD1_DAT3__GPIO1_IO21      0x80000000  // {{external-gpio-8}}
+            MX6QDL_PAD_SD1_DAT2__GPIO1_IO19      0x80000000  // {{external-gpio-9}}
+            MX6QDL_PAD_GPIO_1__GPIO1_IO01        0x80000000  // {{external-gpio-10}}
+            MX6QDL_PAD_GPIO_9__GPIO1_IO09        0x80000000  // {{external-gpio-11}}
+            MX6QDL_PAD_GPIO_3__GPIO1_IO03        0x80000000  // {{external-gpio-12}}
+            MX6QDL_PAD_SD4_DAT0__GPIO2_IO08      0x80000000  // {{external-gpio-13}}
+            MX6QDL_PAD_CSI0_DAT4__GPIO5_IO22     0x80000000  // {{external-gpio-14}}
+            MX6QDL_PAD_CSI0_DAT16__GPIO6_IO02    0x80000000  // {{external-gpio-15}}
+            MX6QDL_PAD_CSI0_DAT14__GPIO6_IO00    0x80000000  // {{external-gpio-16}}
+            MX6QDL_PAD_CSI0_DAT15__GPIO6_IO01    0x80000000  // {{external-gpio-17}}
+            MX6QDL_PAD_CSI0_DAT12__GPIO5_IO30    0x80000000  // {{external-gpio-18}}
+            MX6QDL_PAD_CSI0_DAT13__GPIO5_IO31    0x80000000  // {{external-gpio-19}}
+//          MX6QDL_PAD_EIM_D21__GPIO3_IO21       0x80000000  // {{external-gpio-20}} (used in I2C1)
+//          MX6QDL_PAD_EIM_D28__GPIO3_IO28       0x80000000  // {{external-gpio-21}} (used in I2C1)
+            MX6QDL_PAD_DISP0_DAT6__GPIO4_IO27    0x80000000  // {{external-gpio-22}}
+            MX6QDL_PAD_DISP0_DAT7__GPIO4_IO28    0x80000000  // {{external-gpio-23}}
+            MX6QDL_PAD_DISP0_DAT8__GPIO4_IO29    0x80000000  // {{external-gpio-24}}
+            MX6QDL_PAD_DISP0_DAT9__GPIO4_IO30    0x80000000  // {{external-gpio-25}}
+            MX6QDL_PAD_DISP0_DAT10__GPIO4_IO31   0x80000000  // {{external-gpio-26}}
+            MX6QDL_PAD_DISP0_DAT11__GPIO5_IO05   0x80000000  // {{external-gpio-27}}
+            MX6QDL_PAD_DISP0_DAT12__GPIO5_IO06   0x80000000  // {{external-gpio-28}}
+            MX6QDL_PAD_DISP0_DAT13__GPIO5_IO07   0x80000000  // {{external-gpio-29}}
+            MX6QDL_PAD_DISP0_DAT14__GPIO5_IO08   0x80000000  // {{external-gpio-30}}
+            MX6QDL_PAD_DISP0_DAT15__GPIO5_IO09   0x80000000  // {{external-gpio-31}}
+            MX6QDL_PAD_DISP0_DAT16__GPIO5_IO10   0x80000000  // {{external-gpio-32}}
+            MX6QDL_PAD_DISP0_DAT17__GPIO5_IO11   0x80000000  // {{external-gpio-33}}
+            MX6QDL_PAD_DISP0_DAT18__GPIO5_IO12   0x80000000  // {{external-gpio-34}}
+            MX6QDL_PAD_DISP0_DAT19__GPIO5_IO13   0x80000000  // {{external-gpio-35}}
+            MX6QDL_PAD_DISP0_DAT20__GPIO5_IO14   0x80000000  // {{external-gpio-36}}
+            MX6QDL_PAD_DISP0_DAT21__GPIO5_IO15   0x80000000  // {{external-gpio-37}}
+            MX6QDL_PAD_EIM_A16__GPIO2_IO22       0x80000000  // {{external-gpio-38}}
+            MX6QDL_PAD_GPIO_18__GPIO7_IO13       0x80000000  // {{external-gpio-39}} (KEY_VOL_UP)
+            MX6QDL_PAD_NANDF_D0__GPIO2_IO00      0x80000000  // {{external-gpio-40}} (HOME)
+            MX6QDL_PAD_NANDF_D3__GPIO2_IO03      0x80000000  // {{external-gpio-41}} (SEARCH)
+            MX6QDL_PAD_NANDF_D2__GPIO2_IO02      0x80000000  // {{external-gpio-42}} (BACK)
+            MX6QDL_PAD_NANDF_D1__GPIO2_IO01      0x80000000  // {{external-gpio-43}} (MENU)
+            MX6QDL_PAD_GPIO_19__GPIO4_IO05       0x80000000  // {{external-gpio-44}} (KEY_VOL_DOWN)
+            MX6QDL_PAD_DISP0_DAT22__GPIO5_IO16   0x80000000  // {{external-gpio-45}}
+            MX6QDL_PAD_DISP0_DAT23__GPIO5_IO17   0x80000000  // {{external-gpio-46}}
+            MX6QDL_PAD_EIM_D25__GPIO3_IO25       0x80000000  // {{external-gpio-47}}
+            MX6QDL_PAD_KEY_ROW1__GPIO4_IO09      0x80000000  // {{external-gpio-48}}
+            MX6QDL_PAD_KEY_COL1__GPIO4_IO08      0x80000000  // {{external-gpio-49}}
+            MX6QDL_PAD_EIM_OE__GPIO2_IO25        0x80000000  // {{external-gpio-50}}
+            MX6QDL_PAD_EIM_CS1__GPIO2_IO24       0x80000000  // {{external-gpio-51}}
+            MX6QDL_PAD_EIM_CS0__GPIO2_IO23       0x80000000  // {{external-gpio-52}}
+            MX6QDL_PAD_EIM_D24__GPIO3_IO24       0x80000000  // {{external-gpio-53}}
+            >;
+        };
+        
+        pinctrl_usdhc1: usdhc1grp {
+            fsl,pins = <
+            MX6QDL_PAD_SD1_CMD__SD1_CMD       0x17059
+            MX6QDL_PAD_SD1_CLK__SD1_CLK       0x10059
+            MX6QDL_PAD_SD1_DAT0__SD1_DATA0    0x17059
+            MX6QDL_PAD_SD1_DAT1__SD1_DATA1    0x17059
+            MX6QDL_PAD_SD1_DAT2__SD1_DATA2    0x17059
+            MX6QDL_PAD_SD1_DAT3__SD1_DATA3    0x17059
+            >;
+        };
+        
+        pinctrl_pwm1: pwm1grp {
+            fsl,pins = <
+            MX6QDL_PAD_SD1_DAT3__PWM1_OUT     0x1b0b1  // {{external-pwm-8}}
+//          MX6QDL_PAD_GPIO_9__PWM1_OUT       0x1b0b1  // {{external-pwm-11}}
+            >;
+        };
+        
+        pinctrl_pwm2: pwm2grp {
+            fsl,pins = <
+            MX6QDL_PAD_SD1_DAT2__PWM2_OUT     0x1b0b1  // {{external-pwm-9}}
+//          MX6QDL_PAD_GPIO_1__PWM2_OUT       0x1b0b1  // {{external-pwm-10}}
+            >;
+        };
+        
+        pinctrl_pwm3: pwm3grp {
+            fls,pins = <
+            MX6QDL_PAD_SD1_DAT1__PWM3_OUT     0x1b0b1  // {{external-pwm-4}}
+//          MX6QDL_PAD_SD4_DAT1__PWM3_OUT     0x1b0b1  // {{external-pwm-6}}
+            >;
+        };
+        
+        pinctrl_pwm4: pwm4grp {
+            fls,pins = <
+            MX6QDL_PAD_SD1_CMD__PWM4_OUT      0x1b0b1  // {{external-pwm-5}}
+//          MX6QDL_PAD_SD4_DAT2__PWM4_OUT     0x1b0b1  // {{external-pwm-7}}
+            >;
+        };
+        
+        pinctrl_uart3: uart3grp {
+            fsl,pins = <
+            MX6QDL_PAD_EIM_D24__UART3_TX_DATA      0x1b0b1
+            MX6QDL_PAD_EIM_D25__UART3_RX_DATA      0x1b0b1
+            >;
+        };
+        
+        pinctrl_uart5: uart5grp {
+            fsl,pins = <
+            MX6QDL_PAD_CSI0_DAT14__UART5_TX_DATA      0x1b0b1
+            MX6QDL_PAD_CSI0_DAT15__UART5_RX_DATA      0x1b0b1
+            >;
+        };
+    };
+ };
+ 
+&usdhc1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_usdhc1>;
+    non-removable;
+    keep-power-in-suspend;
+    no-1-8-v;
+    enable-sdio-wakeup;
+    status = "disabled";
+};
+
+&pwm1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_pwm1>;
+    status = "disabled";
+};
+
+&pwm2 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_pwm2>;
+    status = "disabled";
+};
+
+&pwm3 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_pwm3>;
+    status = "disabled";
+};
+
+&pwm4 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_pwm4>;
+    status = "disabled";
+};
+
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3>;
+	status = "disabled";
+};
+
+&uart5 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart5>;
+	status = "disabled";
+};
+
+&i2c1 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c1>;
+	status = "okay";
+};
+
+
+
+/ {
+    onewire@2 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 20 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@3 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@4 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@5 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@6 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 9 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@7 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 10 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@8 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 21 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@9 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@10 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@11 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@12 {
+        compatible = "w1-gpio";
+        gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@13 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 8 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@14 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 22 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@15 {
+        compatible = "w1-gpio";
+        gpios = <&gpio6 2 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@16 {
+        compatible = "w1-gpio";
+        gpios = <&gpio6 0 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@17 {
+        compatible = "w1-gpio";
+        gpios = <&gpio6 1 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@18 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 30 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@19 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 31 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@20 {
+        compatible = "w1-gpio";
+        gpios = <&gpio3 21 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@21 {
+        compatible = "w1-gpio";
+        gpios = <&gpio3 28 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@22 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 27 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@23 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 28 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@24 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 29 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@25 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 30 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@26 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 31 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@27 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 5 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@28 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 6 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@29 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 7 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@30 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 8 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@31 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@32 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 10 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@33 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 11 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@34 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 12 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@35 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 13 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@36 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 14 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@37 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 15 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@38 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 22 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@39 {
+        compatible = "w1-gpio";
+        gpios = <&gpio7 13 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@40 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 0 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@41 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 3 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@42 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 2 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@43 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 1 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@44 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 5 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@45 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 16 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@46 {
+        compatible = "w1-gpio";
+        gpios = <&gpio5 17 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@47 {
+        compatible = "w1-gpio";
+        gpios = <&gpio3 25 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@48 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@49 {
+        compatible = "w1-gpio";
+        gpios = <&gpio4 8 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@50 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 25 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@51 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 24 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@52 {
+        compatible = "w1-gpio";
+        gpios = <&gpio2 23 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+    
+    onewire@53 {
+        compatible = "w1-gpio";
+        gpios = <&gpio3 24 GPIO_ACTIVE_HIGH>;
+        status = "disabled";
+    };
+}; 
+ 
+ 
+
+ 
