@@ -6,7 +6,6 @@
  * published by the Free Software Foundation.
  */
 
-#include "imx6sx-udoo-neo.dtsi"
 
 / {
 	
