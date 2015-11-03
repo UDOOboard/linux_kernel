@@ -191,13 +191,6 @@
 	};
 };
 
-&i2c1 { // external pinout pin 20-21
-	clock-frequency = <100000>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_i2c1>;
-	status = "okay";
-};
-
 &i2c2 { // internal (hdmi)
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
@@ -283,65 +276,6 @@
 			>;
 		};
 		
-		external_hog: hoggrp-2 {
-			fsl,pins = <
-			// External Pinout GPIOs
-			MX6QDL_PAD_CSI0_DAT11__GPIO5_IO29		0x80000000  // pin 00
-			MX6QDL_PAD_CSI0_DAT10__GPIO5_IO28		0x80000000  // pin 01
-			MX6QDL_PAD_SD1_CLK__GPIO1_IO20			0x80000000  // pin 02
-			MX6QDL_PAD_SD1_DAT0__GPIO1_IO16			0x80000000  // pin 03
-			MX6QDL_PAD_SD1_DAT1__GPIO1_IO17			0x80000000  // pin 04
-			MX6QDL_PAD_SD1_CMD__GPIO1_IO18			0x80000000  // pin 05
-			MX6QDL_PAD_SD4_DAT1__GPIO2_IO09			0x80000000  // pin 06
-			MX6QDL_PAD_SD4_DAT2__GPIO2_IO10			0x80000000  // pin 07
-			MX6QDL_PAD_SD1_DAT3__GPIO1_IO21			0x80000000  // pin 08
-			MX6QDL_PAD_SD1_DAT2__GPIO1_IO19			0x80000000  // pin 09
-			MX6QDL_PAD_GPIO_1__GPIO1_IO01			0x80000000  // pin 10
-			MX6QDL_PAD_GPIO_9__GPIO1_IO09			0x80000000  // pin 11
-			MX6QDL_PAD_GPIO_3__GPIO1_IO03			0x80000000  // pin 12
-			MX6QDL_PAD_SD4_DAT0__GPIO2_IO08			0x80000000  // pin 13
-			MX6QDL_PAD_CSI0_DAT4__GPIO5_IO22		0x80000000  // pin 14
-			MX6QDL_PAD_CSI0_DAT16__GPIO6_IO02		0x80000000  // pin 15
-			MX6QDL_PAD_CSI0_DAT14__GPIO6_IO00		0x80000000  // pin 16
-			MX6QDL_PAD_CSI0_DAT15__GPIO6_IO01		0x80000000  // pin 17
-			MX6QDL_PAD_CSI0_DAT12__GPIO5_IO30		0x80000000  // pin 18
-			MX6QDL_PAD_CSI0_DAT13__GPIO5_IO31		0x80000000  // pin 19
-			// pin 20, 21 in pinctrl_i2c1
-			MX6QDL_PAD_DISP0_DAT6__GPIO4_IO27		0x80000000  // pin 22
-			MX6QDL_PAD_DISP0_DAT7__GPIO4_IO28		0x80000000  // pin 23
-			MX6QDL_PAD_DISP0_DAT8__GPIO4_IO29		0x80000000  // pin 24
-			MX6QDL_PAD_DISP0_DAT9__GPIO4_IO30		0x80000000  // pin 25
-			MX6QDL_PAD_DISP0_DAT10__GPIO4_IO31		0x80000000  // pin 26
-			MX6QDL_PAD_DISP0_DAT11__GPIO5_IO05		0x80000000  // pin 27
-			MX6QDL_PAD_DISP0_DAT12__GPIO5_IO06		0x80000000  // pin 28
-			MX6QDL_PAD_DISP0_DAT13__GPIO5_IO07		0x80000000  // pin 29
-			MX6QDL_PAD_DISP0_DAT14__GPIO5_IO08		0x80000000  // pin 30
-			MX6QDL_PAD_DISP0_DAT15__GPIO5_IO09		0x80000000  // pin 31
-			MX6QDL_PAD_DISP0_DAT16__GPIO5_IO10		0x80000000  // pin 32
-			MX6QDL_PAD_DISP0_DAT17__GPIO5_IO11		0x80000000  // pin 33
-			MX6QDL_PAD_DISP0_DAT18__GPIO5_IO12		0x80000000  // pin 34
-			MX6QDL_PAD_DISP0_DAT19__GPIO5_IO13		0x80000000  // pin 35
-			MX6QDL_PAD_DISP0_DAT20__GPIO5_IO14		0x80000000  // pin 36
-			MX6QDL_PAD_DISP0_DAT21__GPIO5_IO15		0x80000000  // pin 37
-			MX6QDL_PAD_EIM_A16__GPIO2_IO22			0x80000000  // pin 38
-			MX6QDL_PAD_GPIO_18__GPIO7_IO13			0x80000000  // pin 39 KEY_VOL_UP
-			MX6QDL_PAD_NANDF_D0__GPIO2_IO00			0x80000000  // pin 40 HOME
-			MX6QDL_PAD_NANDF_D3__GPIO2_IO03			0x80000000  // pin 41 SEARCH
-			MX6QDL_PAD_NANDF_D2__GPIO2_IO02			0x80000000  // pin 42 BACK
-			MX6QDL_PAD_NANDF_D1__GPIO2_IO01			0x80000000  // pin 43 MENU
-			MX6QDL_PAD_GPIO_19__GPIO4_IO05			0x80000000  // pin 44 KEY_VOL_DOWN
-			MX6QDL_PAD_DISP0_DAT22__GPIO5_IO16		0x80000000  // pin 45
-			MX6QDL_PAD_DISP0_DAT23__GPIO5_IO17		0x80000000  // pin 46
-			MX6QDL_PAD_EIM_D25__GPIO3_IO25			0x80000000  // pin 47
-			MX6QDL_PAD_KEY_ROW1__GPIO4_IO09			0x80000000  // pin 48
-			MX6QDL_PAD_KEY_COL1__GPIO4_IO08			0x80000000  // pin 49
-			MX6QDL_PAD_EIM_OE__GPIO2_IO25			0x80000000  // pin 50
-			MX6QDL_PAD_EIM_CS1__GPIO2_IO24			0x80000000  // pin 51
-			MX6QDL_PAD_EIM_CS0__GPIO2_IO23			0x80000000  // pin 52
-			MX6QDL_PAD_EIM_D24__GPIO3_IO24			0x80000000  // pin 53
-			>;
-		};
-		
 		pinctrl_enet: enetgrp {
 			fsl,pins = <
 			MX6QDL_PAD_RGMII_RXC__RGMII_RXC			0x1b0b0
@@ -421,32 +355,7 @@
 // 				MX6QDL_PAD_GPIO_8__FLEXCAN1_RX 0x1b0b1
 // 			>;
 // 		};
-		 
-
-// 		pinctrl_pwm4: pwm4grp {
-// 			fls,pins = <
-// 			MX6QDL_PAD_SD4_DAT2__PWM4_OUT 		0x1b0b1
-// 			>;
-// 		};
-// 		
-// 		pinctrl_pwm3: pwm3grp {
-// 			fls,pins = <
-// 			MX6QDL_PAD_SD4_DAT1__PWM3_OUT           0x1b0b1
-// 			>;
-// 		};
-// 		
-// 		pinctrl_pwm1: pwm1grp {
-// 			fsl,pins = <
-// 			MX6QDL_PAD_GPIO_9__PWM1_OUT             0x1b0b1
-// 			>;
-// 		};
-// 		
-// 		pinctrl_pwm2: pwm2grp {
-// 			fsl,pins = <
-// 			MX6QDL_PAD_GPIO_1__PWM2_OUT             0x1b0b1
-// 			>;
-// 		};
-
+		
 		pinctrl_usdhc3: usdhc3grp {
 			fsl,pins = <
 			MX6QDL_PAD_SD3_CMD__SD3_CMD		0x17059
@@ -457,7 +366,6 @@
 			MX6QDL_PAD_SD3_DAT3__SD3_DATA3		0x17059
 			>;
 		};
-		
 		
 		pinctrl_spdif_1: spdifgrp-1 {
 			fsl,pins = <
@@ -538,37 +446,6 @@
 	status = "okay";
 };
 
-/*
- * &pwm1 {
- *    pinctrl-names = "default";
- *	pinctrl-0 = <&pinctrl_pwm1>;
- * 	#pwm-cells = <3>;
- *    status = "okay";
- * };
- * 
- * &pwm2 {
- *    pinctrl-names = "default";
- *	pinctrl-0 = <&pinctrl_pwm2>;
- *	#pwm-cells = <3>;
- *    status = "okay";
- * };
- * 
- * &pwm3 {
- *    pinctrl-names = "default";
- *    pinctrl-0 = <&pinctrl_pwm3>;
- *	#pwm-cells = <3>;
- *	status = "okay";
- * };
- * 
- * &pwm4 {
- *    pinctrl-names = "default";
- *    pinctrl-0 = <&pinctrl_pwm4>;
- *	#pwm-cells = <3>;
- *	status = "okay";
- * };
- */
-
-
 &mipi_csi {
    status = "okay";
    ipu_id = <0>;
@@ -582,3 +459,5 @@
 //    pinctrl-0 = <&pinctrl_spdif_1>;
 //    status = "disabled";
 // };
+
+#include "imx6qdl-udoo-externalpins.dtsi"

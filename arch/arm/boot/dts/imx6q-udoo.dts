@@ -15,7 +15,7 @@
 #include "imx6qdl-udoo.dtsi"
 
 / {
-	model = "Udoo i.MX6 Quad Board";
+	model = "UDOO i.MX6 Quad Board";
 	compatible = "udoo,imx6q-udoo", "fsl,imx6q";
 	
 	mxcfb1: fb@0 {
