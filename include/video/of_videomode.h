@@ -15,4 +15,10 @@ struct videomode;
 int of_get_videomode(struct device_node *np, struct videomode *vm,
 		     int index);
 
+
+int of_search_and_get_videomode (struct device_node *np,
+			const char *mode_str, struct videomode *vm, int index);
+
+
+
 #endif /* __LINUX_OF_VIDEOMODE_H */
