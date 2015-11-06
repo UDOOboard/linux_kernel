@@ -14,5 +14,4 @@
 
 #include "imx6sx-udoo-neo.dtsi" 
 #include "imx6sx-udoo-neo-basicks.dtsi"
-#include "imx6sx-udoo-neo-hdmi.dtsi"
-#include "imx6sx-udoo-neo-m4.dtsi"
+#include "imx6sx-udoo-neo-lvds15.dtsi"
