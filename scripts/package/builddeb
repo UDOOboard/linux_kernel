@@ -93,7 +93,7 @@ tmpdir="$objtree/debian/tmp"
 fwdir="$objtree/debian/fwtmp"
 kernel_headers_dir="$objtree/debian/hdrtmp"
 libc_headers_dir="$objtree/debian/headertmp"
-dtb_dir="$objtree/debian/dtbtmp"
+dtb_dir="$objtree/debian/tmp"
 dbg_dir="$objtree/debian/dbgtmp"
 packagename=linux-image-$version
 fwpackagename=linux-firmware-image-$version
@@ -319,12 +319,12 @@ else
 	cat <<EOF >> debian/control
 
 Package: $packagename
-Provides: linux-image, linux-image-2.6, linux-modules-$version
-Suggests: $fwpackagename, $dtb_packagename
+Provides: linux-image, linux-image-2.6, linux-modules-$version, $dtb_packagename
+Suggests: $fwpackagename
 Architecture: any
 Description: Linux kernel, version $version
- This package contains the Linux kernel, modules and corresponding other
- files, version: $version.
+ This package contains the Linux kernel, modules, device tree blobs
+ and corresponding other files, version: $version.
 EOF
 
 fi
@@ -388,17 +388,6 @@ EOF
 
 	create_package "$fwpackagename" "$fwdir"
 fi
-
-cat <<EOF >> debian/control
-
-Package: $dtb_packagename
-Architecture: any
-Description: Linux DTB, version $version
- This package contains device blobs from the Linux kernel, version $version.
-EOF
-
-create_package "$dtb_packagename" "$dtb_dir"
-
 
 create_package "$packagename" "$tmpdir"
 
