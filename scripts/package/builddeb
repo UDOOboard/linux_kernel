@@ -212,10 +212,19 @@ else
 fi
 for script in postinst postrm preinst prerm ; do
 	mkdir -p "$tmpdir$debhookdir/$script.d"
+
+	unset metascript
+	[ $script = "preinst" ] && metascript="
+rm -rf /boot/dts
+rm -rf /boot/zImage
+"
+
 	cat <<EOF > "$tmpdir/DEBIAN/$script"
 #!/bin/sh
 
 set -e
+
+$metascript
 
 # Pass maintainer script parameters to hook scripts
 
@@ -225,7 +234,8 @@ export DEB_MAINT_PARAMS="\$*"
 
 export INITRD=$want_initrd
 
-test -d $debhookdir/$script.d && run-parts --arg="$KERNELRELEASE" --arg="/$installed_image_path" $debhookdir/$script.d
+#ubuntu dont evaluate INITRD variable. why?
+#test -d $debhookdir/$script.d && run-parts --arg="$KERNELRELEASE" --arg="/$installed_image_path" $debhookdir/$script.d
 exit 0
 EOF
 	chmod 755 "$tmpdir/DEBIAN/$script"
