@@ -9,20 +9,24 @@
 
 
 / {
-  model = "UDOO Neo Basic Kickstarter (based on iMX.6 SoloX)";
-    compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
+	model = "UDOO Neo Basic Kickstarter (based on iMX.6 SoloX)";
+	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
+	
+	memory {
+		linux,usable-memory = <0x80000000 0x1f800000>;
+		reg = <0x80000000 0x20000000>;
+	};
 };
 
 &fec1 {
-  status = "disabled";
+	status = "disabled";
 };
 
 &i2c4 {
-  accelerometer: fxos8700@1e {
-    status = "disabled";
-  };
-  gyroscope: fxas2100x@20 {
-    status = "disabled";
-  };
+	accelerometer: fxos8700@1e {
+		status = "disabled";
+	};
+	gyroscope: fxas2100x@20 {
+		status = "disabled";
+	};
 };
-
