@@ -12,7 +12,7 @@ set -e
 dts_dir="arch/arm/boot/dts/"
 preudoo="imx6sx-udoo-neo"
 
-boards=( basicks NONE )
+boards=( basicks basic NONE )
 videos=( hdmi lvds7 lvds15 NONE )
 
 HEAD="/*
