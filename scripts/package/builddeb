@@ -95,6 +95,7 @@ kernel_headers_dir="$objtree/debian/hdrtmp"
 libc_headers_dir="$objtree/debian/headertmp"
 dtb_dir="$objtree/debian/tmp"
 dbg_dir="$objtree/debian/dbgtmp"
+metadir="$objtree/debian/metatmp"
 packagename=linux-image-$version
 fwpackagename=linux-firmware-image-$version
 kernel_headers_packagename=linux-headers-$version
@@ -123,7 +124,8 @@ esac
 BUILD_DEBUG="$(grep -s '^CONFIG_DEBUG_INFO=y' $KCONFIG_CONFIG || true)"
 
 # Setup the directory structure
-rm -rf "$tmpdir" "$fwdir" "$kernel_headers_dir" "$libc_headers_dir" "$dbg_dir" "$dtb_dir" 2>/dev/null
+rm -rf "$tmpdir" "$fwdir" "$kernel_headers_dir" "$libc_headers_dir" \
+   "$dbg_dir" "$dtb_dir" "$metadir"  2>/dev/null
 mkdir -m 755 -p "$tmpdir/DEBIAN"
 mkdir -p  "$tmpdir/lib" "$tmpdir/boot" "$tmpdir/usr/share/doc/$packagename"
 mkdir -m 755 -p "$fwdir/DEBIAN"
@@ -133,6 +135,9 @@ mkdir -p "$libc_headers_dir/usr/share/doc/$libc_headers_packagename"
 
 mkdir -m 755 -p "$dtb_dir/DEBIAN"
 mkdir -p "$dtb_dir/boot/dts" "$dtb_dir/usr/share/doc/$dtb_packagename"
+
+mkdir -m 755 -p "$metadir/DEBIAN"
+mkdir -p  "$metadir/usr/share/doc/linux-$version"
 
 mkdir -m 755 -p "$kernel_headers_dir/DEBIAN"
 mkdir -p "$kernel_headers_dir/usr/share/doc/$kernel_headers_packagename"
@@ -295,7 +300,7 @@ Priority: optional
 Maintainer: $maintainer
 Standards-Version: 3.8.4
 Homepage: http://www.kernel.org/
-Vcs-Git: https://github.com/UDOOboard/linux_kernel
+Vcs-Browser: https://github.com/UDOOboard/linux_kernel
 EOF
 
 if [ "$ARCH" = "um" ]; then
@@ -319,12 +324,24 @@ else
 	cat <<EOF >> debian/control
 
 Package: $packagename
-Provides: linux-image, linux-image-2.6, linux-modules-$version, $dtb_packagename
+Provides: linux-image, linux-image-2.6, linux-modules-$version, $dtb_packagename,
+ linux-$version, linux-udoo-$version, linux$LOCALVERSION
 Suggests: $fwpackagename
+Replaces: $dtb_packagename
+Conflicts: $dtb_packagename
 Architecture: any
 Description: Linux kernel, version $version
  This package contains the Linux kernel, modules, device tree blobs
  and corresponding other files, version: $version.
+
+Package: linux-$version
+Depends: $dtb_packagename (= 1.0), $packagename (= $packageversion), 
+ $fwpackagename 
+Architecture: any
+Description: Linux kernel, version $version
+ This metapackage contains the Linux kernel, modules, device tree blobs
+ and corresponding other files, version: $version.
+
 EOF
 
 fi
@@ -390,6 +407,7 @@ EOF
 fi
 
 create_package "$packagename" "$tmpdir"
+create_package "linux-$version" "$metadir"
 
 if [ -n "$BUILD_DEBUG" ] ; then
 	# Build debug package
