@@ -335,7 +335,7 @@ Description: Linux kernel, version $version
  and corresponding other files, version: $version.
 
 Package: linux-$version
-Depends: $dtb_packagename (= 1.0), $packagename (= $packageversion), 
+Depends: $dtb_packagename, $packagename (= $packageversion), 
  $fwpackagename 
 Architecture: any
 Description: Linux kernel, version $version
