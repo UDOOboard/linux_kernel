@@ -31,7 +31,6 @@
 #include <linux/types.h>
 #include <video/of_videomode.h>
 #include <video/videomode.h>
-#include <video/of_display_timing.h>
 #include "mxc_dispdrv.h"
 
 #define DRIVER_NAME	"ldb"
@@ -91,7 +90,6 @@ struct ldb_chan {
 	int chno;
 	bool is_used;
 	bool online;
-	struct device_node *np_timings;
 };
 
 struct ldb_data {
@@ -312,34 +310,12 @@ static int ldb_init(struct mxc_dispdrv_handle *mddh,
 	struct fb_info *fbi = setting->fbi;
 	struct ldb_chan *chan;
 	struct fb_videomode fb_vm;
-	int chno, ret = 0;
+	int chno;
 
 	chno = ldb->chan[ldb->primary_chno].is_used ?
 		!ldb->primary_chno : ldb->primary_chno;
 
 	chan = &ldb->chan[chno];
-
-	if ( setting->dft_mode_str != NULL ) {
-		ret = of_search_and_get_videomode (chan->np_timings,
-				setting->dft_mode_str, &chan->vm, -1);
-
-		if ( ret ) {
-			dev_warn (dev, "using display timing with name %s.\n", setting->dft_mode_str);
-		} else {
-			ret = of_get_videomode(chan->np_timings, &chan->vm, -1);
-			if ( ret )
-				return -EINVAL;
-
-			dev_warn (dev, "using default display timing.\n");
-		}
-
-	} else {
-		ret = of_get_videomode(chan->np_timings, &chan->vm, -1);
-		if ( ret )
-			return -EINVAL;
-
-		dev_warn (dev, "using default display timing.\n");
-	}
 
 	if (chan->is_used) {
 		dev_err(dev, "LVDS channel%d is already used\n", chno);
@@ -869,7 +845,9 @@ static int ldb_probe(struct platform_device *pdev)
 			return -EINVAL;
 		}
 
-		chan->np_timings = child;
+		ret = of_get_videomode(child, &chan->vm, 0);
+		if (ret)
+			return -EINVAL;
 
 		sprintf(clkname, "ldb_di%d", i);
 		ldb->ldb_di_clk[i] = devm_clk_get(dev, clkname);
