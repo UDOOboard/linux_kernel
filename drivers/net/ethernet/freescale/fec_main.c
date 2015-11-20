@@ -625,7 +625,7 @@ fec_enet_txq_put_data_tso(struct fec_enet_priv_tx_q *txq, struct sk_buff *skb,
 		if (fep->bufdesc_ex)
 			ebdp->cbd_esc |= BD_ENET_TX_INT;
 	}
-
+	mb();
 	bdp->cbd_sc = status;
 
 	return 0;
@@ -680,7 +680,7 @@ fec_enet_txq_put_hdr_tso(struct fec_enet_priv_tx_q *txq,
 		ebdp->cbd_bdu = 0;
 		ebdp->cbd_esc = estatus;
 	}
-
+	mb();
 	bdp->cbd_sc = status;
 
 	return 0;
@@ -1229,8 +1229,7 @@ fec_enet_tx_queue(struct net_device *ndev, u16 queue_id)
 			skb = txq->tx_skbuff[index];
 			bdnum++;
 		}
-		if (skb_shinfo(skb)->nr_frags &&
-		    (status = bdp_t->cbd_sc) & BD_ENET_TX_READY)
+		if ((status = bdp_t->cbd_sc) & BD_ENET_TX_READY)
 			break;
 
 		for (i = 0; i < bdnum; i++) {
@@ -3286,6 +3285,7 @@ fec_probe(struct platform_device *pdev)
 		pdev->id_entry = of_id->data;
 	fep->quirks = pdev->id_entry->driver_data;
 
+	fep->netdev = ndev;
 	fep->num_rx_queues = num_rx_qs;
 	fep->num_tx_queues = num_tx_qs;
 

@@ -1,0 +1,31 @@
+The NXP TDA19971/19972 are HDMI receiver devices that decode HDMI
+input signals and present a configurable parallel video output bus and 
+audio output bus.  The internal video bus is 36bits while the output bus
+differs per device.  These devices offer High Definition (HD) video resolutions
+up to 1080p50/60 or WUXGA and HD audio formats up to 8 channels such as DTS HD
+and Dolby True HD. The chips optionally include an HDCP 1.4 engine with
+pre-programmed keys stored into an internal NV memory.  Additionally the chips
+also supports several HDMI 1.4b options such as 3D formats up to 1080p50/60,
+Deep Colors up to 36bpp and extended colorimetry.
+
+The TDA19971 has one HDMI input (HDMI-A) and 24bit output bus and the TDA19972
+has two HDMI inputs (HDMI-A/B) and a 36bit video output bus.
+
+Driver Details:
+---------------
+
+The chips respond to two i2c slave addresses, the first allows access to
+HDMI input, audio, and video status and configuration and the second allows
+access to CEC.  
+
+The tda1997x-core driver attaches to the i2c slave that controls the device.
+It also manages the 2nd i2c slave for CEC.  The platform data structure
+provides details about the desired video output bus configuration and the
+desired audio output bus configuration. An ASoC codec driver is also provided
+however this is merely a skeleton driver as the audio output format cannot
+be changed and is dependent upon the HDMI input signal.  A separate platform
+specific device video driver can interact with the core to obtain information
+about the video data format which is dependent upon the HDMI input signal.  A
+separate platform specific ASoC SoC DAI driver can interact with the core
+to obtain information about the audio data format which is dependent upon
+the HDMI input signal.
