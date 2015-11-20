@@ -222,6 +222,9 @@ for script in postinst postrm preinst prerm ; do
 	[ $script = "preinst" ] && metascript="
 rm -rf /boot/dts
 rm -rf /boot/zImage
+rm -rf /boot/System.map*
+rm -rf /boot/config*
+
 "
 
 	cat <<EOF > "$tmpdir/DEBIAN/$script"
