@@ -327,19 +327,17 @@ else
 	cat <<EOF >> debian/control
 
 Package: $packagename
-Provides: linux-image, linux-image-2.6, linux-modules-$version, $dtb_packagename,
- linux-$version, linux-udoo-$version, linux$LOCALVERSION
+Provides: linux-image, linux-image-2.6, linux-modules-$version, $dtb_packagename
 Suggests: $fwpackagename
-Replaces: $dtb_packagename
-Conflicts: $dtb_packagename
+Replaces: linux-image, linux-image-2.6, linux-modules-$version, $dtb_packagename
+Conflicts: linux-image, linux-image-2.6, linux-modules-$version, $dtb_packagename
 Architecture: any
 Description: Linux kernel, version $version
  This package contains the Linux kernel, modules, device tree blobs
  and corresponding other files, version: $version.
 
 Package: linux-$version
-Depends: $dtb_packagename, $packagename (= $packageversion), 
- $fwpackagename 
+Depends: $dtb_packagename, $packagename, $fwpackagename 
 Architecture: any
 Description: Linux kernel, version $version
  This metapackage contains the Linux kernel, modules, device tree blobs
@@ -402,6 +400,9 @@ if [ -e "$tmpdir/lib/firmware" ]; then
 
 Package: $fwpackagename
 Architecture: all
+Provides: linux-firmware
+Conflicts: linux-firmware
+Replaces: linux-firmware
 Description: Linux kernel firmware, version $version
  This package contains firmware from the Linux kernel, version $version.
 EOF
