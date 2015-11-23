@@ -515,6 +515,13 @@ config SRAM
 	  the genalloc API. It is supposed to be used for small on-chip SRAM
 	  areas found on many SoCs.
 
+config UDOO_ARD
+	tristate "UDOO-Arduino erase/reset Driver"
+	default n
+	help
+	  This driver is used to erase and reset arduino board via command sent
+	  over USB-to-SERIAL connection.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
@@ -526,4 +533,5 @@ source "drivers/misc/mei/Kconfig"
 source "drivers/misc/vmw_vmci/Kconfig"
 source "drivers/misc/mic/Kconfig"
 source "drivers/misc/genwqe/Kconfig"
+source "drivers/misc/udooneo/Kconfig"
 endmenu

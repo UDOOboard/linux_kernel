@@ -203,10 +203,10 @@ static const struct regmap_config fsl_ssi_regconfig = {
 	.val_bits = 32,
 	.reg_stride = 4,
 	.val_format_endian = REGMAP_ENDIAN_NATIVE,
-	.readable_reg = fsl_ssi_readable_reg,
-	.volatile_reg = fsl_ssi_volatile_reg,
-	.writeable_reg = fsl_ssi_writeable_reg,
-	.cache_type = REGCACHE_RBTREE,
+	//.readable_reg = fsl_ssi_readable_reg,
+	//.volatile_reg = fsl_ssi_volatile_reg,
+	//.writeable_reg = fsl_ssi_writeable_reg,
+	//.cache_type = REGCACHE_RBTREE,
 };
 
 struct fsl_ssi_soc_data {
@@ -969,6 +969,11 @@ static int _fsl_ssi_set_dai_fmt(struct fsl_ssi_private *ssi_private,
 	case SND_SOC_DAIFMT_CBM_CFM:
 		scr &= ~CCSR_SSI_SCR_SYS_CLK_EN;
 		break;
+	case SND_SOC_DAIFMT_CBM_CFS:
+		strcr &= ~CCSR_SSI_STCR_TXDIR; /* transmit clock is external */
+		strcr |= CCSR_SSI_STCR_TFDIR; /* frame sync generated internally */
+		scr &= ~CCSR_SSI_SCR_SYS_CLK_EN;
+		break;
 	default:
 		return -EINVAL;
 	}
@@ -1170,6 +1175,7 @@ static const struct snd_soc_component_driver fsl_ssi_component = {
 };
 
 static struct snd_soc_dai_driver fsl_ssi_ac97_dai = {
+	.probe = fsl_ssi_dai_probe,
 	.ac97_control = 1,
 	.playback = {
 		.stream_name = "AC97 Playback",
@@ -1385,7 +1391,7 @@ static int fsl_ssi_probe(struct platform_device *pdev)
 	sprop = of_get_property(np, "fsl,mode", NULL);
 	if (sprop) {
 		if (!strcmp(sprop, "ac97-slave"))
-			ssi_private->dai_fmt = SND_SOC_DAIFMT_AC97;
+			ssi_private->dai_fmt = SND_SOC_DAIFMT_AC97 | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBM_CFS;
 		else if (!strcmp(sprop, "i2s-slave"))
 			ssi_private->dai_fmt = SND_SOC_DAIFMT_I2S |
 				SND_SOC_DAIFMT_CBM_CFM;
@@ -1467,7 +1473,11 @@ static int fsl_ssi_probe(struct platform_device *pdev)
 		if (ret)
 			goto error_irqmap;
 	}
-
+	if (fsl_ssi_is_ac97(ssi_private)) {
+		ret = clk_prepare_enable(fsl_ac97_data->clk);
+		if (ret)
+			goto error_asoc_register;
+	}
 	ret = snd_soc_register_component(&pdev->dev, &fsl_ssi_component,
 					 &ssi_private->cpu_dai_drv, 1);
 	if (ret) {

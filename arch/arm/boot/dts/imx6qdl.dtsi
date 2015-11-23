@@ -41,6 +41,7 @@
 		spi1 = &ecspi2;
 		spi2 = &ecspi3;
 		spi3 = &ecspi4;
+		ssi0 = &ssi1;
 		usbphy0 = &usbphy1;
 		usbphy1 = &usbphy2;
 	};
@@ -321,7 +322,9 @@
 				};
 
 				ssi1: ssi@02028000 {
-					compatible = "fsl,imx6q-ssi","fsl,imx21-ssi";
+					compatible = "fsl,imx6q-ssi", 
+							"fsl,imx51-ssi",
+							"fsl,imx21-ssi";
 					reg = <0x02028000 0x4000>;
 					interrupts = <0 46 IRQ_TYPE_LEVEL_HIGH>;
 					clocks = <&clks IMX6QDL_CLK_SSI1_IPG>,
