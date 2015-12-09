@@ -86,8 +86,34 @@
 				MX6SX_PAD_CSI_DATA05__PWM6_OUT	0x1b0b1
 			>;
 		};
+
+		pinctrl_flexcan1: flexcan1grp {
+			fsl,pins = <
+				MX6SX_PAD_QSPI1B_DQS__CAN1_TX		0x80000000
+				MX6SX_PAD_QSPI1A_SS1_B__CAN1_RX		0x80000000
+			>;
+		};
+
+		pinctrl_flexcan2: flexcan2grp {
+			fsl,pins = <
+				MX6SX_PAD_QSPI1B_SS1_B__CAN2_RX		0x80000000
+				MX6SX_PAD_QSPI1A_DQS__CAN2_TX		0x80000000
+			>;
+		};
 	};
  };
+
+&flexcan1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexcan1>;
+	status = "disabled";
+};
+
+&flexcan2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexcan2>;
+	status = "disabled";
+};
 
 &pwm1 {
     pinctrl-names = "default";
