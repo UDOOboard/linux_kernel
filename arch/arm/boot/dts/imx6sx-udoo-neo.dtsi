@@ -151,7 +151,6 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c1_1>;
-	status = "okay";
 	pmic: pfuze3000@08 {
 		compatible = "fsl,pfuze3000";
 		reg = <0x08>;
@@ -247,7 +246,6 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_1>;
-	status = "okay";
 
 	barometer: mpl3115@60 {
 		compatible = "fsl,mpl3115";
@@ -267,7 +265,6 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c4_1>;
-	status = "okay";
 
 	accelerometer: fxos8700@1e {
 		compatible = "fsl,fxos8700";
@@ -319,21 +316,6 @@
 				MX6SX_PAD_KEY_COL0__AUDMUX_AUD5_TXC     0x130b0
 				MX6SX_PAD_KEY_COL1__AUDMUX_AUD5_TXFS    0x130b0
 				MX6SX_PAD_KEY_ROW0__AUDMUX_AUD5_TXD     0x120b0
-			>;
-		};
-
-		pinctrl_uart1_1: uart1grp-1 {
-			fsl,pins = <
-				MX6SX_PAD_GPIO1_IO04__UART1_TX 0x1b0b1
-				MX6SX_PAD_GPIO1_IO05__UART1_RX 0x1b0b1
-			>;
-		};
-
-
-		pinctrl_uart2_1: uart2grp-1 {
-			fsl,pins = <
-				MX6SX_PAD_GPIO1_IO07__UART2_RX 0x1b0b1
-				MX6SX_PAD_GPIO1_IO06__UART2_TX 0x1b0b1
 			>;
 		};
 
@@ -483,18 +465,6 @@
 		};
 
 	};
-};
-
-&uart1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart1_1>;
-	status = "okay";
-};
-
-&uart2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart2_1>;
-	status = "disabled";
 };
 
 &uart3 { /* for bluetooth */
