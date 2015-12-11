@@ -12,4 +12,5 @@
 /dts-v1/;
 
 #include "imx6sx-udoo-neo.dtsi" 
+#include "imx6sx-udoo-neo-extended.dtsi"
 #include "imx6sx-udoo-neo-hdmi.dtsi"

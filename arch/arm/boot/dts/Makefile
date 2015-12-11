@@ -186,12 +186,38 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-sabresd-ldo.dtb \
 	imx6q-sbc6x.dtb \
 	imx6q-udoo.dtb \
-	imx6q-udoo-7lvds.dtb \
-	imx6q-udoo-15lvds.dtb \
-	imx6sx-udoo-neo.dtb \
-	imx6sx-udoo-neo-hdmi.dtb \
-	imx6sx-udoo-neo-m4.dtb \
-	imx6sx-udoo-neo-hdmi-m4.dtb \
+	imx6sx-udoo-neo-basic.dtb \
+	imx6sx-udoo-neo-basic-hdmi.dtb \
+	imx6sx-udoo-neo-basic-hdmi-m4.dtb \
+	imx6sx-udoo-neo-basicks.dtb \
+	imx6sx-udoo-neo-basicks-hdmi.dtb \
+	imx6sx-udoo-neo-basicks-hdmi-m4.dtb \
+	imx6sx-udoo-neo-basicks-lvds15.dtb \
+	imx6sx-udoo-neo-basicks-lvds15-m4.dtb \
+	imx6sx-udoo-neo-basicks-lvds7.dtb \
+	imx6sx-udoo-neo-basicks-lvds7-m4.dtb \
+	imx6sx-udoo-neo-basicks-m4.dtb \
+	imx6sx-udoo-neo-basic-lvds15.dtb \
+	imx6sx-udoo-neo-basic-lvds15-m4.dtb \
+	imx6sx-udoo-neo-basic-lvds7.dtb \
+	imx6sx-udoo-neo-basic-lvds7-m4.dtb \
+	imx6sx-udoo-neo-basic-m4.dtb \
+	imx6sx-udoo-neo-extended.dtb \
+	imx6sx-udoo-neo-extended-hdmi.dtb \
+	imx6sx-udoo-neo-extended-hdmi-m4.dtb \
+	imx6sx-udoo-neo-extended-lvds15.dtb \
+	imx6sx-udoo-neo-extended-lvds15-m4.dtb \
+	imx6sx-udoo-neo-extended-lvds7.dtb \
+	imx6sx-udoo-neo-extended-lvds7-m4.dtb \
+	imx6sx-udoo-neo-extended-m4.dtb \
+	imx6sx-udoo-neo-full.dtb \
+	imx6sx-udoo-neo-full-hdmi.dtb \
+	imx6sx-udoo-neo-full-hdmi-m4.dtb \
+	imx6sx-udoo-neo-full-lvds15.dtb \
+	imx6sx-udoo-neo-full-lvds15-m4.dtb \
+	imx6sx-udoo-neo-full-lvds7.dtb \
+	imx6sx-udoo-neo-full-lvds7-m4.dtb \
+	imx6sx-udoo-neo-full-m4.dtb \
 	imx6q-wandboard.dtb \
 	imx6sl-evk.dtb \
 	imx6sl-evk-csi.dtb \
