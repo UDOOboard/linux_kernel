@@ -12,5 +12,6 @@
 /dts-v1/;
 
 #include "imx6sx-udoo-neo.dtsi" 
+#include "imx6sx-udoo-neo-extended.dtsi"
 #include "imx6sx-udoo-neo-m4.dtsi"
 #include "imx6sx-udoo-neo-lvds15.dtsi"
