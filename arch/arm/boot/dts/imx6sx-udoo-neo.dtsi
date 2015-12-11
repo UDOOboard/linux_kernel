@@ -283,7 +283,7 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_hog>;
+	pinctrl-0 = <&pinctrl_hog &external_hog>;
 
 	imx6x-udoo-neo {
 
@@ -573,3 +573,5 @@
 		};
 	};
 };
+
+#include "imx6sx-udoo-neo-externalpins.dtsi"
