@@ -50,7 +50,17 @@
 				MX6SX_PAD_GPIO1_IO04__GPIO1_IO_4		0x80000000	// {{external-gpio-47}}
 			>;
 		};
-	
+
+		pinctrl_ecspi2: ecspi2grp {
+			fsl,pins = <
+				MX6SX_PAD_SD4_CLK__ECSPI2_MISO		0x100b1
+				MX6SX_PAD_SD4_CMD__ECSPI2_MOSI		0x100b1
+				MX6SX_PAD_SD4_DATA1__ECSPI2_SCLK	0x100b1
+				/*  CS SPI 1  */
+				MX6SX_PAD_SD4_DATA0__GPIO6_IO_14	0x80000000
+			>;
+		};
+
 		pinctrl_uart1: uart1grp-1 {
 			fsl,pins = <
 				MX6SX_PAD_GPIO1_IO04__UART1_TX          0x1b0b1
@@ -131,6 +141,14 @@
 		};
 	};
  };
+
+&ecspi2 {
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio6 14 0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ecspi2>;
+	status = "disabled";
+};
 
 &uart1 {
 	pinctrl-names = "default";
