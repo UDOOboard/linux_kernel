@@ -14,7 +14,7 @@
 #include "imx6qdl-udoo.dtsi"
 
 / {
-	model = "Udoo i.MX6 Dual-lite Board";
+	model = "UDOO Dual-lite Board";
 	compatible = "udoo,imx6dl-udoo", "fsl,imx6dl";
 	
 	mxcfb1: fb@0 {
