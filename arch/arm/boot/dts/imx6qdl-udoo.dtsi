@@ -44,7 +44,7 @@
 		};
 		
 		reg_lcd0_pwr: regulator@1 {
-			compatible = "regulator-fixed";
+			compatible = "regulator-fixed", "udoo,lvds-power";
 			regulator-name = "LCD0 POWER";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
@@ -89,7 +89,7 @@
 	};
 
 	backlight_lcd {// enable, disable lvds
-		compatible = "gpio-backlight";
+		compatible = "gpio-backlight", "udoo,lvds-backlight";
 		gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
 		default-on;
 		status = "disabled";
@@ -150,6 +150,13 @@
 		bossac-erase-gpio = <&gpio4 21 GPIO_ACTIVE_LOW>;
 		bossac-reset-gpio = <&gpio1 0 GPIO_ACTIVE_LOW>;
 		status = "okay";
+	};
+
+	poweroff {
+		compatible = "udoo,poweroff";
+		sam3x_rst_gpio = <&gpio1 0 GPIO_ACTIVE_LOW>;
+		pwr_5v_gpio = <&gpio2 4 GPIO_ACTIVE_LOW>;
+		arduino_mode = <0>; // 0=running, 1=halted, 2=running after shutdown
 	};
 };
 
@@ -227,9 +234,6 @@
 		pinctrl-0 = <&pinctrl_st1232>;
 		pinctrl-names = "default";
 		gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
-		/* udoo poweroff driver */
-		lcd_panel_on_gpio = <&gpio1 2 1>;
-		lcd_backlight_gpio = <&gpio1 4 1>;
 	};
 };
 
