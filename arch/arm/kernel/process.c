@@ -203,6 +203,12 @@ void machine_halt(void)
 	smp_send_stop();
 
 	local_irq_disable();
+	
+#ifdef CONFIG_POWER_RESET_UDOO
+	if (pm_power_off)
+		pm_power_off();
+#endif
+	
 	while (1);
 }
 
