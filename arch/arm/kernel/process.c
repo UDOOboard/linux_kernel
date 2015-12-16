@@ -48,12 +48,6 @@ unsigned long __stack_chk_guard __read_mostly;
 EXPORT_SYMBOL(__stack_chk_guard);
 #endif
 
-#ifdef CONFIG_UDOO_QDL_HALT
-#include <linux/gpio.h>
-#define IMX_GPIO_NR(bank, nr)       (((bank) - 1) * 32 + (nr))
-#define HALT_GPIO                   IMX_GPIO_NR(2, 4)
-#endif
-
 static const char *processor_modes[] = {
   "USER_26", "FIQ_26" , "IRQ_26" , "SVC_26" , "UK4_26" , "UK5_26" , "UK6_26" , "UK7_26" ,
   "UK8_26" , "UK9_26" , "UK10_26", "UK11_26", "UK12_26", "UK13_26", "UK14_26", "UK15_26",
@@ -198,20 +192,6 @@ void machine_shutdown(void)
 	disable_nonboot_cpus();
 }
 
-#ifdef CONFIG_UDOO_QDL_HALT
-void udoo_qdl_halt(void)
-{
-    int ret = gpio_request(HALT_GPIO, "HALT");
-    if (ret) {
-        printk(KERN_EMERG "Failed to get HALT: %d\n", ret);
-    } else {
-        printk(KERN_EMERG "UDOO iMX6 CPU shutdown!\n");
-        gpio_direction_output(HALT_GPIO, 1);
-    }
-}
-#endif
-
-
 /*
  * Halting simply requires that the secondary CPUs stop performing any
  * activity (executing tasks, handling interrupts). smp_send_stop()
@@ -223,11 +203,6 @@ void machine_halt(void)
 	smp_send_stop();
 
 	local_irq_disable();
-
-#ifdef CONFIG_UDOO_QDL_HALT
-    udoo_qdl_halt();
-#endif
-
 	while (1);
 }
 
@@ -244,10 +219,6 @@ void machine_power_off(void)
 
 	if (pm_power_off)
 		pm_power_off();
-
-#ifdef CONFIG_UDOO_QDL_HALT
-    udoo_qdl_halt();
-#endif
 }
 
 /*
