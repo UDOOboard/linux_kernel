@@ -69,22 +69,6 @@
 	};
 };
 
-&i2c1 {
-	touchscreen: st1232@55 {
-		compatible = "sitronix,st1232";
-		reg = <0x55>;
-		interrupt-parent = <&gpio6>;
-		interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
-		pinctrl-0 = <&pinctrl_st1232>;
-		pinctrl-names = "default";
-		gpios = <&gpio6 5 GPIO_ACTIVE_LOW>;
-		/* udoo poweroff driver */
-		lcd_backlight_gpio = <&gpio6 3 GPIO_ACTIVE_LOW>;
-		lcd_panel_on_gpio = <&gpio4 27 GPIO_ACTIVE_LOW>;
-	};
-};
-
-
 &dcic2 {
 	dcic_id = <1>;
 	dcic_mux = "dcic-lvds";
