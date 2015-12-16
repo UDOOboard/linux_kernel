@@ -9,7 +9,7 @@
 
 / {
 	reg_lcd_pwr: lcd_pwr {
-		compatible = "regulator-fixed";
+		compatible = "regulator-fixed", "udoo,lvds-power";
 		regulator-name = "LCD POWER";
 		gpio = <&gpio4 27 GPIO_ACTIVE_LOW>;
 		enable-active-high;
@@ -19,7 +19,7 @@
 	};
 
 	reg_lcd_bl: lcd_bl {
-		compatible = "regulator-fixed";
+		compatible = "regulator-fixed", "udoo,lvds-backlight";
 		regulator-name = "LCD BACKLIGHT BL_ON";
 		gpio = <&gpio6 3 GPIO_ACTIVE_LOW>;
 		enable-active-high;
@@ -78,9 +78,6 @@
 		pinctrl-0 = <&pinctrl_st1232>;
 		pinctrl-names = "default";
 		gpios = <&gpio6 5 GPIO_ACTIVE_LOW>;
-		/* udoo poweroff driver */
-		lcd_backlight_gpio = <&gpio6 3 GPIO_ACTIVE_LOW>;
-		lcd_panel_on_gpio = <&gpio4 27 GPIO_ACTIVE_LOW>;
 	};
 };
 
