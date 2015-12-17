@@ -131,6 +131,16 @@
 	fsl,arm-soc-shared = <1>;
 };
 
+&adc1 {
+	vref-supply = <&reg_vref_3v3>;
+	status = "okay";
+};
+
+&adc2 {
+	vref-supply = <&reg_vref_3v3>;
+	status = "okay";
+};
+
 &fec1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet1_2 &pinctrl_enet1_clkout_2>;
