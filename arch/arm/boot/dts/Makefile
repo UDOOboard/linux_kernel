@@ -166,6 +166,9 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6dl-sabresd-hdcp.dtb \
 	imx6dl-udoo.dtb \
 	imx6dl-wandboard.dtb \
+	imx6dl-udoo-hdmi.dtb \
+	imx6dl-udoo-lvds7.dtb \
+	imx6dl-udoo-lvds15.dtb \
 	imx6q-arm2.dtb \
 	imx6q-cubox-i.dtb \
 	imx6q-phytec-pbab01.dtb \
@@ -185,7 +188,9 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-sabresd-hdcp.dtb \
 	imx6q-sabresd-ldo.dtb \
 	imx6q-sbc6x.dtb \
-	imx6q-udoo.dtb \
+	imx6q-udoo-hdmi.dtb \
+	imx6q-udoo-lvds7.dtb \
+	imx6q-udoo-lvds15.dtb \
 	imx6sx-udoo-neo-basic.dtb \
 	imx6sx-udoo-neo-basic-hdmi.dtb \
 	imx6sx-udoo-neo-basic-hdmi-m4.dtb \
