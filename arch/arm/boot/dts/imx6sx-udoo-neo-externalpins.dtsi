@@ -24,8 +24,8 @@
 						
 				MX6SX_PAD_CSI_VSYNC__GPIO1_IO_25		0x80000000	// {{external-gpio-24}}
 				MX6SX_PAD_CSI_HSYNC__GPIO1_IO_22		0x80000000	// {{external-gpio-25}}
-				MX6SX_PAD_CSI_DATA00__GPIO1_IO_14		0x80000000	// {{external-gpio-26}}
-				MX6SX_PAD_CSI_DATA01__GPIO1_IO_15		0x80000000	// {{external-gpio-27}}
+				//MX6SX_PAD_CSI_DATA00__GPIO1_IO_14		0x80000000	// {{external-gpio-26}}
+				//MX6SX_PAD_CSI_DATA01__GPIO1_IO_15		0x80000000	// {{external-gpio-27}}
 				MX6SX_PAD_CSI_DATA02__GPIO1_IO_16		0x80000000	// {{external-gpio-28}}
 				MX6SX_PAD_CSI_DATA03__GPIO1_IO_17		0x80000000	// {{external-gpio-29}}
 				MX6SX_PAD_CSI_DATA04__GPIO1_IO_18		0x80000000	// {{external-gpio-30}}
@@ -33,8 +33,8 @@
 				MX6SX_PAD_CSI_DATA06__GPIO1_IO_20		0x80000000	// {{external-gpio-32}}
 				MX6SX_PAD_CSI_DATA07__GPIO1_IO_21		0x80000000	// {{external-gpio-33}}
 				
-				MX6SX_PAD_USB_H_STROBE__GPIO7_IO_11		0x80000000	// {{external-gpio-34}}
-				MX6SX_PAD_USB_H_DATA__GPIO7_IO_10		0x80000000	// {{external-gpio-35}}
+				//MX6SX_PAD_USB_H_STROBE__GPIO7_IO_11		0x80000000	// {{external-gpio-34}}
+				//MX6SX_PAD_USB_H_DATA__GPIO7_IO_10		0x80000000	// {{external-gpio-35}}
 				MX6SX_PAD_SD4_DATA3__GPIO6_IO_17		0x80000000	// {{external-gpio-36}}
 				MX6SX_PAD_SD4_DATA2__GPIO6_IO_16		0x80000000	// {{external-gpio-37}}
 				MX6SX_PAD_SD4_DATA1__GPIO6_IO_15		0x80000000	// {{external-gpio-38}}
@@ -46,8 +46,8 @@
 				MX6SX_PAD_QSPI1A_DQS__GPIO4_IO_20		0x80000000	// {{external-gpio-43}}
 				MX6SX_PAD_GPIO1_IO07__GPIO1_IO_7		0x80000000	// {{external-gpio-44}}
 				MX6SX_PAD_GPIO1_IO06__GPIO1_IO_6		0x80000000	// {{external-gpio-45}}
-				MX6SX_PAD_GPIO1_IO05__GPIO1_IO_5		0x80000000	// {{external-gpio-46}}
-				MX6SX_PAD_GPIO1_IO04__GPIO1_IO_4		0x80000000	// {{external-gpio-47}}
+				//MX6SX_PAD_GPIO1_IO05__GPIO1_IO_5		0x80000000	// {{external-gpio-46}}
+				//MX6SX_PAD_GPIO1_IO04__GPIO1_IO_4		0x80000000	// {{external-gpio-47}}
 			>;
 		};
 
