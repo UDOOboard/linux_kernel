@@ -90,12 +90,6 @@
 			default-state = "off";
 			linux,default-trigger = "mmc0";
 		};
-
-//		led1: led1 {
-//			label = "led1";
-//			gpios = <&gpio4 6 0>;
-//			default-state = "off";
-//		};
 	};
 
 	kim {
@@ -302,7 +296,6 @@
 			fsl,pins = <
 
 				MX6SX_PAD_SD1_CLK__GPIO6_IO_0       0x80000000 // LED
-				MX6SX_PAD_NAND_DATA02__GPIO4_IO_6   0x80000000 // LED
 
 				MX6SX_PAD_SD1_CMD__GPIO6_IO_1       0x80000000 // USDHC2 PWR
 				MX6SX_PAD_SD1_DATA0__GPIO6_IO_2     0x80000000 // USDHC2 CD
