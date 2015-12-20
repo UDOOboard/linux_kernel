@@ -66,6 +66,7 @@ snd-soc-imx-hdmi-objs := imx-hdmi.o
 snd-soc-imx-si476x-objs := imx-si476x.o
 snd-soc-imx-mqs-objs := imx-mqs.o
 snd-soc-imx-tda19988-objs :=imx-tda19988.o
+snd-soc-imx-es9023-objs :=imx-es9023.o
 
 obj-$(CONFIG_SND_SOC_EUKREA_TLV320) += snd-soc-eukrea-tlv320.o
 obj-$(CONFIG_SND_SOC_PHYCORE_AC97) += snd-soc-phycore-ac97.o
@@ -85,6 +86,6 @@ obj-$(CONFIG_SND_SOC_IMX_SI476X) += snd-soc-imx-si476x.o
 obj-$(CONFIG_SND_SOC_IMX_MQS) += snd-soc-imx-mqs.o
 
 obj-$(CONFIG_SND_SOC_IMX_TDA19988) += snd-soc-imx-tda19988.o
-
+obj-$(CONFIG_SND_SOC_IMX_ES9023) += snd-soc-imx-es9023.o
 
 AFLAGS_hdmi_pcm.o := -march=armv7-a -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp

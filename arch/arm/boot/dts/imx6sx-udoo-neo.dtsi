@@ -13,14 +13,6 @@
 
 
 / {
-	model = "UDOO Neo (based on iMX.6 SoloX)";
-	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
-
-	memory {
-		linux,usable-memory = <0x80000000 0x3f800000>;
-		reg = <0x80000000 0x40000000>;
-	};
-	
 	aliases {
 		mmc0 = &usdhc2;
 	};
@@ -90,6 +82,12 @@
 			default-state = "off";
 			linux,default-trigger = "mmc0";
 		};
+
+//		led1: led1 {
+//			label = "led1";
+//			gpios = <&gpio4 6 0>;
+//			default-state = "off";
+//		};
 	};
 
 	kim {
@@ -100,8 +98,8 @@
 	        baud_rate = <921600>;
 	};
 
-	poweroff {
-		compatible = "udoo,poweroff";
+	btwilink {
+	        compatible = "btwilink";
 	};
 };
 
@@ -125,16 +123,6 @@
 	fsl,arm-soc-shared = <1>;
 };
 
-&adc1 {
-	vref-supply = <&reg_vref_3v3>;
-	status = "okay";
-};
-
-&adc2 {
-	vref-supply = <&reg_vref_3v3>;
-	status = "okay";
-};
-
 &fec1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet1_2 &pinctrl_enet1_clkout_2>;
@@ -155,6 +143,7 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c1_1>;
+	status = "okay";
 	pmic: pfuze3000@08 {
 		compatible = "fsl,pfuze3000";
 		reg = <0x08>;
@@ -250,6 +239,7 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_1>;
+	status = "okay";
 
 	barometer: mpl3115@60 {
 		compatible = "fsl,mpl3115";
@@ -269,6 +259,7 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c4_1>;
+	status = "okay";
 
 	accelerometer: fxos8700@1e {
 		compatible = "fsl,fxos8700";
@@ -284,7 +275,7 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_hog &external_hog>;
+	pinctrl-0 = <&pinctrl_hog>;
 
 	imx6x-udoo-neo {
 
@@ -292,6 +283,7 @@
 			fsl,pins = <
 
 				MX6SX_PAD_SD1_CLK__GPIO6_IO_0       0x80000000 // LED
+				MX6SX_PAD_NAND_DATA02__GPIO4_IO_6   0x80000000 // LED
 
 				MX6SX_PAD_SD1_CMD__GPIO6_IO_1       0x80000000 // USDHC2 PWR
 				MX6SX_PAD_SD1_DATA0__GPIO6_IO_2     0x80000000 // USDHC2 CD
@@ -314,11 +306,34 @@
 			>;
 		};
 
-		pinctrl_audmux: audmuxgrp {
+		pinctrl_audmux_hdmi: audmuxgrp-hdmi {
 			fsl,pins = <
 				MX6SX_PAD_KEY_COL0__AUDMUX_AUD5_TXC     0x130b0
 				MX6SX_PAD_KEY_COL1__AUDMUX_AUD5_TXFS    0x130b0
 				MX6SX_PAD_KEY_ROW0__AUDMUX_AUD5_TXD     0x120b0
+			>;
+		};
+
+		pinctrl_audmux_dac: audmuxgrp-dac {
+			fsl,pins = <
+				MX6SX_PAD_CSI_DATA00__AUDMUX_AUD6_TXC   0x130b0
+				MX6SX_PAD_CSI_DATA01__AUDMUX_AUD6_TXFS  0x130b0
+				MX6SX_PAD_CSI_HSYNC__AUDMUX_AUD6_TXD    0x120b0
+			>;
+		};
+
+		pinctrl_uart1_1: uart1grp-1 {
+			fsl,pins = <
+				MX6SX_PAD_GPIO1_IO04__UART1_TX 0x1b0b1
+				MX6SX_PAD_GPIO1_IO05__UART1_RX 0x1b0b1
+			>;
+		};
+
+
+		pinctrl_uart2_1: uart2grp-1 {
+			fsl,pins = <
+				MX6SX_PAD_GPIO1_IO07__UART2_RX 0x1b0b1
+				MX6SX_PAD_GPIO1_IO06__UART2_TX 0x1b0b1
 			>;
 		};
 
@@ -470,6 +485,18 @@
 	};
 };
 
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1_1>;
+	status = "okay";
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2_1>;
+	status = "disabled";
+};
+
 &uart3 { /* for bluetooth */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3_1>;
@@ -546,5 +573,3 @@
 		};
 	};
 };
-
-#include "imx6sx-udoo-neo-externalpins.dtsi"

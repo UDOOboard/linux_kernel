@@ -1,0 +1,37 @@
+/*
+ * Copyright (C) 2015 Jasbir Matharu
+ * Copyright (C) 2014-2015 Freescale Semiconductor, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+ 
+/ {
+	codec_dac: dac-codec {
+		compatible = "udoo,es9023";
+		status = "okay";
+	};
+
+	sound_dac {
+		compatible = "udoo,imx-audio-es9023";
+		model = "imx6sx-es9023";
+		cpu-dai = <&ssi1>;
+		audio-codec = <&codec_dac>;
+		mux-int-port = <1>;
+		mux-ext-port = <6>;
+		ssi-controller = <&ssi1>;
+		status = "okay";
+	};
+};
+
+&ssi1 {
+    fsl,mode = "i2s-master";
+	status = "okay";
+};
+
+&audmux {
+	pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_audmux_dac>;
+	status = "okay";
+};
