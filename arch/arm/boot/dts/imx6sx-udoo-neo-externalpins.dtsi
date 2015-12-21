@@ -158,7 +158,7 @@
 /*
 &audmux {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_audmux_dac>;
+	pinctrl-1 = <&pinctrl_audmux_dac>;
 	status = "okay";
 };*/
 
