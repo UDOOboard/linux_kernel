@@ -268,6 +268,12 @@
 #define SDHCI_DEFAULT_BOUNDARY_SIZE  (512 * 1024)
 #define SDHCI_DEFAULT_BOUNDARY_ARG   (ilog2(SDHCI_DEFAULT_BOUNDARY_SIZE) - 12)
 
+enum sdhci_cookie {
+COOKIE_UNMAPPED,
+COOKIE_MAPPED,
+COOKIE_GIVEN,
+};
+
 struct sdhci_ops {
 #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 	u32		(*read_l)(struct sdhci_host *host, int reg);
@@ -284,7 +290,9 @@ struct sdhci_ops {
 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-	unsigned int	(*get_max_timeout_counter)(struct sdhci_host *host);
+	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
+	void		(*set_timeout)(struct sdhci_host *host,
+				       struct mmc_command *cmd);
 	int		(*platform_bus_width)(struct sdhci_host *host,
 					       int width);
 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,

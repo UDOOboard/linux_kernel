@@ -106,6 +106,7 @@ static unsigned int const clks_init_on[] __initconst = {
 	IMX6QDL_CLK_ROM,
 	IMX6QDL_CLK_ARM,
 	IMX6QDL_CLK_OCRAM,
+	IMX6QDL_CLK_AXI,
 };
 
 static struct clk_div_table clk_enet_ref_table[] = {
@@ -205,7 +206,7 @@ static void of_assigned_ldb_sels(struct device_node *node,
 	}
 }
 
-static void __init mmdc_ch1_handshake(bool enable)
+static void mmdc_ch1_handshake(bool enable)
 {
 	unsigned int reg;
 
@@ -737,7 +738,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
 	clk[IMX6QDL_CLK_GPMI_IO]      = imx_clk_gate2("gpmi_io",       "enfc",              base + 0x78, 28);
 	clk[IMX6QDL_CLK_GPMI_APB]     = imx_clk_gate2("gpmi_apb",      "usdhc3",            base + 0x78, 30);
 	clk[IMX6QDL_CLK_ROM]          = imx_clk_gate2("rom",           "ahb",               base + 0x7c, 0);
-	clk[IMX6QDL_CLK_SATA]         = imx_clk_gate2("sata",          "ipg",               base + 0x7c, 4);
+	clk[IMX6QDL_CLK_SATA]         = imx_clk_gate2("sata",          "ahb",               base + 0x7c, 4);
 	clk[IMX6QDL_CLK_SDMA]         = imx_clk_gate2("sdma",          "ahb",               base + 0x7c, 6);
 	clk[IMX6QDL_CLK_SPBA]         = imx_clk_gate2("spba",          "ipg",               base + 0x7c, 12);
 	clk[IMX6QDL_CLK_SPDIF]        = imx_clk_gate2_shared("spdif",     "spdif_podf",     base + 0x7c, 14, &share_count_spdif);
@@ -814,6 +815,9 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
 	/* set pll5_video as default pll for lvds */
 	imx_clk_set_parent(clk[IMX6QDL_CLK_LDB_DI0_SEL], clk[IMX6QDL_CLK_PLL5_VIDEO_DIV]);
 	
+	imx_clk_set_parent(clk[IMX6QDL_CLK_AXI_ALT_SEL], clk[IMX6QDL_CLK_PLL3_PFD1_540M]);
+	imx_clk_set_parent(clk[IMX6QDL_CLK_AXI_SEL], clk[IMX6QDL_CLK_AXI_ALT_SEL]);
+
 	/*
 	 * The gpmi needs 100MHz frequency in the EDO/Sync mode,
 	 * We can not get the 100MHz from the pll2_pfd0_352m.
@@ -870,8 +874,8 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
 	if (IS_ENABLED(CONFIG_PCI_IMX6))
 		imx_clk_set_parent(clk[IMX6QDL_CLK_LVDS1_SEL], clk[IMX6QDL_CLK_SATA_REF]);
 
-	/* set eim_slow to 132Mhz */
-	imx_clk_set_rate(clk[IMX6QDL_CLK_EIM_SLOW], 132000000);
+	/* set eim_slow to 135Mhz */
+	imx_clk_set_rate(clk[IMX6QDL_CLK_EIM_SLOW], 135000000);
 
 	/*
 	 * Enable clocks only after both parent and rate are all initialized

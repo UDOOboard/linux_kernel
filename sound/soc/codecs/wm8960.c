@@ -205,28 +205,38 @@ static int wm8960_put_deemph(struct snd_kcontrol *kcontrol,
 	return wm8960_set_deemph(codec);
 }
 
-static const DECLARE_TLV_DB_SCALE(adc_tlv, -9700, 50, 0);
-static const DECLARE_TLV_DB_SCALE(dac_tlv, -12700, 50, 1);
+static const DECLARE_TLV_DB_SCALE(adc_tlv, -9750, 50, 1);
+static const DECLARE_TLV_DB_SCALE(inpga_tlv, -1725, 75, 0);
+static const DECLARE_TLV_DB_SCALE(dac_tlv, -12750, 50, 1);
 static const DECLARE_TLV_DB_SCALE(bypass_tlv, -2100, 300, 0);
 static const DECLARE_TLV_DB_SCALE(out_tlv, -12100, 100, 1);
-static const DECLARE_TLV_DB_SCALE(boost_tlv, -1200, 300, 1);
+static const DECLARE_TLV_DB_SCALE(lineinboost_tlv, -1500, 300, 1);
+static const unsigned int micboost_tlv[] = {
+	TLV_DB_RANGE_HEAD(2),
+	0, 1, TLV_DB_SCALE_ITEM(0, 1300, 0),
+	2, 3, TLV_DB_SCALE_ITEM(2000, 900, 0),
+};
 
 static const struct snd_kcontrol_new wm8960_snd_controls[] = {
 SOC_DOUBLE_R_TLV("Capture Volume", WM8960_LINVOL, WM8960_RINVOL,
-		 0, 63, 0, adc_tlv),
+		 0, 63, 0, inpga_tlv),
 SOC_DOUBLE_R("Capture Volume ZC Switch", WM8960_LINVOL, WM8960_RINVOL,
 	6, 1, 0),
 SOC_DOUBLE_R("Capture Switch", WM8960_LINVOL, WM8960_RINVOL,
 	7, 1, 0),
 
 SOC_SINGLE_TLV("Right Input Boost Mixer RINPUT3 Volume",
-	       WM8960_INBMIX1, 4, 7, 0, boost_tlv),
+	       WM8960_INBMIX1, 4, 7, 0, lineinboost_tlv),
 SOC_SINGLE_TLV("Right Input Boost Mixer RINPUT2 Volume",
-	       WM8960_INBMIX1, 1, 7, 0, boost_tlv),
+	       WM8960_INBMIX1, 1, 7, 0, lineinboost_tlv),
 SOC_SINGLE_TLV("Left Input Boost Mixer LINPUT3 Volume",
-	       WM8960_INBMIX2, 4, 7, 0, boost_tlv),
+	       WM8960_INBMIX2, 4, 7, 0, lineinboost_tlv),
 SOC_SINGLE_TLV("Left Input Boost Mixer LINPUT2 Volume",
-	       WM8960_INBMIX2, 1, 7, 0, boost_tlv),
+	       WM8960_INBMIX2, 1, 7, 0, lineinboost_tlv),
+SOC_SINGLE_TLV("Right Input Boost Mixer RINPUT1 Volume",
+		WM8960_RINPATH, 4, 3, 0, micboost_tlv),
+SOC_SINGLE_TLV("Left Input Boost Mixer LINPUT1 Volume",
+		WM8960_LINPATH, 4, 3, 0, micboost_tlv),
 
 SOC_DOUBLE_R_TLV("Playback Volume", WM8960_LDAC, WM8960_RDAC,
 		 0, 255, 0, dac_tlv),
@@ -247,7 +257,7 @@ SOC_SINGLE("PCM Playback -6dB Switch", WM8960_DACCTL1, 7, 1, 0),
 SOC_ENUM("ADC Polarity", wm8960_enum[0]),
 SOC_SINGLE("ADC High Pass Filter Switch", WM8960_DACCTL1, 0, 1, 0),
 
-SOC_ENUM("DAC Polarity", wm8960_enum[2]),
+SOC_ENUM("DAC Polarity", wm8960_enum[1]),
 SOC_SINGLE_BOOL_EXT("DAC Deemphasis Switch", 0,
 		    wm8960_get_deemph, wm8960_put_deemph),
 
@@ -1112,7 +1122,7 @@ static int wm8960_probe(struct snd_soc_codec *codec)
 static struct snd_soc_codec_driver soc_codec_dev_wm8960 = {
 	.probe =	wm8960_probe,
 	.set_bias_level = wm8960_set_bias_level,
-	.idle_bias_off = true,
+	.suspend_bias_off = true,
 };
 
 static const struct regmap_config wm8960_regmap = {

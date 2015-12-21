@@ -397,21 +397,21 @@
 			clock-names = "dma_apbh_bch", "dma_apbh_io";
 		};
 
-        gpmi: gpmi-nand@33002000{
+		gpmi: gpmi-nand@33002000{
 			compatible = "fsl,imx7d-gpmi-nand";
-            #address-cells = <1>;
-            #size-cells = <1>;
-            reg = <0x33002000 0x2000>, <0x33004000 0x4000>;
-            reg-names = "gpmi-nand", "bch";
-            interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
-            interrupt-names = "bch";
-            clocks = <&clks IMX7D_NAND_ROOT_CLK>,
-                 <&clks IMX7D_NAND_USDHC_BUS_ROOT_CLK>;
-            clock-names = "gpmi_io", "gpmi_bch_apb";
-            dmas = <&dma_apbh 0>;
-            dma-names = "rx-tx";
-            status = "disabled";
-        };
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0x33002000 0x2000>, <0x33004000 0x4000>;
+			reg-names = "gpmi-nand", "bch";
+			interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "bch";
+			clocks = <&clks IMX7D_NAND_ROOT_CLK>,
+				<&clks IMX7D_NAND_USDHC_BUS_ROOT_CLK>;
+			clock-names = "gpmi_io", "gpmi_bch_apb";
+			dmas = <&dma_apbh 0>;
+			dma-names = "rx-tx";
+			status = "disabled";
+		};
 
 		aips1: aips-bus@30000000 {
 			compatible = "fsl,aips-bus", "simple-bus";
@@ -495,6 +495,11 @@
 				#gpio-cells = <2>;
 				interrupt-controller;
 				#interrupt-cells = <2>;
+			};
+
+			iomuxc_lpsr_gpr: lpsr-gpr@30270000 {
+				compatible = "fsl,imx7d-lpsr-gpr";
+				reg = <0x30270000 0x10000>;
 			};
 
 			wdog1: wdog@30280000 {
@@ -655,6 +660,8 @@
 			caam_snvs: caam-snvs@30370000 {
 				compatible = "fsl,imx6q-caam-snvs";
 				reg = <0x30370000 0x10000>;
+				clocks = <&clks IMX7D_SNVS_ROOT_CLK>;
+				clock-names = "snvs";
 			};
 
 			snvs: snvs@30370000 {
@@ -668,6 +675,8 @@
 					reg = <0x34 0x58>;
 					interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
 						<GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
+					clocks = <&clks IMX7D_SNVS_ROOT_CLK>;
+					clock-names = "snvs";
 				};
 			};
 
@@ -675,6 +684,8 @@
 				compatible = "fsl, imx7d-snvs-pwrkey", "fsl,imx6sx-snvs-pwrkey";
 				reg = <0x30370000 0x10000>;
 				interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
+				clocks = <&clks IMX7D_SNVS_ROOT_CLK>;
+				clock-names = "snvs";
 				fsl,keycode = <116>; /* KEY_POWER */
 				fsl,wakeup;
 			};
@@ -966,10 +977,10 @@
 					status = "disabled";
 				};
 
-				uart2: serial@30870000 {
+				uart2: serial@30890000 {
 					compatible = "fsl,imx7d-uart",
 						     "fsl,imx6q-uart", "fsl,imx21-uart";
-					reg = <0x30870000 0x10000>;
+					reg = <0x30890000 0x10000>;
 					interrupts = <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>;
 					clocks = <&clks IMX7D_UART2_ROOT_CLK>,
 						<&clks IMX7D_UART2_ROOT_CLK>;
@@ -1372,7 +1383,7 @@
 				interrupts = <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>,
 					<GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>,
 					<GIC_SPI 120 IRQ_TYPE_LEVEL_HIGH>;
-				clocks = <&clks IMX7D_IPG_ROOT_CLK>,
+				clocks = <&clks IMX7D_ENET_AXI_ROOT_CLK>,
 					<&clks IMX7D_ENET_AXI_ROOT_CLK>,
 					<&clks IMX7D_ENET1_TIME_ROOT_CLK>,
 					<&clks IMX7D_PLL_ENET_MAIN_125M_CLK>,
@@ -1392,7 +1403,7 @@
 				interrupts = <GIC_SPI 100 IRQ_TYPE_LEVEL_HIGH>,
 					<GIC_SPI 101 IRQ_TYPE_LEVEL_HIGH>,
 					<GIC_SPI 102 IRQ_TYPE_LEVEL_HIGH>;
-				clocks = <&clks IMX7D_IPG_ROOT_CLK>,
+				clocks = <&clks IMX7D_ENET_AXI_ROOT_CLK>,
 					<&clks IMX7D_ENET_AXI_ROOT_CLK>,
 					<&clks IMX7D_ENET2_TIME_ROOT_CLK>,
 					<&clks IMX7D_PLL_ENET_MAIN_125M_CLK>,

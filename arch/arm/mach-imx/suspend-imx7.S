@@ -60,17 +60,19 @@
 #define PM_INFO_MX7_CCM_V_OFFSET		0x40
 #define PM_INFO_MX7_GPC_P_OFFSET		0x44
 #define PM_INFO_MX7_GPC_V_OFFSET		0x48
-#define PM_INFO_MX7_L2_P_OFFSET			0x4c
-#define PM_INFO_MX7_L2_V_OFFSET			0x50
+#define PM_INFO_MX7_SNVS_P_OFFSET		0x4c
+#define PM_INFO_MX7_SNVS_V_OFFSET		0x50
 #define PM_INFO_MX7_ANATOP_P_OFFSET		0x54
 #define PM_INFO_MX7_ANATOP_V_OFFSET		0x58
-#define PM_INFO_MX7_TTBR1_V_OFFSET		0x5c
-#define PM_INFO_DDRC_REG_NUM_OFFSET		0x60
-#define PM_INFO_DDRC_REG_OFFSET			0x64
-#define PM_INFO_DDRC_VALUE_OFFSET		0x68
-#define PM_INFO_DDRC_PHY_REG_NUM_OFFSET		0x164
-#define PM_INFO_DDRC_PHY_REG_OFFSET		0x168
-#define PM_INFO_DDRC_PHY_VALUE_OFFSET		0x16c
+#define PM_INFO_MX7_LPSR_P_OFFSET		0x5c
+#define PM_INFO_MX7_LPSR_V_OFFSET		0x60
+#define PM_INFO_MX7_TTBR1_V_OFFSET		0x64
+#define PM_INFO_DDRC_REG_NUM_OFFSET		0x68
+#define PM_INFO_DDRC_REG_OFFSET			0x6c
+#define PM_INFO_DDRC_VALUE_OFFSET		0x70
+#define PM_INFO_DDRC_PHY_REG_NUM_OFFSET		0x16c
+#define PM_INFO_DDRC_PHY_REG_OFFSET		0x170
+#define PM_INFO_DDRC_PHY_VALUE_OFFSET		0x174
 
 #define MX7_SRC_GPR1	0x74
 #define MX7_SRC_GPR2	0x78
@@ -85,6 +87,8 @@
 #define DDRC_SWCTL	0x320
 #define DDRC_SWSTAT	0x324
 #define DDRPHY_LP_CON0	0x18
+
+#define CCM_SNVS_LPCG	0x250
 
 	.align 3
 
@@ -450,6 +454,12 @@
 ENTRY(imx7_suspend)
 	push	{r4-r12}
 
+	/* make sure SNVS clk is enabled */
+	ldr	r11, [r0, #PM_INFO_MX7_CCM_V_OFFSET]
+	add	r11, r11, #0x4000
+	ldr	r7, =0x3
+	str	r7, [r11, #CCM_SNVS_LPCG]
+
 	/* check whether it is a standby mode */
 	ldr	r11, [r0, #PM_INFO_MX7_GPC_V_OFFSET]
 	ldr	r7, [r11, #GPC_PGC_C0]
@@ -490,7 +500,25 @@ ENTRY(imx7_suspend)
 	beq	ddr_only_self_refresh
 
 	ddr_enter_retention
-	b	ddr_retention_enter_out
+	/* enter LPSR mode if resume addr is valid */
+	ldr	r11, [r0, #PM_INFO_MX7_LPSR_V_OFFSET]
+	ldr	r7, [r11]
+	cmp	r7, #0x0
+	beq	ddr_retention_enter_out
+
+	/* shut down vddsoc to enter lpsr mode */
+	ldr	r11, [r0, #PM_INFO_MX7_SNVS_V_OFFSET]
+	ldr	r7, [r11, #0x38]
+	orr	r7, r7, #0x60
+	str	r7, [r11, #0x38]
+wait_shutdown:
+	wfi
+	nop
+	nop
+	nop
+	nop
+	b	wait_shutdown
+
 ddr_only_self_refresh:
 	ddrc_enter_self_refresh
 ddr_retention_enter_out:
@@ -523,6 +551,12 @@ wfi_ddr_retention_out:
 
 	restore_ttbr1
 standby_out:
+	/* make sure SNVS clk is disabled */
+	ldr	r11, [r0, #PM_INFO_MX7_CCM_V_OFFSET]
+	add	r11, r11, #0x4000
+	ldr	r7, =0x0
+	str	r7, [r11, #CCM_SNVS_LPCG]
+
 	pop	{r4-r12}
 	/* return to suspend finish */
 	mov	pc, lr
@@ -557,6 +591,11 @@ resume:
 dsm_ddr_self_refresh_out:
 	ddrc_exit_self_refresh
 dsm_ddr_retention_out:
+	/* make sure SNVS clk is disabled */
+	ldr	r11, [r0, #PM_INFO_MX7_CCM_P_OFFSET]
+	add	r11, r11, #0x4000
+	ldr	r7, =0x0
+	str	r7, [r11, #CCM_SNVS_LPCG]
 
 	mov	pc, lr
 ENDPROC(imx7_suspend)

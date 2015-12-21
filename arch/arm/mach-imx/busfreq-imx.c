@@ -273,8 +273,6 @@ static void exit_lpm_imx6_up(void)
 	else
 		imx_clk_set_rate(ahb_clk, LPAPM_CLK / 3);
 	imx_clk_set_rate(ocram_clk, LPAPM_CLK / 2);
-	/* set periph_clk2 to pll3 */
-	imx_clk_set_parent(periph_clk2_sel, pll3);
 	/* set periph clk to from pll2_bus on i.MX6UL */
 	if (cpu_is_imx6ul())
 		imx_clk_set_parent(periph_pre_clk, pll2_bus);
@@ -282,6 +280,8 @@ static void exit_lpm_imx6_up(void)
 	else
 		imx_clk_set_parent(periph_pre_clk, pll2_400);
 	imx_clk_set_parent(periph_clk, periph_pre_clk);
+	/* set periph_clk2 to pll3 */
+	imx_clk_set_parent(periph_clk2_sel, pll3);
 
 	if (ddr_type == MMDC_MDMISC_DDR_TYPE_DDR3)
 		update_ddr_freq_imx6_up(ddr_normal_rate);
@@ -1261,6 +1261,10 @@ static int busfreq_probe(struct platform_device *pdev)
 	register_pm_notifier(&imx_bus_freq_pm_notifier);
 	register_reboot_notifier(&imx_busfreq_reboot_notifier);
 
+	/* enter low bus mode if no high speed device enabled */
+	schedule_delayed_work(&bus_freq_daemon,
+		msecs_to_jiffies(10000));
+
 	/*
 	 * Need to make sure to an entry for the ddr freq change code address in the IRAM page table.
 	 * This is only required if the DDR freq code and suspend/idle code are in different OCRAM spaces.
@@ -1298,6 +1302,9 @@ static int busfreq_probe(struct platform_device *pdev)
 			(clk_get_rate(m4_clk) > LPAPM_CLK))
 			high_bus_count++;
 	}
+
+	if (cpu_is_imx7d() && imx_src_is_m4_enabled())
+		high_bus_count++;
 
 	if (err) {
 		dev_err(busfreq_dev, "Busfreq init of ddr controller failed\n");

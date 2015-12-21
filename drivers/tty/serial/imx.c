@@ -246,7 +246,6 @@ struct imx_port {
 	unsigned int		tx_bytes;
 	unsigned int		dma_tx_nents;
 	struct delayed_work	tsk_dma_tx;
-	struct work_struct	tsk_dma_rx;
 	wait_queue_head_t	dma_wait;
 	unsigned int            saved_reg[10];
 #define DMA_TX_IS_WORKING 1
@@ -896,7 +895,6 @@ static int imx_setup_ufcr(struct imx_port *sport, unsigned int mode)
 }
 
 #define RX_BUF_SIZE	(PAGE_SIZE)
-static int start_rx_dma(struct imx_port *sport);
 
 static void dma_rx_push_data(struct imx_port *sport, struct tty_struct *tty,
 				unsigned int start, unsigned int end)
@@ -917,9 +915,8 @@ static void dma_rx_push_data(struct imx_port *sport, struct tty_struct *tty,
 	}
 }
 
-static void dma_rx_work(struct work_struct *w)
+static void dma_rx_work(struct imx_port *sport)
 {
-	struct imx_port *sport = container_of(w, struct imx_port, tsk_dma_rx);
 	struct tty_struct *tty = sport->port.state->port.tty;
 	unsigned int cur_idx = sport->rx_buf.cur_idx;
 
@@ -980,7 +977,7 @@ static void dma_rx_callback(void *data)
 		dev_err(sport->port.dev, "overwrite!\n");
 
 	if (count)
-		schedule_work(&sport->tsk_dma_rx);
+		dma_rx_work(sport);
 }
 
 static int start_rx_dma(struct imx_port *sport)
@@ -1219,10 +1216,8 @@ static int imx_startup(struct uart_port *port)
 		&& !sport->dma_is_inited)
 		imx_uart_dma_init(sport);
 
-	if (sport->dma_is_inited) {
+	if (sport->dma_is_inited)
 		INIT_DELAYED_WORK(&sport->tsk_dma_tx, dma_tx_work);
-		INIT_WORK(&sport->tsk_dma_rx, dma_rx_work);
-	}
 
 	spin_lock_irqsave(&sport->port.lock, flags);
 	/*
@@ -1966,6 +1961,8 @@ static int serial_imx_suspend(struct platform_device *dev, pm_message_t state)
 	sport->saved_reg[9] = readl(sport->port.membase + IMX21_UTS);
 	clk_disable_unprepare(sport->clk_ipg);
 
+	pinctrl_pm_select_sleep_state(&dev->dev);
+
 	return 0;
 }
 
@@ -1973,6 +1970,8 @@ static int serial_imx_resume(struct platform_device *dev)
 {
 	struct imx_port *sport = platform_get_drvdata(dev);
 	unsigned int val;
+
+	pinctrl_pm_select_default_state(&dev->dev);
 
 	clk_prepare_enable(sport->clk_ipg);
 	writel(sport->saved_reg[4], sport->port.membase + UFCR);

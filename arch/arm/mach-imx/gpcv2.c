@@ -116,8 +116,9 @@ void imx_gpcv2_set_slot_ack(u32 index, enum imx_gpc_slot m_core,
 	if (index >= MAX_SLOT_NUMBER)
 		pr_err("Invalid slot index!\n");
 	/* set slot */
-	writel_relaxed((mode + 1) << (m_core * 2), gpc_base +
-		GPC_SLOT0_CFG + index * 4);
+	writel_relaxed(readl_relaxed(gpc_base + GPC_SLOT0_CFG + index * 4)|
+		((mode + 1) << (m_core * 2)),
+		gpc_base + GPC_SLOT0_CFG + index * 4);
 
 	if (ack) {
 		/* set ack */
@@ -306,16 +307,16 @@ void imx_gpcv2_set_cpu_power_gate_in_idle(bool pdn)
 	if (pdn) {
 		imx_gpcv2_set_slot_ack(0, CORE0_A7, false, false);
 		if (num_online_cpus() > 1)
-			imx_gpcv2_set_slot_ack(1, CORE1_A7, false, false);
-		imx_gpcv2_set_slot_ack(2, SCU_A7, false, true);
+			imx_gpcv2_set_slot_ack(2, CORE1_A7, false, false);
+		imx_gpcv2_set_slot_ack(3, SCU_A7, false, true);
 		imx_gpcv2_set_slot_ack(6, SCU_A7, true, false);
 		imx_gpcv2_set_slot_ack(7, CORE0_A7, true, false);
 		if (num_online_cpus() > 1)
 			imx_gpcv2_set_slot_ack(8, CORE1_A7, true, true);
 	} else {
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 0 * 0x4);
-		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 1 * 0x4);
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 2 * 0x4);
+		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 3 * 0x4);
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 6 * 0x4);
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 7 * 0x4);
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 8 * 0x4);
@@ -352,7 +353,9 @@ static void imx_gpcv2_mf_mix_off(void)
 			return;
 
 	pr_info("Turn off Mega/Fast mix in DSM\n");
-	imx_gpcv2_set_mix_phy_gate_by_lpm(1, 5);
+
+	imx_gpcv2_set_slot_ack(1, FAST_MEGA_MIX, false, false);
+	imx_gpcv2_set_slot_ack(5, FAST_MEGA_MIX, true, false);
 	imx_gpcv2_set_m_core_pgc(true, GPC_PGC_FM);
 }
 
@@ -399,8 +402,9 @@ void imx_gpcv2_pre_suspend(bool arm_power_off)
 		 */
 		imx_gpcv2_set_slot_ack(0, CORE0_A7, false, false);
 		imx_gpcv2_set_slot_ack(2, SCU_A7, false, true);
-
-		imx_gpcv2_mf_mix_off();
+		if ((!imx_src_is_m4_enabled()) ||
+		    (imx_src_is_m4_enabled() && imx_mu_is_m4_in_stop()))
+			 imx_gpcv2_mf_mix_off();
 
 		imx_gpcv2_set_slot_ack(6, SCU_A7, true, false);
 		imx_gpcv2_set_slot_ack(7, CORE0_A7, true, true);
@@ -421,7 +425,34 @@ void imx_gpcv2_pre_suspend(bool arm_power_off)
 void imx_gpcv2_post_resume(void)
 {
 	void __iomem *reg_imr1 = gpc_base + GPC_IMR1_CORE0;
-	int i;
+	int i, val;
+
+	/* only external IRQs to wake up LPM and core 0/1 */
+	val = readl_relaxed(gpc_base + GPC_LPCR_A7_BSC);
+	val |= BM_LPCR_A7_BSC_IRQ_SRC_A7_WAKEUP;
+	writel_relaxed(val, gpc_base + GPC_LPCR_A7_BSC);
+	/* mask m4 dsm trigger if M4 not enabled*/
+	if (!imx_src_is_m4_enabled())
+		writel_relaxed(readl_relaxed(gpc_base + GPC_LPCR_M4) |
+			BM_LPCR_M4_MASK_DSM_TRIGGER, gpc_base + GPC_LPCR_M4);
+	/* set mega/fast mix in A7 domain */
+	writel_relaxed(0x1, gpc_base + GPC_PGC_CPU_MAPPING);
+	/* set SCU timing */
+	writel_relaxed((0x59 << 10) | 0x5B | (0x51 << 20),
+		gpc_base + GPC_PGC_SCU_TIMING);
+
+	val = readl_relaxed(gpc_base + GPC_SLPCR);
+	val &= ~(BM_SLPCR_EN_DSM);
+	if (!imx_src_is_m4_enabled())
+		val &= ~(BM_SLPCR_VSTBY | BM_SLPCR_RBC_EN |
+			BM_SLPCR_SBYOS | BM_SLPCR_BYPASS_PMIC_READY);
+	val |= BM_SLPCR_EN_A7_FASTWUP_WAIT_MODE;
+	writel_relaxed(val, gpc_base + GPC_SLPCR);
+
+	/* disable memory low power mode */
+	val = readl_relaxed(gpc_base + GPC_MLPCR);
+	val |= BM_GPC_MLPCR_MEMLP_CTL_DIS;
+	writel_relaxed(val, gpc_base + GPC_MLPCR);
 
 	for (i = 0; i < IMR_NUM; i++)
 		writel_relaxed(gpcv2_saved_imrs[i], reg_imr1 + i * 4);
@@ -434,7 +465,11 @@ void imx_gpcv2_post_resume(void)
 	imx_gpcv2_set_m_core_pgc(false, GPC_PGC_SCU);
 	imx_gpcv2_set_m_core_pgc(false, GPC_PGC_FM);
 	for (i = 0; i < MAX_SLOT_NUMBER; i++)
+	{
+		if (i==1||i==4) /* skip slts m4 uses */
+			continue;
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + i * 0x4);
+        }
 	writel_relaxed(BM_GPC_PGC_ACK_SEL_A7_DUMMY_PUP_ACK |
 		BM_GPC_PGC_ACK_SEL_A7_DUMMY_PDN_ACK,
 		gpc_base + GPC_PGC_ACK_SEL_A7);
@@ -485,31 +520,31 @@ static int imx_usb_hsic_regulator_notify(struct notifier_block *nb,
 {
 	u32 val = 0;
 
+	val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
+	writel_relaxed(val | BIT(6), gpc_base + GPC_PGC_CPU_MAPPING);
+
 	switch (event) {
 	case REGULATOR_EVENT_PRE_ENABLE:
-		val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
-		writel_relaxed(val | BIT(6), gpc_base + GPC_PGC_CPU_MAPPING);
-
-		val = readl_relaxed(gpc_base + GPC_PGC_USB_HSIC_PHY);
-		writel_relaxed(val | BIT(0), gpc_base + GPC_PGC_USB_HSIC_PHY);
-
 		val = readl_relaxed(gpc_base + GPC_PU_PGC_SW_PUP_REQ);
 		writel_relaxed(val | BIT(4), gpc_base + GPC_PU_PGC_SW_PUP_REQ);
-
+		while (readl_relaxed(gpc_base + GPC_PU_PGC_SW_PUP_REQ) & BIT(4))
+			;
 		break;
 	case REGULATOR_EVENT_PRE_DISABLE:
+		/* only disable phy need to set PGC bit, enable does NOT need */
+		imx_gpcv2_set_m_core_pgc(true, GPC_PGC_USB_HSIC_PHY);
 		val = readl_relaxed(gpc_base + GPC_PU_PGC_SW_PDN_REQ);
 		writel_relaxed(val | BIT(4), gpc_base + GPC_PU_PGC_SW_PDN_REQ);
-
-		val = readl_relaxed(gpc_base + GPC_PGC_USB_HSIC_PHY);
-		writel_relaxed(val | BIT(0), gpc_base + GPC_PGC_USB_HSIC_PHY);
-
-		val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
-		writel_relaxed(val & ~BIT(6), gpc_base + GPC_PGC_CPU_MAPPING);
+		while (readl_relaxed(gpc_base + GPC_PU_PGC_SW_PDN_REQ) & BIT(4))
+			;
+		imx_gpcv2_set_m_core_pgc(false, GPC_PGC_USB_HSIC_PHY);
 		break;
 	default:
 		break;
 	}
+
+	val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
+	writel_relaxed(val & ~BIT(6), gpc_base + GPC_PGC_CPU_MAPPING);
 
 	return NOTIFY_OK;
 }
@@ -519,27 +554,31 @@ static int imx_pcie_regulator_notify(struct notifier_block *nb,
 {
 	u32 val = 0;
 
+	val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
+	writel_relaxed(val | BIT(3), gpc_base + GPC_PGC_CPU_MAPPING);
+
 	switch (event) {
 	case REGULATOR_EVENT_PRE_ENABLE:
-		val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
-		writel_relaxed(val | BIT(3), gpc_base + GPC_PGC_CPU_MAPPING);
-
 		val = readl_relaxed(gpc_base + GPC_PU_PGC_SW_PUP_REQ);
 		writel_relaxed(val | BIT(1), gpc_base + GPC_PU_PGC_SW_PUP_REQ);
+		while (readl_relaxed(gpc_base + GPC_PU_PGC_SW_PUP_REQ) & BIT(1))
+			;
 		break;
 	case REGULATOR_EVENT_PRE_DISABLE:
+		/* only disable phy need to set PGC bit, enable does NOT need */
+		imx_gpcv2_set_m_core_pgc(true, GPC_PGC_PCIE_PHY);
 		val = readl_relaxed(gpc_base + GPC_PU_PGC_SW_PDN_REQ);
 		writel_relaxed(val | BIT(1), gpc_base + GPC_PU_PGC_SW_PDN_REQ);
-
-		val = readl_relaxed(gpc_base + GPC_PGC_PCIE_PHY);
-		writel_relaxed(val | BIT(0), gpc_base + GPC_PGC_PCIE_PHY);
-
-		val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
-		writel_relaxed(val & ~BIT(3), gpc_base + GPC_PGC_CPU_MAPPING);
+		while (readl_relaxed(gpc_base + GPC_PU_PGC_SW_PDN_REQ) & BIT(1))
+			;
+		imx_gpcv2_set_m_core_pgc(false, GPC_PGC_PCIE_PHY);
 		break;
 	default:
 		break;
 	}
+
+	val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
+	writel_relaxed(val & ~BIT(3), gpc_base + GPC_PGC_CPU_MAPPING);
 
 	return NOTIFY_OK;
 }
@@ -550,27 +589,31 @@ static int imx_mipi_regulator_notify(struct notifier_block *nb,
 {
 	u32 val = 0;
 
+	val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
+	writel_relaxed(val | BIT(2), gpc_base + GPC_PGC_CPU_MAPPING);
+
 	switch (event) {
 	case REGULATOR_EVENT_PRE_ENABLE:
-		val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
-		writel_relaxed(val | BIT(2), gpc_base + GPC_PGC_CPU_MAPPING);
-
 		val = readl_relaxed(gpc_base + GPC_PU_PGC_SW_PUP_REQ);
 		writel_relaxed(val | BIT(0), gpc_base + GPC_PU_PGC_SW_PUP_REQ);
+		while (readl_relaxed(gpc_base + GPC_PU_PGC_SW_PUP_REQ) & BIT(0))
+			;
 		break;
 	case REGULATOR_EVENT_PRE_DISABLE:
+		/* only disable phy need to set PGC bit, enable does NOT need */
+		imx_gpcv2_set_m_core_pgc(true, GPC_PGC_MIPI_PHY);
 		val = readl_relaxed(gpc_base + GPC_PU_PGC_SW_PDN_REQ);
 		writel_relaxed(val | BIT(0), gpc_base + GPC_PU_PGC_SW_PDN_REQ);
-
-		val = readl_relaxed(gpc_base + GPC_PGC_MIPI_PHY);
-		writel_relaxed(val | BIT(0), gpc_base + GPC_PGC_MIPI_PHY);
-
-		val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
-		writel_relaxed(val & ~BIT(2), gpc_base + GPC_PGC_CPU_MAPPING);
+		while (readl_relaxed(gpc_base + GPC_PU_PGC_SW_PDN_REQ) & BIT(0))
+			;
+		imx_gpcv2_set_m_core_pgc(false, GPC_PGC_MIPI_PHY);
 		break;
 	default:
 		break;
 	}
+
+	val = readl_relaxed(gpc_base + GPC_PGC_CPU_MAPPING);
+	writel_relaxed(val & ~BIT(2), gpc_base + GPC_PGC_CPU_MAPPING);
 
 	return NOTIFY_OK;
 }
@@ -615,9 +658,10 @@ void __init imx_gpcv2_init(void)
 	val = readl_relaxed(gpc_base + GPC_LPCR_A7_BSC);
 	val |= BM_LPCR_A7_BSC_IRQ_SRC_A7_WAKEUP;
 	writel_relaxed(val, gpc_base + GPC_LPCR_A7_BSC);
-	/* mask m4 dsm trigger */
-	writel_relaxed(readl_relaxed(gpc_base + GPC_LPCR_M4) |
-		BM_LPCR_M4_MASK_DSM_TRIGGER, gpc_base + GPC_LPCR_M4);
+	/* mask m4 dsm trigger if M4 not enabled*/
+	if (!imx_src_is_m4_enabled())
+		writel_relaxed(readl_relaxed(gpc_base + GPC_LPCR_M4) |
+			BM_LPCR_M4_MASK_DSM_TRIGGER, gpc_base + GPC_LPCR_M4);
 	/* set mega/fast mix in A7 domain */
 	writel_relaxed(0x1, gpc_base + GPC_PGC_CPU_MAPPING);
 	/* set SCU timing */
@@ -628,8 +672,10 @@ void __init imx_gpcv2_init(void)
 		gpc_base + GPC_PGC_ACK_SEL_A7);
 
 	val = readl_relaxed(gpc_base + GPC_SLPCR);
-	val &= ~(BM_SLPCR_EN_DSM | BM_SLPCR_VSTBY | BM_SLPCR_RBC_EN |
-		BM_SLPCR_SBYOS | BM_SLPCR_BYPASS_PMIC_READY);
+	val &= ~(BM_SLPCR_EN_DSM);
+	if (!imx_src_is_m4_enabled())
+		val &= ~(BM_SLPCR_VSTBY | BM_SLPCR_RBC_EN |
+			BM_SLPCR_SBYOS | BM_SLPCR_BYPASS_PMIC_READY);
 	val |= BM_SLPCR_EN_A7_FASTWUP_WAIT_MODE;
 	writel_relaxed(val, gpc_base + GPC_SLPCR);
 

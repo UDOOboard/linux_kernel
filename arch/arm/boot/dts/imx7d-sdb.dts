@@ -36,7 +36,6 @@
 			100
 			>;
 		default-brightness-level = <94>;
-
 	};
 
 	pxp_v4l2_out {
@@ -75,7 +74,7 @@
 			regulator-name = "can2-3v3";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
-			gpio = <&gpio1 7 GPIO_ACTIVE_LOW>;
+			gpio = <&gpio2 14 GPIO_ACTIVE_LOW>;
 		};
 
 		reg_vref_1v8: regulator@3 {
@@ -102,6 +101,7 @@
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
 			gpio = <&gpio5 2 GPIO_ACTIVE_HIGH>;
+			startup-delay-us = <200000>;
 			enable-active-high;
 		};
 
@@ -111,12 +111,15 @@
 			regulator-max-microvolt = <5000000>;
 			regulator-name = "wlreg_on";
 			gpio = <&gpio4 21 GPIO_ACTIVE_HIGH>;
+			startup-delay-us = <100>; /* WL_REG_ON needs 61 usec delay */
 			enable-active-high;
 		};
 	};
 
 	bcmdhd_wlan_0: bcmdhd_wlan@0 {
 		compatible = "android,bcmdhd_wlan";
+		/* OOB_IRQ: ECSPI2_SCLK (gpio4 20) */
+		gpios = <&gpio4 20 0>;
 		wlreg_on-supply = <&wlreg_on>;
 	};
 
@@ -185,8 +188,34 @@
     };
 };
 
+&adc1 {
+	vref-supply = <&reg_vref_1v8>;
+	status = "okay";
+};
+
+&adc2 {
+	vref-supply = <&reg_vref_1v8>;
+	status = "okay";
+};
+
+&clks {
+	assigned-clocks = <&clks IMX7D_PLL_AUDIO_POST_DIV>;
+	assigned-clock-rates = <884736000>;
+};
+
 &cpu0 {
 	arm-supply = <&sw1a_reg>;
+};
+
+&csi1 {
+	csi-mux-mipi = <&gpr 0x14 4>;
+	status = "okay";
+
+	port {
+		csi_ep: endpoint {
+			remote-endpoint = <&csi_mipi_ep>;
+		};
+	};
 };
 
 &epdc {
@@ -202,28 +231,6 @@
 &epxp {
 	status = "okay";
 };
-
-&adc1 {
-	vref-supply = <&reg_vref_1v8>;
-	status = "okay";
-};
-
-&adc2 {
-	vref-supply = <&reg_vref_1v8>;
-	status = "okay";
-};
-
-&csi1 {
-	csi-mux-mipi = <&gpr 0x14 4>;
-	status = "okay";
-
-	port {
-		csi_ep: endpoint {
-			remote-endpoint = <&csi_mipi_ep>;
-		};
-	};
-};
-
 
 &fec1 {
 	pinctrl-names = "default";
@@ -311,7 +318,7 @@
 		regulators {
 			sw1a_reg: sw1a {
 				regulator-min-microvolt = <700000>;
-				regulator-max-microvolt = <1475000>;
+				regulator-max-microvolt = <3300000>;
 				regulator-boot-on;
 				regulator-always-on;
 				regulator-ramp-delay = <6250>;
@@ -548,46 +555,6 @@
 			};
 		};
 	};
-};
-
-&lcdif {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_lcdif_dat
-		     &pinctrl_lcdif_ctrl>;
-	pinctrl-assert-gpios = <&gpio_spi 7 GPIO_ACTIVE_HIGH>;
-	display = <&display0>;
-	status = "okay";
-
-	display0: display {
-		bits-per-pixel = <16>;
-		bus-width = <24>;
-
-		display-timings {
-			native-mode = <&timing0>;
-			timing0: timing0 {
-			clock-frequency = <9200000>;
-			hactive = <480>;
-			vactive = <272>;
-			hfront-porch = <8>;
-			hback-porch = <4>;
-			hsync-len = <41>;
-			vback-porch = <2>;
-			vfront-porch = <4>;
-			vsync-len = <10>;
-
-			hsync-active = <0>;
-			vsync-active = <0>;
-			de-active = <1>;
-			pixelclk-active = <0>;
-			};
-		};
-	};
-};
-
-&pwm1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_pwm1>;
-	status = "okay";
 };
 
 &iomuxc {
@@ -898,7 +865,8 @@
 				MX7D_PAD_SD2_DATA1__SD2_DATA1   0x59
 				MX7D_PAD_SD2_DATA2__SD2_DATA2   0x59
 				MX7D_PAD_SD2_DATA3__SD2_DATA3   0x59
-				MX7D_PAD_ECSPI2_MOSI__GPIO4_IO21	0x59 /* WL_REG_ON */
+				MX7D_PAD_ECSPI2_MOSI__GPIO4_IO21	0x19 /* WL_REG_ON */
+				MX7D_PAD_ECSPI2_SCLK__GPIO4_IO20	0x19 /* WL OOB */
 			>;
 		};
 
@@ -923,7 +891,6 @@
 				MX7D_PAD_SD2_DATA3__SD2_DATA3   0x5b
 			>;
 		};
-
 
 		pinctrl_usdhc3: usdhc3grp {
 			fsl,pins = <
@@ -1010,14 +977,49 @@
 		pinctrl_hog_2: hoggrp-2 {
 			fsl,pins = <
 				MX7D_PAD_GPIO1_IO05__GPIO1_IO5	0x14
-				MX7D_PAD_GPIO1_IO07__GPIO1_IO7	0x59  /* CAN_STBY */
+				MX7D_PAD_EPDC_DATA14__GPIO2_IO14 0x59  /* CAN_STBY */
 				MX7D_PAD_GPIO1_IO00__WDOD1_WDOG_B 0x74
 			>;
 		};
+
 		pinctrl_pwm1: pwm1grp {
 			fsl,pins = <
 				MX7D_PAD_GPIO1_IO01__PWM1_OUT	0x110b0
 			>;
+		};
+	};
+};
+
+&lcdif {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lcdif_dat
+		     &pinctrl_lcdif_ctrl>;
+	pinctrl-assert-gpios = <&gpio_spi 7 GPIO_ACTIVE_HIGH>;
+	display = <&display0>;
+	status = "okay";
+
+	display0: display {
+		bits-per-pixel = <16>;
+		bus-width = <24>;
+
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: timing0 {
+			clock-frequency = <9200000>;
+			hactive = <480>;
+			vactive = <272>;
+			hfront-porch = <8>;
+			hback-porch = <4>;
+			hsync-len = <41>;
+			vback-porch = <2>;
+			vfront-porch = <4>;
+			vsync-len = <10>;
+
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <0>;
+			};
 		};
 	};
 };
@@ -1029,9 +1031,10 @@
 	status = "okay";
 };
 
-&clks {
-	assigned-clocks = <&clks IMX7D_PLL_AUDIO_POST_DIV>;
-	assigned-clock-rates = <884736000>;
+&pwm1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pwm1>;
+	status = "okay";
 };
 
 &sai1 {

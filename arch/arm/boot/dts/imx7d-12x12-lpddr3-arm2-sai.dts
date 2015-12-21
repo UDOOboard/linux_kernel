@@ -22,13 +22,22 @@
 };
 
 &iomuxc {
-	pinctrl-0 = <&pinctrl_hog_1 &pinctrl_hog>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&pinctrl_hog_1 &pinctrl_hog_headphone_det>;
+	pinctrl-1 = <&pinctrl_hog_1 &pinctrl_hog_sd2_vselect>;
+};
+
+&sai1 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&pinctrl_sai1>;
+	pinctrl-1 = <&pinctrl_sai1>;
+	status = "okay";
+};
+
+&sdma {
+	status = "okay";
 };
 
 &usdhc2 {
 	no-1-8-v;
-};
-
-&sai1 {
-	status = "okay";
 };

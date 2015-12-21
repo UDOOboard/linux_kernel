@@ -3833,6 +3833,9 @@ wl_cfg80211_disconnect(struct wiphy *wiphy, struct net_device *dev,
 			dhd_set_cpucore(dhd, FALSE);
 	}
 #endif /* CUSTOM_SET_CPUCORE */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
+               cfg80211_disconnected(dev, reason_code, NULL, 0, GFP_KERNEL);
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)) */
 
 	return err;
 }
@@ -7905,10 +7908,6 @@ wl_notify_connect_status(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 					return 0;
 				}
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
-				cfg80211_disconnected(ndev, reason, NULL, 0, GFP_KERNEL);
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)) */
-
 				wl_clr_drv_status(cfg, CONNECTED, ndev);
 				if (! wl_get_drv_status(cfg, DISCONNECTING, ndev)) {
 					/* To make sure disconnect, explictly send dissassoc
@@ -9161,9 +9160,14 @@ static void wl_scan_timeout(unsigned long data)
 static s32
 wl_cfg80211_netdev_notifier_call(struct notifier_block * nb,
 	unsigned long state,
-	void *ndev)
+	void *ptr)
 {
-	struct net_device *dev = ndev;
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0))
+	struct net_device *dev = ptr;
+#else
+	struct net_device *dev = netdev_notifier_info_to_dev(ptr);
+#endif
+
 	struct wireless_dev *wdev = dev->ieee80211_ptr;
 	struct bcm_cfg80211 *cfg = g_bcm_cfg;
 
@@ -9211,7 +9215,7 @@ wl_cfg80211_netdev_notifier_call(struct notifier_block * nb,
 
 		case NETDEV_UNREGISTER:
 			/* after calling list_del_rcu(&wdev->list) */
-			wl_dealloc_netinfo(cfg, ndev);
+			wl_dealloc_netinfo(cfg, dev);
 			break;
 		case NETDEV_GOING_DOWN:
 			/* At NETDEV_DOWN state, wdev_cleanup_work work will be called.

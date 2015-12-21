@@ -269,7 +269,11 @@
 	assigned-clocks = <&clks IMX6UL_CLK_SIM_SEL>;
 	assigned-clock-parents = <&clks IMX6UL_CLK_SIM_PODF>;
 	assigned-clock-rates = <240000000>;
-	pinctrl-assert-gpios = <&gpio4 23 GPIO_ACTIVE_LOW>;
+	/* GPIO_ACTIVE_HIGH/LOW:sim card voltage control
+	 * NCN8025:Vcc = ACTIVE_HIGH?5V:3V
+	 * TDA8035:Vcc = ACTIVE_HIGH?5V:1.8V
+	 */
+	pinctrl-assert-gpios = <&gpio4 23 GPIO_ACTIVE_HIGH>;
 	port = <1>;
 	sven_low_active;
 	status = "okay";
@@ -327,6 +331,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc2>;
 	no-1-8-v;
+	non-removable;
 	keep-power-in-suspend;
 	enable-sdio-wakeup;
 	status = "okay";
@@ -526,10 +531,10 @@
 		pinctrl_sim2_1: sim2grp-1 {
 			fsl,pins = <
 				MX6UL_PAD_CSI_DATA03__SIM2_PORT1_PD		0xb808
-				MX6UL_PAD_CSI_DATA04__SIM2_PORT1_CLK		0x31
-				MX6UL_PAD_CSI_DATA05__SIM2_PORT1_RST_B		0xb808
-				MX6UL_PAD_CSI_DATA06__SIM2_PORT1_SVEN		0xb808
-				MX6UL_PAD_CSI_DATA07__SIM2_PORT1_TRXD		0xb809
+				MX6UL_PAD_CSI_DATA04__SIM2_PORT1_CLK		0x11
+				MX6UL_PAD_CSI_DATA05__SIM2_PORT1_RST_B		0xb810
+				MX6UL_PAD_CSI_DATA06__SIM2_PORT1_SVEN		0xb810
+				MX6UL_PAD_CSI_DATA07__SIM2_PORT1_TRXD		0xb811
 				MX6UL_PAD_CSI_DATA02__GPIO4_IO23		0x3008
 			>;
 		};
@@ -562,7 +567,7 @@
 		pinctrl_usdhc1: usdhc1grp {
 			fsl,pins = <
 				MX6UL_PAD_SD1_CMD__USDHC1_CMD     0x17059
-				MX6UL_PAD_SD1_CLK__USDHC1_CLK     0x10059
+				MX6UL_PAD_SD1_CLK__USDHC1_CLK     0x10071
 				MX6UL_PAD_SD1_DATA0__USDHC1_DATA0 0x17059
 				MX6UL_PAD_SD1_DATA1__USDHC1_DATA1 0x17059
 				MX6UL_PAD_SD1_DATA2__USDHC1_DATA2 0x17059
@@ -594,7 +599,7 @@
 
 		pinctrl_usdhc2: usdhc2grp {
 			fsl,pins = <
-				MX6UL_PAD_NAND_RE_B__USDHC2_CLK     0x17059
+				MX6UL_PAD_NAND_RE_B__USDHC2_CLK     0x10069
 				MX6UL_PAD_NAND_WE_B__USDHC2_CMD     0x17059
 				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0 0x17059
 				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1 0x17059
@@ -604,7 +609,7 @@
 		};
 
 		pinctrl_tsc: tscgrp {
-			fsl,pin = <
+			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0xb0
 				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02	0xb0
 				MX6UL_PAD_GPIO1_IO03__GPIO1_IO03	0xb0

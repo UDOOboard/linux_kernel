@@ -208,7 +208,6 @@ static bool spi_imx_can_dma(struct spi_master *master, struct spi_device *spi,
 	struct spi_imx_data *spi_imx = spi_master_get_devdata(master);
 
 	if (spi_imx->dma_is_inited &&
-		(transfer->len > spi_imx_get_fifosize(spi_imx)) &&
 		(transfer->len > spi_imx_get_fifosize(spi_imx)))
 		return true;
 	return false;
@@ -1286,12 +1285,32 @@ static int spi_imx_remove(struct platform_device *pdev)
 	return 0;
 }
 
+#ifdef CONFIG_PM_SLEEP
+static int spi_imx_suspend(struct device *dev)
+{
+	pinctrl_pm_select_sleep_state(dev);
+	return 0;
+}
+
+static int spi_imx_resume(struct device *dev)
+{
+	pinctrl_pm_select_default_state(dev);
+	return 0;
+}
+
+static SIMPLE_DEV_PM_OPS(imx_spi_pm, spi_imx_suspend, spi_imx_resume);
+#define IMX_SPI_PM       (&imx_spi_pm)
+#else
+#define IMX_SPI_PM       NULL
+#endif
+
 static struct platform_driver spi_imx_driver = {
 	.driver = {
 		   .name = DRIVER_NAME,
 		   .owner = THIS_MODULE,
 		   .of_match_table = spi_imx_dt_ids,
-		   },
+		   .pm = IMX_SPI_PM,
+	},
 	.id_table = spi_imx_devtype,
 	.probe = spi_imx_probe,
 	.remove = spi_imx_remove,

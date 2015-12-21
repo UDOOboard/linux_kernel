@@ -36,6 +36,27 @@ static u32 fsl_sai_rates[] = {
 	88200, 96000, 176400, 192000
 };
 
+static struct reg_default fsl_sai_reg[] = {
+	{0x0, 0},	/*TCSR */
+	{0x4, 0},	/*TCR1 */
+	{0x8, 0},	/*TCR2 */
+	{0xc, 0},	/*TCR3 */
+	{0x10, 0},	/*TCR4 */
+	{0x14, 0},	/*TCR5 */
+	{0x20, 0},	/*TDR */
+	{0x40, 0},	/*TFR */
+	{0x60, 0},	/*TMR */
+	{0x80, 0},	/*RCSR */
+	{0x84, 0},	/*RCR1 */
+	{0x88, 0},	/*RCR2 */
+	{0x8c, 0},	/*RCR3 */
+	{0x90, 0},	/*RCR4 */
+	{0x94, 0},	/*RCR5 */
+	{0xa0, 0},	/*RDR */
+	{0xc0, 0},	/*RFR */
+	{0xe0, 0},	/*RMR */
+};
+
 static struct snd_pcm_hw_constraint_list fsl_sai_rate_constraints = {
 	.count = ARRAY_SIZE(fsl_sai_rates),
 	.list = fsl_sai_rates,
@@ -427,6 +448,35 @@ static int fsl_sai_hw_params(struct snd_pcm_substream *substream,
 
 	val_cr4 |= FSL_SAI_CR4_FRSZ(sai->slots);
 
+	/*
+	 * For SAI master mode, when Tx(Rx) sync with Rx(Tx) clock, Rx(Tx) will
+	 * generate bclk and frame clock for Tx(Rx), we should set RCR4(TCR4),
+	 * RCR5(TCR5) and RMR(TMR) for playback(capture), or there will be sync
+	 * error.
+	 */
+
+	if (!sai->is_slave_mode) {
+		if (!sai->synchronous[TX] && sai->synchronous[RX] && !tx) {
+			regmap_update_bits(sai->regmap, FSL_SAI_TCR4,
+				FSL_SAI_CR4_SYWD_MASK | FSL_SAI_CR4_FRSZ_MASK,
+				val_cr4);
+			regmap_update_bits(sai->regmap, FSL_SAI_TCR5,
+				FSL_SAI_CR5_WNW_MASK | FSL_SAI_CR5_W0W_MASK |
+				FSL_SAI_CR5_FBT_MASK, val_cr5);
+			regmap_write(sai->regmap, FSL_SAI_TMR,
+				~0UL - ((1 << channels) - 1));
+		} else if (!sai->synchronous[RX] && sai->synchronous[TX] && tx) {
+			regmap_update_bits(sai->regmap, FSL_SAI_RCR4,
+				FSL_SAI_CR4_SYWD_MASK | FSL_SAI_CR4_FRSZ_MASK,
+				val_cr4);
+			regmap_update_bits(sai->regmap, FSL_SAI_RCR5,
+				FSL_SAI_CR5_WNW_MASK | FSL_SAI_CR5_W0W_MASK |
+				FSL_SAI_CR5_FBT_MASK, val_cr5);
+			regmap_write(sai->regmap, FSL_SAI_RMR,
+				~0UL - ((1 << channels) - 1));
+		}
+	}
+
 	regmap_update_bits(sai->regmap, FSL_SAI_xCR4(tx),
 			   FSL_SAI_CR4_SYWD_MASK | FSL_SAI_CR4_FRSZ_MASK,
 			   val_cr4);
@@ -479,7 +529,6 @@ static int fsl_sai_trigger(struct snd_pcm_substream *substream, int cmd,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-		pm_runtime_get_sync(cpu_dai->dev);
 		regmap_update_bits(sai->regmap, FSL_SAI_xCSR(tx),
 				   FSL_SAI_CSR_FRDE, FSL_SAI_CSR_FRDE);
 
@@ -531,7 +580,6 @@ static int fsl_sai_trigger(struct snd_pcm_substream *substream, int cmd,
 			regmap_write(sai->regmap, FSL_SAI_TCSR, 0);
 			regmap_write(sai->regmap, FSL_SAI_RCSR, 0);
 		}
-		pm_runtime_put_sync(cpu_dai->dev);
 		break;
 	default:
 		return -EINVAL;
@@ -552,6 +600,8 @@ static int fsl_sai_startup(struct snd_pcm_substream *substream,
 		return -EBUSY;
 	else
 		sai->is_stream_opened[tx] = true;
+
+	pm_runtime_get_sync(cpu_dai->dev);
 
 	ret = clk_prepare_enable(sai->bus_clk);
 	if (ret) {
@@ -581,6 +631,7 @@ static void fsl_sai_shutdown(struct snd_pcm_substream *substream,
 		regmap_update_bits(sai->regmap, FSL_SAI_xCR3(tx), FSL_SAI_CR3_TRCE, 0);
 		clk_disable_unprepare(sai->bus_clk);
 		sai->is_stream_opened[tx] = false;
+		pm_runtime_put_sync(cpu_dai->dev);
 	}
 }
 
@@ -713,6 +764,8 @@ static const struct regmap_config fsl_sai_regmap_config = {
 	.val_bits = 32,
 
 	.max_register = FSL_SAI_RMR,
+	.reg_defaults = fsl_sai_reg,
+	.num_reg_defaults = ARRAY_SIZE(fsl_sai_reg),
 	.readable_reg = fsl_sai_readable_reg,
 	.volatile_reg = fsl_sai_volatile_reg,
 	.writeable_reg = fsl_sai_writeable_reg,
