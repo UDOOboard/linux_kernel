@@ -89,9 +89,10 @@ do
 $HEAD 
 EOF
 
-      echo -en ${BOARD}${M4}${VIDEO} >> "$DTS"
+      DTSI=$(dtsi_chooser externalpins)
+      EXT="#include \"$DTSI\"\n"
       
-      echo -en "#include \"imx6sx-udoo-neo-externalpins.dtsi\"" >> "$DTS"
+      echo -en ${BOARD}${M4}${VIDEO}${EXT} >> "$DTS"
 
       unset DTS
 
