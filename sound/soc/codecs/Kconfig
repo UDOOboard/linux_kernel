@@ -579,3 +579,6 @@ config SND_SOC_TPA6130A2
 
 config SND_SOC_TDA19988_CODEC
 	tristate
+
+config SND_SOC_ES9023
+	tristate

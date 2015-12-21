@@ -135,6 +135,7 @@ snd-soc-max9877-objs := max9877.o
 snd-soc-tpa6130a2-objs := tpa6130a2.o
 
 snd-soc-tda19988-codec-objs := tda19988-codec.o
+snd-soc-es9023-objs := es9023.o
 
 obj-$(CONFIG_SND_SOC_88PM860X)	+= snd-soc-88pm860x.o
 obj-$(CONFIG_SND_SOC_AB8500_CODEC)	+= snd-soc-ab8500-codec.o
@@ -272,3 +273,4 @@ obj-$(CONFIG_SND_SOC_MAX9877)	+= snd-soc-max9877.o
 obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
 
 obj-$(CONFIG_SND_SOC_TDA19988_CODEC)	+= snd-soc-tda19988-codec.o
+obj-$(CONFIG_SND_SOC_ES9023)	+= snd-soc-es9023.o

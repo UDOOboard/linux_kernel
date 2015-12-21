@@ -51,6 +51,14 @@
 			>;
 		};
 
+		pinctrl_audmux_dac: audmuxgrp-dac {
+			fsl,pins = <
+				MX6SX_PAD_CSI_DATA00__AUDMUX_AUD6_TXC   0x130b0
+				MX6SX_PAD_CSI_DATA01__AUDMUX_AUD6_TXFS  0x130b0
+				MX6SX_PAD_CSI_HSYNC__AUDMUX_AUD6_TXD    0x120b0
+			>;
+		};
+
 		pinctrl_ecspi2: ecspi2grp {
 			fsl,pins = <
 				MX6SX_PAD_SD4_CLK__ECSPI2_MISO		0x100b1
@@ -140,7 +148,19 @@
 			>;
 		};
 	};
- };
+};
+
+&ssi1 {
+    fsl,mode = "i2s-master";
+	status = "disabled";
+};
+
+/*
+&audmux {
+	pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_audmux_dac>;
+	status = "okay";
+};*/
 
 &ecspi2 {
 	fsl,spi-num-chipselects = <1>;
@@ -236,7 +256,24 @@
 };
 
 / {
-	sound-spdif {
+
+	codec_dac: dac-codec {
+		compatible = "udoo,es9023";
+		status = "disabled";
+	};
+
+	sound_dac {
+		compatible = "udoo,imx-audio-es9023";
+		model = "imx6sx-es9023";
+		cpu-dai = <&ssi1>;
+		audio-codec = <&codec_dac>;
+		mux-int-port = <1>;
+		mux-ext-port = <6>;
+		ssi-controller = <&ssi1>;
+		status = "disabled";
+	};
+	
+	sound_spdif {
 		compatible = "fsl,imx-audio-spdif";
 		model = "imx-spdif";
 		spdif-controller = <&spdif>;

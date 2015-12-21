@@ -318,7 +318,7 @@
 			>;
 		};
 
-		pinctrl_audmux: audmuxgrp {
+		pinctrl_audmux_hdmi: audmuxgrp-hdmi {
 			fsl,pins = <
 				MX6SX_PAD_KEY_COL0__AUDMUX_AUD5_TXC     0x130b0
 				MX6SX_PAD_KEY_COL1__AUDMUX_AUD5_TXFS    0x130b0
