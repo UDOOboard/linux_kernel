@@ -12,6 +12,7 @@
 /dts-v1/;
 #include "imx6dl.dtsi"
 #include "imx6qdl-udoo.dtsi"
+#include "imx6qdl-udoo-externalpins.dtsi"
 
 / {
 	model = "UDOO Dual-lite Board";
