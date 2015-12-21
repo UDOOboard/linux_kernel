@@ -90,6 +90,8 @@ $HEAD
 EOF
 
       echo -en ${BOARD}${M4}${VIDEO} >> "$DTS"
+      
+      echo -en "#include \"imx6sx-udoo-neo-externalpins.dtsi\"" >> "$DTS"
 
       unset DTS
 

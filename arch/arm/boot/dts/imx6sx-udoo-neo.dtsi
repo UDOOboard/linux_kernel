@@ -550,5 +550,3 @@
 		};
 	};
 };
-
-#include "imx6sx-udoo-neo-externalpins.dtsi"

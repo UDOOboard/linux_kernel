@@ -14,3 +14,4 @@
 #include "imx6sx-udoo-neo.dtsi" 
 #include "imx6sx-udoo-neo-full.dtsi"
 #include "imx6sx-udoo-neo-lvds15.dtsi"
+#include "imx6sx-udoo-neo-externalpins.dtsi"
