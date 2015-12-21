@@ -13,6 +13,7 @@
 /dts-v1/;
 #include "imx6q.dtsi"
 #include "imx6qdl-udoo.dtsi"
+#include "imx6qdl-udoo-externalpins.dtsi"
 
 / {
 	model = "UDOO Quad Board";

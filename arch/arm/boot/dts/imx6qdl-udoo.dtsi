@@ -463,5 +463,3 @@
 //    pinctrl-0 = <&pinctrl_spdif_1>;
 //    status = "disabled";
 // };
-
-#include "imx6qdl-udoo-externalpins.dtsi"
