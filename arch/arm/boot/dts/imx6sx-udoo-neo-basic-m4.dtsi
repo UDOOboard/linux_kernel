@@ -9,22 +9,22 @@
 
 / {
 	reserved-memory {
-		
+
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
-		
+
 		/* Reserved 8Mb for M4 */
 		m4_memory:  m4@0x84000000 {
 			no-map;
 			reg = <0x84000000 0x00800000>;
 		};
 
-		/* Reserved 1Mb for MCC */
-		mcc_memory:  m4@0xBFF00000 {
-			no-map;
-			reg = <0xBFF00000 0x00100000>;
-		};
+    /* Reserved 1Mb for MCC */
+    mcc_memory:  m4@0x9FF00000 {
+      no-map;
+      reg = <0x9FF00000 0x00100000>;
+    };
 	};
 };
 

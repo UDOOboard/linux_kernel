@@ -64,8 +64,10 @@ do
     if [ $m != 'NONE' ]
     then
 
-      DTSI=$(dtsi_chooser $m)
       M=-$m
+      [[ $b =~ basic ]] && m="basic-m4"
+
+      DTSI=$(dtsi_chooser $m)
       M4="#include \"$DTSI\"\n"
 
     fi
