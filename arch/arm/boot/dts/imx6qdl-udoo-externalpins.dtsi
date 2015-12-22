@@ -68,7 +68,14 @@
             MX6QDL_PAD_EIM_D24__GPIO3_IO24       0x80000000  // {{external-gpio-53}}
             >;
         };
-        
+
+        pinctrl_flexcan1: can1grp {
+            fsl,pins = <
+            MX6QDL_PAD_GPIO_7__FLEXCAN1_TX    0x1b0b1
+            MX6QDL_PAD_GPIO_8__FLEXCAN1_RX    0x1b0b1
+            >;
+        };
+
         pinctrl_usdhc1: usdhc1grp {
             fsl,pins = <
             MX6QDL_PAD_SD1_CMD__SD1_CMD       0x17059
@@ -107,7 +114,13 @@
 //          MX6QDL_PAD_SD4_DAT2__PWM4_OUT     0x1b0b1  // {{external-pwm4-7}}
             >;
         };
-        
+
+        pinctrl_spdif: spdifgrp {
+            fsl,pins = <
+            MX6SX_PAD_SD4_DATA4__SPDIF_OUT          0x1b0b0
+            >;
+        };
+
         pinctrl_uart3: uart3grp {
             fsl,pins = <
             MX6QDL_PAD_EIM_D24__UART3_TX_DATA      0x1b0b1
@@ -123,6 +136,12 @@
         };
     };
  };
+
+&flexcan1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_flexcan1>;
+    status = "disabled";
+};
  
 &usdhc1 {
     pinctrl-names = "default";
@@ -158,6 +177,12 @@
     status = "disabled";
 };
 
+&spdif {
+   pinctrl-names = "default";
+   pinctrl-0 = <&pinctrl_spdif>;
+   status = "disabled";
+};
+
 &uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
@@ -180,6 +205,15 @@
 
 
 / {
+    sound-spdif {
+        compatible = "fsl,imx-audio-spdif";
+        model = "imx-spdif";
+        /* IMX6 doesn't implement this yet */
+        spdif-controller = <&spdif>;
+        spdif-out;
+        status = "disabled";
+    };
+
     onewire@2 {
         compatible = "w1-gpio";
         gpios = <&gpio1 20 GPIO_ACTIVE_HIGH>;

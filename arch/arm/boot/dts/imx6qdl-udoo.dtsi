@@ -16,7 +16,6 @@
 / {
 	aliases {
 		mxcfb0 = &mxcfb1;
-// 		reg_can_xcvr = &reg_can_xcvr;
 		mmc0 = &usdhc3;
 		mmc1 = &usdhc2;
 		mmc2 = &usdhc1;
@@ -54,17 +53,7 @@
 			regulator-always-on;
 			status = "disabled";
 		};
-		
-// 		reg_can_xcvr: regulator@3 {
-// 			compatible = "regulator-fixed";
-// 			reg = <3>;
-// 			regulator-name = "CAN XCVR";
-// 			regulator-min-microvolt = <3300000>;
-// 			regulator-max-microvolt = <3300000>;
-// 			regulator-always-on;
-// 			enable-active-low;
-// 		};
-		
+
 		reg_usb_otg_vbus: regulator@4 {
 			compatible = "regulator-fixed";
 			reg = <4>;
@@ -109,16 +98,6 @@
 		model = "imx-audio-hdmi";
 		hdmi-controller = <&hdmi_audio>;
 	};
-	
-	
-// 	sound-spdif {
-// 		compatible = 	"fsl,imx-audio-spdif",
-// 				"fsl,imx-sabreauto-spdif";
-// 		model = "imx-spdif";
-// 		spdif-controller = <&spdif>;
-// 		spdif-in;
-// 		status = "disabled";
-// 	};
 
 	v4l2_cap_0 {
 		compatible = "fsl,imx6q-v4l2-capture";
@@ -352,14 +331,7 @@
 			MX6QDL_PAD_GPIO_0__GPIO1_IO00           0x80000000
 			>;
 		};
-		
-// 		pinctrl_flexcan1: can1grp {
-// 			fsl,pins = <
-// 				MX6QDL_PAD_GPIO_7__FLEXCAN1_TX 0x1b0b1
-// 				MX6QDL_PAD_GPIO_8__FLEXCAN1_RX 0x1b0b1
-// 			>;
-// 		};
-		
+
 		pinctrl_usdhc3: usdhc3grp {
 			fsl,pins = <
 			MX6QDL_PAD_SD3_CMD__SD3_CMD		0x17059
@@ -370,13 +342,7 @@
 			MX6QDL_PAD_SD3_DAT3__SD3_DATA3		0x17059
 			>;
 		};
-		
-		pinctrl_spdif_1: spdifgrp-1 {
-			fsl,pins = <
-			MX6QDL_PAD_KEY_COL3__SPDIF_IN 	0x1b0b0
-			>;
-		};
-		
+
 		ac97link_running: ac97link_runninggrp {
 			fsl,pins = <
 			MX6QDL_PAD_DI0_PIN2__AUD6_TXD   0x80000000
@@ -457,9 +423,3 @@
    v_channel = <0>;
    lanes = <2>;
 };
-
-// &spdif {
-//    pinctrl-names = "default";
-//    pinctrl-0 = <&pinctrl_spdif_1>;
-//    status = "disabled";
-// };
