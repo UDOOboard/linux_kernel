@@ -155,12 +155,11 @@
 	status = "disabled";
 };
 
-/*
-&audmux {
-	pinctrl-names = "default";
-	pinctrl-1 = <&pinctrl_audmux_dac>;
-	status = "okay";
-};*/
+//&audmux {									// {{required-by-sound_dac}}
+//	pinctrl-names = "default";				// {{required-by-sound_dac}}
+//	pinctrl-1 = <&pinctrl_audmux_dac>;		// {{required-by-sound_dac}}
+//	status = "okay";						// {{required-by-sound_dac}}
+//};										// {{required-by-sound_dac}}
 
 &ecspi2 {
 	fsl,spi-num-chipselects = <1>;
@@ -253,7 +252,7 @@
 
 / {
 
-	codec_dac: dac-codec {
+	codec_dac {
 		compatible = "udoo,es9023";
 		status = "disabled";
 	};
