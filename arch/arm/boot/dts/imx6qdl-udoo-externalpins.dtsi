@@ -117,7 +117,7 @@
 
         pinctrl_spdif: spdifgrp {
             fsl,pins = <
-            MX6SX_PAD_SD4_DATA4__SPDIF_OUT          0x1b0b0
+            MX6QDL_PAD_GPIO_19__SPDIF_OUT  0x1b0b0
             >;
         };
 
