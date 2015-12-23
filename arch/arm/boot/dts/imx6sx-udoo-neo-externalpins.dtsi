@@ -252,7 +252,7 @@
 
 / {
 
-	codec_dac {
+	codec_dac: dac-codec {
 		compatible = "udoo,es9023";
 		status = "disabled";
 	};
