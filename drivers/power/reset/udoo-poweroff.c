@@ -21,14 +21,8 @@
 #include <linux/of_gpio.h>
 #include <../arch/arm/mach-imx/hardware.h>
 
-#define QDL_ARDUINO_MODE_STOPPED      1   /* does arduino starts at boot */
-#define QDL_ARDUINO_MODE_LEAVE_POWER  2   /* leave 5V power on after shutdown (to keep arduino reset) */
-
 static void (*pm_power_off_orig)(void) = NULL;
-static int sam3x_rst_gpio = -EINVAL;
 static int pwr_5v_gpio = -EINVAL;
-static u32 arduino_mode = -EINVAL;
-static int lcd_touch_reset_gpio = -EINVAL;
 static int lcd_panel_on_gpio = -EINVAL;
 static int lcd_backlight_gpio = -EINVAL;
 
@@ -61,9 +55,6 @@ static void udoo_power_off(void) {
 		pm_power_off_orig();
 	}
 
-	if (lcd_touch_reset_gpio != -EINVAL) {
-		udoo_set_gpio(lcd_touch_reset_gpio, 1);
-	}
 	if (lcd_panel_on_gpio != -EINVAL) {
 		udoo_set_gpio(lcd_panel_on_gpio, 0);
 	}
@@ -72,14 +63,9 @@ static void udoo_power_off(void) {
 	}
 
 	if (!cpu_is_imx6sx()) {
-		udoo_set_gpio(sam3x_rst_gpio, 0);
-		msleep(50);		/* stop sam3x safely */
-
-		if (gpio_is_valid(pwr_5v_gpio) && (arduino_mode & QDL_ARDUINO_MODE_LEAVE_POWER) == 0) {
+		if (gpio_is_valid(pwr_5v_gpio)) {
 			pr_emerg("%s: 5V power down\n", __func__);
 			udoo_set_gpio(pwr_5v_gpio, 1);
-		} else {
-			pr_emerg("%s: 5V power still on, SAM3X in reset\n", __func__);
 		}
 	}
 }
@@ -87,7 +73,6 @@ static void udoo_power_off(void) {
 static int udoo_power_off_probe(struct platform_device *pdev)
 {
 	struct device_node *pwr_off_np;
-	int ret;
 
 	pwr_off_np = of_find_compatible_node(NULL, NULL, "udoo,lvds-power");
 	if (pwr_off_np) {
@@ -105,41 +90,13 @@ static int udoo_power_off_probe(struct platform_device *pdev)
 		udoo_request_gpio(&pdev->dev, lcd_backlight_gpio, GPIOF_OUT_INIT_HIGH, "lcd_backlight_gpio");
 	}
 	
-	pwr_off_np = of_find_compatible_node(NULL, NULL, "sitronix,st1232");
-	if (pwr_off_np) {
-		printk("[UDOO power-off] Probed sitronix st1232 touch panel.\n");
-		lcd_touch_reset_gpio = of_get_named_gpio(pwr_off_np, "gpios", 0);
-		of_node_put(pwr_off_np);
-		ret = gpio_export(lcd_backlight_gpio, false);
-	}
-
 	pwr_off_np = of_find_compatible_node(NULL, NULL, "udoo,poweroff");
 	if (pwr_off_np) {
 		if (!cpu_is_imx6sx()) {
 			printk("[UDOO power-off] Probed UDOO Quad/Dual.\n");
-			ret = of_property_read_u32(pwr_off_np, "arduino_mode", &arduino_mode);
-			if (ret != 0) {
-				dev_err(&pdev->dev, "%s: arduino mode not found in dtb\n", __func__);
-				arduino_mode = 0;
-			}
-
-			sam3x_rst_gpio = of_get_named_gpio(pwr_off_np, "sam3x_rst_gpio", 0);
 			pwr_5v_gpio = of_get_named_gpio(pwr_off_np, "pwr_5v_gpio", 0);
 			of_node_put(pwr_off_np);
-
 			udoo_request_gpio(&pdev->dev, pwr_5v_gpio, GPIOF_OUT_INIT_LOW, "pwr_5v_gpio");
-
-			if (gpio_is_valid(sam3x_rst_gpio)) {
-				ret = gpio_export(sam3x_rst_gpio, false);
-			
-				if (arduino_mode & QDL_ARDUINO_MODE_STOPPED) {
-					printk("[UDOO power-off] SAM3X stopped.\n");
-					udoo_set_gpio(sam3x_rst_gpio, 0);
-				} else {
-					printk("[UDOO power-off] SAM3X is running.\n");
-					udoo_set_gpio(sam3x_rst_gpio, 1);
-				}
-			}
 		}
 
 		pm_power_off_orig = pm_power_off;
