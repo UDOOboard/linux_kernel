@@ -133,9 +133,7 @@
 
 	poweroff {
 		compatible = "udoo,poweroff";
-		sam3x_rst_gpio = <&gpio1 0 GPIO_ACTIVE_LOW>;
 		pwr_5v_gpio = <&gpio2 4 GPIO_ACTIVE_LOW>;
-		arduino_mode = <0>; // 0=running, 1=halted, 2=running after shutdown
 	};
 };
 
