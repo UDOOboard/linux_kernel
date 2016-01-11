@@ -543,7 +543,7 @@ config UDOO_ARD
 	tristate "UDOO-Arduino erase/reset Driver"
 	default n
 	help
-	  This driver is used to erase and reset arduino board via command sent
+	  This driver is used to erase and reset Arduino board via command sent
 	  over USB-to-SERIAL connection.
 
 source "drivers/misc/c2port/Kconfig"
