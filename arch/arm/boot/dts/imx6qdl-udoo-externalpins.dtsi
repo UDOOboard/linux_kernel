@@ -102,14 +102,14 @@
         };
         
         pinctrl_pwm3: pwm3grp {
-            fls,pins = <
+            fsl,pins = <
             MX6QDL_PAD_SD1_DAT1__PWM3_OUT     0x1b0b1  // {{external-pwm3-4}}
 //          MX6QDL_PAD_SD4_DAT1__PWM3_OUT     0x1b0b1  // {{external-pwm3-6}}
             >;
         };
         
         pinctrl_pwm4: pwm4grp {
-            fls,pins = <
+            fsl,pins = <
             MX6QDL_PAD_SD1_CMD__PWM4_OUT      0x1b0b1  // {{external-pwm4-5}}
 //          MX6QDL_PAD_SD4_DAT2__PWM4_OUT     0x1b0b1  // {{external-pwm4-7}}
             >;
