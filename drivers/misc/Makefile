@@ -54,4 +54,4 @@ obj-$(CONFIG_LATTICE_ECP3_CONFIG)	+= lattice-ecp3-config.o
 obj-$(CONFIG_SRAM)		+= sram.o
 obj-y				+= mic/
 obj-$(CONFIG_GENWQE)		+= genwqe/
-obj-$(CONFIG_UDOO_NEO_M4)	+= udoo_neo_m4.o
+obj-$(CONFIG_UDOO_ARD)	+= udoo_ard.o
