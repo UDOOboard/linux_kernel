@@ -119,7 +119,7 @@ static irqreturn_t st1232_ts_irq_handler(int irq, void *dev_id)
 
 		input_report_abs(input_dev, ABS_MT_TOUCH_MAJOR, finger[i].t);
 		input_report_abs(input_dev, ABS_MT_POSITION_X, finger[i].x);
-		input_report_abs(input_dev, ABS_MT_POSITION_Y, finger[i].y);
+		input_report_abs(input_dev, ABS_MT_POSITION_Y, (finger[i].y-MAX_Y)*(-1));
 		input_mt_sync(input_dev);
 		count++;
 	}

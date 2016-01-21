@@ -681,6 +681,7 @@ static int mxsfb_set_par(struct fb_info *fb_info)
 	if (host->enabled) {
 		reenable = 1;
 		mxsfb_disable_controller(fb_info);
+		clk_disable_pix(host);
 	}
 
 	/* clear the FIFOs */
