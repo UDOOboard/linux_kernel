@@ -32,8 +32,8 @@
             MX6QDL_PAD_CSI0_DAT15__GPIO6_IO01    0x80000000  // {{external-gpio-17}}
             MX6QDL_PAD_CSI0_DAT12__GPIO5_IO30    0x80000000  // {{external-gpio-18}}
             MX6QDL_PAD_CSI0_DAT13__GPIO5_IO31    0x80000000  // {{external-gpio-19}}
-            MX6QDL_PAD_EIM_D21__GPIO3_IO21       0x80000000  // {{external-gpio-20}}
-            MX6QDL_PAD_EIM_D28__GPIO3_IO28       0x80000000  // {{external-gpio-21}}
+            MX6QDL_PAD_EIM_D28__GPIO3_IO28       0x80000000  // {{external-gpio-20}}
+            MX6QDL_PAD_EIM_D21__GPIO3_IO21       0x80000000  // {{external-gpio-21}}
             MX6QDL_PAD_DISP0_DAT6__GPIO4_IO27    0x80000000  // {{external-gpio-22}}
             MX6QDL_PAD_DISP0_DAT7__GPIO4_IO28    0x80000000  // {{external-gpio-23}}
             MX6QDL_PAD_DISP0_DAT8__GPIO4_IO29    0x80000000  // {{external-gpio-24}}
@@ -66,6 +66,8 @@
             MX6QDL_PAD_EIM_CS1__GPIO2_IO24       0x80000000  // {{external-gpio-51}}
             MX6QDL_PAD_EIM_CS0__GPIO2_IO23       0x80000000  // {{external-gpio-52}}
             MX6QDL_PAD_EIM_D24__GPIO3_IO24       0x80000000  // {{external-gpio-53}}
+            MX6QDL_PAD_GPIO_8__GPIO1_IO08        0x80000000  // {{external-gpio-54}}
+            MX6QDL_PAD_GPIO_7__GPIO1_IO07        0x80000000  // {{external-gpio-55}}
             >;
         };
 
@@ -117,7 +119,8 @@
 
         pinctrl_spdif: spdifgrp {
             fsl,pins = <
-            MX6QDL_PAD_GPIO_19__SPDIF_OUT  0x1b0b0
+            MX6QDL_PAD_GPIO_19__SPDIF_OUT     0x1b0b0
+            MX6QDL_PAD_EIM_D21__SPDIF_IN      0x1b0b0
             >;
         };
 
@@ -205,12 +208,12 @@
 
 
 / {
-    sound-spdif {
+    sound_spdif {
         compatible = "fsl,imx-audio-spdif";
         model = "imx-spdif";
-        /* IMX6 doesn't implement this yet */
         spdif-controller = <&spdif>;
         spdif-out;
+        spdif-in;
         status = "disabled";
     };
 
