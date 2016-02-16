@@ -340,6 +340,7 @@
 		pinctrl_usb_otg1: usbotg1grp {
 			fsl,pins = <
 				MX6SX_PAD_GPIO1_IO08__USB_OTG1_OC       0x10b0
+				MX6SX_PAD_GPIO1_IO09__GPIO1_IO_9        0x10b0
 			>;
 		};
 
@@ -352,6 +353,7 @@
 		pinctrl_usb_otg2: usbot2ggrp {
 			fsl,pins = <
 				MX6SX_PAD_QSPI1A_DATA0__USB_OTG2_OC     0x10b0
+				MX6SX_PAD_NAND_RE_B__GPIO4_IO_12        0x10b0
 			>;
 		};
 
