@@ -9,20 +9,20 @@ set -e
 #board specific
 dtb=( imx6sx-udoo-neo-{full,extended,basicks,basic}{,-lvds{15,7},-hdmi}{,-m4}.dtb )
 defconfig="udoo_neo_defconfig"
-LOCALVERSION="-udooneo" 
+export LOCALVERSION="-udooneo" 
 
 #generic
 threads=$(grep -c 'processor' /proc/cpuinfo)
-KCFLAGS="-O2 -march=armv7-a -mtune=cortex-a9 -mfpu=vfpv3-d16 -pipe -fomit-frame-pointer"
-ARCH="arm"
-CROSS_COMPILE="/usr/bin/arm-linux-gnueabihf-"
-KBUILD_DEBARCH="armhf" 
-KBUILD_IMAGE="zImage"
-BUILD_HEADERS="yes"
+export KCFLAGS="-O2 -march=armv7-a -mtune=cortex-a9 -mfpu=vfpv3-d16 -pipe -fomit-frame-pointer"
+export ARCH="arm"
+export CROSS_COMPILE="/usr/bin/arm-linux-gnueabihf-"
+export KBUILD_DEBARCH="armhf" 
+export KBUILD_IMAGE="zImage"
+export BUILD_HEADERS="yes"
 
 #author
-DEBFULLNAME="UDOO Team" 
-EMAIL="social@udoo.org" 
+export DEBFULLNAME="UDOO Team" 
+export EMAIL="social@udoo.org" 
 
 #compile
 make -j${threads} clean
