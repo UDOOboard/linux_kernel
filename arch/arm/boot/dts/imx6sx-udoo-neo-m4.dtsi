@@ -9,11 +9,11 @@
 
 / {
 	reserved-memory {
-		
+
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
-		
+
 		/* Reserved 8Mb for M4 */
 		m4_memory:  m4@0x84000000 {
 			no-map;
@@ -51,14 +51,6 @@
  */
 
 &snvs {
-	status = "disabled";
-};
-
-&flexcan1 {
-	status = "disabled";
-};
-
-&flexcan2 {
 	status = "disabled";
 };
 
