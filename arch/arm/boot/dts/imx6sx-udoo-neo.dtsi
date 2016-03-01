@@ -255,17 +255,17 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_1>;
 
-	barometer: mpl3115@60 {
+	barometer: mpl3115@60 {    // Brick Barometer Sensor
 		compatible = "fsl,mpl3115";
 		reg = <0x60>;
 	};
 
-	tsl2561: tsl2561@29 {
+	tsl2561: tsl2561@29 {    // Brick Light Sensor
 		compatible = "amstaos,tsl2561";
 		reg = <0x29>;
 	};
 
-	lm75: lm75@48 {
+	lm75: lm75@48 {    // Brick Temperature Sensor
 		compatible = "national,lm75";
 		reg = <0x48>;
 	};
