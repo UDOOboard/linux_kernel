@@ -1083,6 +1083,16 @@ config SENSORS_SIS5595
 	  This driver can also be built as a module.  If so, the module
 	  will be called sis5595.
 
+config SENSORS_SI70XX
+	tristate "Silicon Laboratories Si70xx humidity and temperature sensors."
+	depends on I2C
+	help
+	  If you say yes here you get support for the Silicon Laboratories Si70xx
+	  humidity and temperature sensors.
+		
+	  This driver can also be built as a module.  If so, the module
+	  will be called si70xx.
+
 config SENSORS_SMM665
 	tristate "Summit Microelectronics SMM665"
 	depends on I2C

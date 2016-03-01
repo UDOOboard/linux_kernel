@@ -269,6 +269,11 @@
 		compatible = "national,lm75";
 		reg = <0x48>;
 	};
+
+  si7006: si70xx@40 {   // Brick Humidity Sensor
+    compatible = "silabs,si70xx";
+    reg = <0x40>;
+  };
 };
 
 
