@@ -436,14 +436,13 @@ static int si70xx_probe(struct i2c_client *client,
 {
 	struct si70xx *si70xx;
 	int error;
-	printk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+
 	/* Allocate memory for global variables */
 	si70xx = kzalloc(sizeof(*si70xx), GFP_KERNEL);
 	if (si70xx == NULL)
 		return -ENOMEM;
 	i2c_set_clientdata(client, si70xx);
 
-printk("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n");
 	/* Initialize the mutex */
 	mutex_init(&si70xx->lock);
 
@@ -456,7 +455,7 @@ printk("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n");
 		kfree(si70xx);
 		return error;
 	}
-printk("ccccccccccccccccccccccccccccccccccccc\n");
+
 	/* Validate the device ID */
 	if ((si70xx->device_id != ID_SAMPLE) &&
 	    (si70xx->device_id != ID_SI7006) &&
@@ -466,26 +465,26 @@ printk("ccccccccccccccccccccccccccccccccccccc\n");
 		kfree(si70xx);
 		return -ENODEV;
 	}
-printk("dddddddddddddddddddddddddddd\n");
+
 	/* If Si7013 then write the thermistor coefficients to the Si7013 */
 	if (si70xx->device_id == ID_SI7013) {
 		mutex_lock(&si70xx->lock);
 		si70xx_write_coefficient_table(client);
 		mutex_unlock(&si70xx->lock);
 	}
-printk("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n");
+
 	/* Initialize the attribute array */
 	si70xx_attributes[0] = &sensor_dev_attr_device_id.dev_attr.attr;
 	si70xx_attributes[1] = &sensor_dev_attr_temp1_input.dev_attr.attr;
 	si70xx_attributes[2] = &sensor_dev_attr_humidity1_input.dev_attr.attr;
-printk("ffffffffffffffffffffffffffffff\n");
+
 	/* If Si7013 then add a second temperature attribute for thermistor */
 	if (si70xx->device_id == ID_SI7013) {
 		si70xx_attributes[3] = &sensor_dev_attr_temp2_input.dev_attr.attr;
 		si70xx_attributes[4] = NULL;
 	}
 	else si70xx_attributes[3] = NULL;
-printk("gggggggggggggggggggggggggggggg\n");
+
 	/* Create the sysfs group */
 	error = sysfs_create_group(&client->dev.kobj, &si70xx_attr_group);
 	if (error)
@@ -493,7 +492,7 @@ printk("gggggggggggggggggggggggggggggg\n");
 		kfree(si70xx);
 		return error;
 	}
-printk("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\n");
+
 	/* Register with hwmon */
 	si70xx->dev = hwmon_device_register(&client->dev);
 	if (IS_ERR(si70xx->dev)) {
@@ -502,7 +501,7 @@ printk("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\n");
 		kfree(si70xx);
 		return error;
 	}
-printk("iiiiiiiiiiiiiiiiiiiiiiiiiiii\n");
+
 	return 0;  /* Success */
 }
 
