@@ -9,7 +9,7 @@
 
 
 / {
-	model = "UDOO Neo Basic Kickstarter (based on iMX.6 SoloX)";
+	model = "UDOO Neo Basic Kickstarter";
 	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
 	
 	memory {
