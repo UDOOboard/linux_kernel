@@ -16,7 +16,7 @@
 #include "imx6qdl-udoo-externalpins.dtsi"
 
 / {
-	model = "Udoo i.MX6 Dual-lite Board";
+	model = "UDOO Dual-lite Board";
 	compatible = "udoo,imx6dl-udoo", "fsl,imx6dl";
 	
 	regulators {
