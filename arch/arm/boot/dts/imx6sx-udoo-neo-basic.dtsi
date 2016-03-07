@@ -9,7 +9,7 @@
 
 
 / {
-	model = "UDOO Neo Basic (based on iMX.6 SoloX)";
+	model = "UDOO Neo Basic";
 	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
 	
 };
