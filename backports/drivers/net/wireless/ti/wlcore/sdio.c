@@ -234,6 +234,9 @@ static int wlcore_probe_of(struct device *dev, int *irq,
 			   struct wlcore_platdev_data *pdev_data)
 {
 	struct device_node *np = dev->of_node;
+	
+	if (!np)
+		np = of_find_matching_node(NULL, wlcore_sdio_of_match_table);
 
 	if (!np || !of_match_node(wlcore_sdio_of_match_table, np))
 		return -ENODATA;

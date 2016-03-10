@@ -28,12 +28,7 @@ else
 WLCORE_VERSION_DEPS := $(GIT_PATH).git/HEAD $(GIT_PATH).git/index $(GIT_PATH).git/refs/tags
 
 define filechk_version.h
-	(echo '#if ((__GNUC__ <= 4)&&(__GNUC_MINOR__ < 9))'; \
-         echo '  static const char *wlcore_timestamp = __TIMESTAMP__;'; \
-         echo '#else  ';                                                \
-         echo '  static const char *wlcore_timestamp = "timestamp not possible with gcc 4.9";';\
-         echo '#endif '; \
-	echo 'static const char *wlcore_git_head = \
+	(echo 'static const char *wlcore_git_head = \
 			"$(shell $(GIT_CHDIR_CMD) git describe --dirty)";')
 endef
 

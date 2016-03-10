@@ -42,6 +42,7 @@ enum {
 	SMART_CONFIG_SYNC_EVENT_ID               = BIT(22),
 	SMART_CONFIG_DECODE_EVENT_ID             = BIT(23),
 	TIME_SYNC_EVENT_ID                       = BIT(24),
+	FW_LOGGER_INDICATION			= BIT(25),
 };
 
 enum wl18xx_radar_types {
@@ -100,7 +101,6 @@ struct wl18xx_event_mailbox {
 
 	/* time sync msb*/
 	u16 time_sync_tsf_msb;
-
 	/* radar detect */
 	u8 radar_channel;
 	u8 radar_type;
