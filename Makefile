@@ -553,8 +553,6 @@ $(KCONFIG_CONFIG) include/config/auto.conf.cmd: ;
 # with it and forgot to run make oldconfig.
 # if auto.conf.cmd is missing then we are probably in a cleaned tree so
 # we execute the config step to be sure to catch updated Kconfig files
-#	$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
-#	echo "DISABLED: $(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
 include/config/%.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
 	if [ ! -e include/config/auto.conf ]; then $(MAKE) -f $(srctree)/Makefile silentoldconfig ; fi
 else

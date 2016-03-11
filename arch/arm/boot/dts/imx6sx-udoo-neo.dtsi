@@ -106,10 +106,6 @@
 	        baud_rate = <921600>;
 	};
 
-	btwilink {
-	        compatible = "btwilink";
-	};
-
 	poweroff {
 		compatible = "udoo,poweroff";
 	};

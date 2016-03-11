@@ -19,14 +19,14 @@ NOSTDINC_FLAGS := \
 
 export backport_srctree = $(M)
 else
-export BACKPORT_DIR = backports/
+export BACKPORT_DIR = backports
 export backport_srctree = $(BACKPORT_DIR)
 NOSTDINC_FLAGS := \
-	-I$(BACKPORT_DIR)/backport-include/ \
-	-I$(BACKPORT_DIR)/backport-include/uapi \
-	-I$(BACKPORT_DIR)/include/ \
-	-I$(BACKPORT_DIR)/include/uapi \
-	-include $(BACKPORT_DIR)/backport-include/backport/backport.h \
+	-I$(KBUILD_SRC)/$(BACKPORT_DIR)/backport-include/ \
+	-I$(KBUILD_SRC)/$(BACKPORT_DIR)/backport-include/uapi \
+	-I$(KBUILD_SRC)/$(BACKPORT_DIR)/include/ \
+	-I$(KBUILD_SRC)/$(BACKPORT_DIR)/include/uapi \
+	-include $(KBUILD_SRC)/$(BACKPORT_DIR)/backport-include/backport/backport.h \
 	$(CFLAGS)
 endif
 
