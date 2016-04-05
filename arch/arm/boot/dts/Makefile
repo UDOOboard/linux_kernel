@@ -155,6 +155,8 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx53-smd.dtb \
 	imx6dl-cubox-i.dtb \
 	imx6dl-hummingboard.dtb \
+	imx6q-seco_A62.dtb \
+	imx6dl-seco_A62.dtb \
 	imx6dl-sabreauto.dtb \
 	imx6dl-sabreauto-flexcan1.dtb \
 	imx6dl-sabreauto-ecspi.dtb \
