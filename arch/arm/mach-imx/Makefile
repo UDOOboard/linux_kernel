@@ -107,7 +107,7 @@ obj-$(CONFIG_HAVE_IMX_RPMSG) += imx_rpmsg.o
 AFLAGS_headsmp.o :=-Wa,-march=armv7-a
 obj-$(CONFIG_SMP) += headsmp.o platsmp.o
 obj-$(CONFIG_HOTPLUG_CPU) += hotplug.o
-obj-$(CONFIG_SOC_IMX6Q) += clk-imx6q.o mach-imx6q.o
+obj-$(CONFIG_SOC_IMX6Q) += clk-imx6q.o mach-imx6q.o apx_wdog-trigger.o
 obj-$(CONFIG_SOC_IMX6SL) += clk-imx6sl.o mach-imx6sl.o
 obj-$(CONFIG_SOC_IMX6SX) += clk-imx6sx.o mach-imx6sx.o mu.o
 obj-$(CONFIG_SOC_IMX6UL) += clk-imx6ul.o mach-imx6ul.o
