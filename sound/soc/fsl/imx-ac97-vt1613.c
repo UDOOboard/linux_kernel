@@ -51,7 +51,7 @@ static struct snd_soc_dai_link imx_vt1613_dai = {
 };
 
 static struct snd_soc_card imx_vt1613_card = { 
-	.name		= "imx-vt1613-audio",
+	.name		= "vt1613-audio",
 	.owner  	= THIS_MODULE,
 	.dai_link	= &imx_vt1613_dai,
 	.num_links	= 1,
@@ -180,7 +180,7 @@ static int imx_vt1613_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id imx_vt1613_audio_match[] = {
-	{ .compatible = "udoo,imx-vt1613-audio", },
+	{ .compatible = "udoo,vt1613-audio", },
 	{}
 };
 MODULE_DEVICE_TABLE(of, imx_vt1613_audio_match);
