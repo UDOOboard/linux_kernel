@@ -9,16 +9,16 @@
 
 
 / {
-	codec: hdmi-codec {
+	codec_hdmi: hdmi-codec {
 		compatible = "udoo,tda19988-codec";
 		status = "okay";
 	};
 	
-	sound {
+	sound_hdmi {
 		compatible = "udoo,imx-audio-tda19988";
 		model = "imx6sx-tda19988";
 		cpu-dai = <&ssi2>;
-		audio-codec = <&codec>;
+		audio-codec = <&codec_hdmi>;
 		mux-int-port = <2>;
 		mux-ext-port = <5>;
 		ssi-controller = <&ssi2>;
@@ -84,6 +84,6 @@
 
 &audmux {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_audmux>;
+	pinctrl-0 = <&pinctrl_audmux_hdmi>;
 	status = "okay";
 };
