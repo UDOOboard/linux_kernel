@@ -1,7 +1,7 @@
 /*
  * OTG Finite State Machine from OTG spec
  *
- * Copyright (C) 2007-2015 Freescale Semiconductor, Inc.
+ * Copyright (C) 2007-2016 Freescale Semiconductor, Inc.
  *
  * Author:	Li Yang <LeoLi@freescale.com>
  *		Jerry Huang <Chang-Ming.Huang@freescale.com>
@@ -399,13 +399,8 @@ static int otg_handle_role_switch(struct otg_fsm *fsm, struct usb_device *udev)
 				USB_DEVICE_B_HNP_ENABLE,
 				0, NULL, 0,
 				USB_CTRL_SET_TIMEOUT);
-			if (err < 0) {
-				/* Continue polling */
-				otg_add_timer(fsm, HNP_POLLING);
-				return 0;
-			} else {
+			if (err >= 0)
 				fsm->a_set_b_hnp_en = 1;
-			}
 		}
 		fsm->a_bus_req = 0;
 		if (fsm->tst_maint) {
@@ -435,6 +430,7 @@ int otg_hnp_polling(struct otg_fsm *fsm)
 	int retval;
 	enum usb_otg_state state = fsm->otg->state;
 	struct usb_otg_descriptor *desc = NULL;
+	u8 host_request_flag;
 
 	if ((state != OTG_STATE_A_HOST || !fsm->b_hnp_enable) &&
 					state != OTG_STATE_B_HOST)
@@ -470,7 +466,7 @@ int otg_hnp_polling(struct otg_fsm *fsm)
 		}
 	}
 
-	fsm->host_req_flag = 0;
+	*fsm->host_req_flag = 0;
 	/* Get host request flag from connected USB device */
 	retval = usb_control_msg(udev,
 				usb_rcvctrlpipe(udev, 0),
@@ -478,13 +474,14 @@ int otg_hnp_polling(struct otg_fsm *fsm)
 				USB_DIR_IN | USB_RECIP_DEVICE,
 				0,
 				OTG_STS_SELECTOR,
-				&fsm->host_req_flag,
+				fsm->host_req_flag,
 				1,
 				USB_CTRL_GET_TIMEOUT);
 	if (retval == 1) {
-		if (fsm->host_req_flag == HOST_REQUEST_FLAG) {
+		host_request_flag = *fsm->host_req_flag;
+		if (host_request_flag == HOST_REQUEST_FLAG) {
 			retval = otg_handle_role_switch(fsm, udev);
-		} else if (fsm->host_req_flag == 0) {
+		} else if (host_request_flag == 0) {
 			/* Continue polling */
 			otg_add_timer(fsm, HNP_POLLING);
 			retval = 0;

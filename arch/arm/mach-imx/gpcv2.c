@@ -33,6 +33,7 @@
 #define GPC_MISC		0x2c
 #define GPC_IMR1_CORE0		0x30
 #define GPC_IMR1_CORE1		0x40
+#define GPC_IMR1_M4		0x50
 #define GPC_SLOT0_CFG		0xb0
 #define GPC_PGC_CPU_MAPPING	0xec
 #define GPC_CPU_PGC_SW_PUP_REQ	0xf0
@@ -76,6 +77,7 @@
 #define BM_LPCR_A7_AD_EN_C0_WFI_PDN		0x1
 
 #define BM_CPU_PGC_SW_PDN_PUP_REQ_CORE1_A7	0x2
+#define BM_GPC_PGC_PCG				0x1
 
 #define BM_GPC_PGC_ACK_SEL_A7_DUMMY_PUP_ACK	0x80000000
 #define BM_GPC_PGC_ACK_SEL_A7_DUMMY_PDN_ACK	0x8000
@@ -103,6 +105,7 @@ enum imx_gpc_slot {
 static void __iomem *gpc_base;
 static u32 gpcv2_wake_irqs[IMR_NUM];
 static u32 gpcv2_saved_imrs[IMR_NUM];
+static u32 gpcv2_saved_imrs_m4[IMR_NUM];
 static u32 gpcv2_mf_irqs[IMR_NUM];
 static u32 gpcv2_mf_request_on[IMR_NUM];
 static DEFINE_SPINLOCK(gpcv2_lock);
@@ -239,7 +242,12 @@ void imx_gpcv2_set_plat_power_gate_by_lpm(bool pdn)
 
 void imx_gpcv2_set_m_core_pgc(bool enable, u32 offset)
 {
-	writel_relaxed(enable, gpc_base + offset);
+	u32 val = readl_relaxed(gpc_base + offset) & (~BM_GPC_PGC_PCG);
+
+	if (enable)
+		val |= BM_GPC_PGC_PCG;
+
+	writel_relaxed(val, gpc_base + offset);
 }
 
 void imx_gpcv2_set_core1_pdn_pup_by_software(bool pdn)
@@ -310,9 +318,9 @@ void imx_gpcv2_set_cpu_power_gate_in_idle(bool pdn)
 			imx_gpcv2_set_slot_ack(2, CORE1_A7, false, false);
 		imx_gpcv2_set_slot_ack(3, SCU_A7, false, true);
 		imx_gpcv2_set_slot_ack(6, SCU_A7, true, false);
-		imx_gpcv2_set_slot_ack(7, CORE0_A7, true, false);
 		if (num_online_cpus() > 1)
-			imx_gpcv2_set_slot_ack(8, CORE1_A7, true, true);
+			imx_gpcv2_set_slot_ack(7, CORE1_A7, true, false);
+		imx_gpcv2_set_slot_ack(8, CORE0_A7, true, true);
 	} else {
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 0 * 0x4);
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + 2 * 0x4);
@@ -422,6 +430,26 @@ void imx_gpcv2_pre_suspend(bool arm_power_off)
 	}
 }
 
+void imx_gpcv2_enable_wakeup_for_m4(void)
+{
+	void __iomem *reg_imr2 = gpc_base + GPC_IMR1_M4;
+	u32 i;
+
+	for (i = 0; i < IMR_NUM; i++) {
+		gpcv2_saved_imrs_m4[i] = readl_relaxed(reg_imr2 + i * 4);
+		writel_relaxed(~gpcv2_wake_irqs[i], reg_imr2 + i * 4);
+	}
+}
+
+void imx_gpcv2_disable_wakeup_for_m4(void)
+{
+	void __iomem *reg_imr2 = gpc_base + GPC_IMR1_M4;
+	u32 i;
+
+	for (i = 0; i < IMR_NUM; i++)
+		writel_relaxed(gpcv2_saved_imrs_m4[i], reg_imr2 + i * 4);
+}
+
 void imx_gpcv2_post_resume(void)
 {
 	void __iomem *reg_imr1 = gpc_base + GPC_IMR1_CORE0;
@@ -466,7 +494,7 @@ void imx_gpcv2_post_resume(void)
 	imx_gpcv2_set_m_core_pgc(false, GPC_PGC_FM);
 	for (i = 0; i < MAX_SLOT_NUMBER; i++)
 	{
-		if (i==1||i==4) /* skip slts m4 uses */
+		if (i == 1 || i == 5) /* skip slots m4 uses */
 			continue;
 		writel_relaxed(0x0, gpc_base + GPC_SLOT0_CFG + i * 0x4);
         }

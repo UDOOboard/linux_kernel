@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2015 Freescale Semiconductor, Inc. All Rights Reserved.
+ * Copyright 2004-2016 Freescale Semiconductor, Inc. All Rights Reserved.
  */
 
 /*
@@ -1572,10 +1572,14 @@ static int mxcfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 		bg_yres = var->yres;
 
 		fbi_tmp = found_registered_fb(MEM_BG_SYNC, mxc_fbi->ipu_id);
-		if (fbi_tmp) {
-			bg_xres = fbi_tmp->var.xres;
-			bg_yres = fbi_tmp->var.yres;
+		if (!fbi_tmp) {
+			dev_err(info->device,
+				"cannot find background fb for overlay fb\n");
+			return -EINVAL;
 		}
+
+		bg_xres = fbi_tmp->var.xres;
+		bg_yres = fbi_tmp->var.yres;
 
 		ipu_disp_get_window_pos(mxc_fbi->ipu, mxc_fbi->ipu_ch, &pos_x, &pos_y);
 
@@ -1649,6 +1653,7 @@ static int mxcfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 		fr_h = var->yres_virtual;
 	}
 
+	tmp_fbi.device = info->device;
 	tmp_fbi.var = *var;
 	tmp_fbi.par = mxc_fbi;
 	if (ipu_pixel_format_is_gpu_tile(var->nonstd)) {
@@ -2053,14 +2058,14 @@ static int mxcfb_ioctl(struct fb_info *fbi, unsigned int cmd, unsigned long arg)
 				}
 			}
 
-			if (mxc_fbi->cur_prefetch == !!enable)
-				break;
-
 			retval = mxcfb_check_var(&fbi->var, fbi);
 			if (retval)
 				break;
 
 			mxc_fbi->prefetch = !!enable;
+
+			if (mxc_fbi->cur_prefetch == mxc_fbi->prefetch)
+				break;
 
 			fbi->var.activate = (fbi->var.activate & ~FB_ACTIVATE_MASK) |
 						FB_ACTIVATE_NOW | FB_ACTIVATE_FORCE;
@@ -2135,8 +2140,10 @@ static int mxcfb_ioctl(struct fb_info *fbi, unsigned int cmd, unsigned long arg)
 			if (mem == NULL)
 				return -ENOMEM;
 
-			if (get_user(size, argp))
+			if (get_user(size, argp)) {
+				kfree(mem);
 				return -EFAULT;
+			}
 
 			mem->size = PAGE_ALIGN(size);
 
@@ -2150,11 +2157,18 @@ static int mxcfb_ioctl(struct fb_info *fbi, unsigned int cmd, unsigned long arg)
 
 			list_add(&mem->list, &fb_alloc_list);
 
+			if (put_user(mem->phy_addr, argp)) {
+				list_del(&mem->list);
+				dma_free_coherent(fbi->device,
+						  mem->size,
+						  mem->cpu_addr,
+						  mem->phy_addr);
+				kfree(mem);
+				return -EFAULT;
+			}
+
 			dev_dbg(fbi->device, "allocated %d bytes @ 0x%08X\n",
 				mem->size, mem->phy_addr);
-
-			if (put_user(mem->phy_addr, argp))
-				return -EFAULT;
 
 			break;
 		}
@@ -2315,16 +2329,19 @@ static int mxcfb_blank(int blank, struct fb_info *info)
 
 	dev_dbg(info->device, "blank = %d\n", blank);
 
+	if (blank)
+		blank = FB_BLANK_POWERDOWN;
+
 	if (mxc_fbi->cur_blank == blank)
 		return 0;
 
 	mxc_fbi->next_blank = blank;
 
-	switch (blank) {
-	case FB_BLANK_POWERDOWN:
-	case FB_BLANK_VSYNC_SUSPEND:
-	case FB_BLANK_HSYNC_SUSPEND:
-	case FB_BLANK_NORMAL:
+	if (blank == FB_BLANK_UNBLANK) {
+		info->var.activate = (info->var.activate & ~FB_ACTIVATE_MASK) |
+				FB_ACTIVATE_NOW | FB_ACTIVATE_FORCE;
+		ret = fb_set_var(info, &info->var);
+	} else {
 		if (mxc_fbi->dispdrv && mxc_fbi->dispdrv->drv->disable)
 			mxc_fbi->dispdrv->drv->disable(mxc_fbi->dispdrv, info);
 		ipu_disable_channel(mxc_fbi->ipu, mxc_fbi->ipu_ch, true);
@@ -2336,12 +2353,6 @@ static int mxcfb_blank(int blank, struct fb_info *info)
 			ipu_pre_disable(mxc_fbi->pre_num);
 			ipu_pre_free(&mxc_fbi->pre_num);
 		}
-		break;
-	case FB_BLANK_UNBLANK:
-		info->var.activate = (info->var.activate & ~FB_ACTIVATE_MASK) |
-				FB_ACTIVATE_NOW | FB_ACTIVATE_FORCE;
-		ret = mxcfb_set_par(info);
-		break;
 	}
 	if (!ret)
 		mxc_fbi->cur_blank = blank;
@@ -3617,9 +3628,6 @@ static int mxcfb_remove(struct platform_device *pdev)
 {
 	struct fb_info *fbi = platform_get_drvdata(pdev);
 	struct mxcfb_info *mxc_fbi = fbi->par;
-
-	if (!fbi)
-		return 0;
 
 	device_remove_file(fbi->dev, &dev_attr_fsl_disp_dev_property);
 	device_remove_file(fbi->dev, &dev_attr_fsl_disp_property);
