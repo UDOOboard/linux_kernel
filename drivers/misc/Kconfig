@@ -545,6 +545,13 @@ config UID_CPUTIME
 	help
 	  Per UID based cpu time statistics exported to /proc/uid_cputime
 
+config UDOO_ARD
+	tristate "UDOO-Arduino erase/reset Driver"
+	default n
+	help
+	  This driver is used to erase and reset Arduino board via command sent
+	  over USB-to-SERIAL connection.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
