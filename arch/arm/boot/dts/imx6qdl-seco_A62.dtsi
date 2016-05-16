@@ -64,7 +64,7 @@
 			regulator-name = "fec-3v3";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
-			gpio = <&gpio4 10 0>;
+			gpio = <&gpio4 10 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 		};
 	};
@@ -75,7 +75,6 @@
 		model = "imx-audio-hdmi";
 		hdmi-controller = <&hdmi_audio>;
 	};
-
 
 	mxcfb1: fb@0 {
 		compatible = "fsl,mxc_sdc_fb";
@@ -116,14 +115,12 @@
 			100
 			>;
 		default-brightness-level = <94>;
-		//brightness-levels = <0 4 8 16 32 64 128 255>;
-		//default-brightness-level = <7>;
 		enable-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH
 				&gpio1 4 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 
-	/*v4l2_cap_0 {
+	v4l2_cap_0 {
 		compatible = "fsl,imx6q-v4l2-capture";
 		ipu_id = <0>;
 		csi_id = <0>;
@@ -144,7 +141,7 @@
 		status = "okay";
 	};
 
-	mipi_dsi_reset: mipi-dsi-reset {
+	/*mipi_dsi_reset: mipi-dsi-reset {
 		compatible = "gpio-reset";
 		reset-gpios = <&gpio6 11 GPIO_ACTIVE_LOW>;
 		reset-delay-us = <50>; 
@@ -317,7 +314,7 @@
 				MX6QDL_PAD_RGMII_RXC__RGMII_RXC		0x1b0b0
 				MX6QDL_PAD_RGMII_TXC__RGMII_TXC		0x1b0b0
 				MX6QDL_PAD_ENET_REF_CLK__ENET_TX_CLK	0x1b0b0
-				MX6QDL_PAD_EIM_D23__GPIO3_IO23           0x80000000
+				MX6QDL_PAD_EIM_D23__GPIO3_IO23          0x80000000
 			>;
 		};
 
@@ -422,7 +419,6 @@
        };
 };
 
-
 &ecspi3 {
 	fsl,spi-num-chipselects = <1>;
 	cs-gpios = <&gpio4 24  0>;
@@ -452,7 +448,6 @@
 	};
 };
 
-
 &i2c3 {
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
@@ -466,7 +461,6 @@
  		interrupts = <13 IRQ_TYPE_LEVEL_LOW>;
  		gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
  	};
-
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -487,13 +481,12 @@
 	status = "okay";
 };
 
-
 &usbotg {	
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usbotg>;
 	vbus-supply = <&reg_usb_otg_vbus>;
 	disable-over-current;
-	status = "disabled";
+	status = "okay";
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -515,16 +508,7 @@
 	phy-supply = <&reg_fec_3v3>;
 	phy-gpios = <&gpio6 24 0 &gpio3 23 0>;
 	fsl,magic-packet;
-	#address-cells = <0>; // non verificato ancora direi che non serve a niente da qua e poi
-	#size-cells = <1>;
-	phy_int {	
-		reg = <0x6>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <28 /* IRQ_TYPE_LEVEL_LOW */>;
-	};	
 };
-
-
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
@@ -539,19 +523,18 @@
 	status = "okay";
 };
 
-
 &hdmi_core {
 	ipu_id = <0>;
 	disp_id = <0>;
 	status = "okay";
 };
 
-
 &hdmi_video {
 	fsl,phy_reg_vlev = <0x0294>;
 	fsl,phy_reg_cksymtx = <0x800d>;
 	status = "okay";
 };
+
 &pwm1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_bl>;

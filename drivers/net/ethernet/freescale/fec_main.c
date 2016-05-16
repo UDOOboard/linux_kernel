@@ -3489,7 +3489,13 @@ fec_probe(struct platform_device *pdev)
 		fep->reg_phy = NULL;
 	}
 
-	fec_reset_phy(pdev);
+	/* reset phy */
+
+	if (of_machine_is_compatible("fsl,imx6q-SBC_A62") ||
+			of_machine_is_compatible("fsl,imx6dl-SBC_A62"))
+		fec_phy_reset(pdev);
+	else
+		fec_reset_phy(pdev);
 
 	if (fep->bufdesc_ex)
 		fec_ptp_init(pdev);
