@@ -3,10 +3,11 @@ if VIDEO_MXC_CAPTURE
 config VIDEO_MXC_CSI_CAMERA
 	tristate "CSI camera support"
 	depends on VIDEO_MXC_CAPTURE && VIDEO_V4L2
+	select VIDEOBUF2_DMA_CONTIG
 	---help---
 	  This is the video4linux2 capture driver based on CSI module.
 
-config MXC_CAMERA_OV5640
+config MXC_CAMERA_SUBDEV_OV5640
         tristate "OmniVision ov5640 camera support"
         depends on VIDEO_MXC_CAPTURE && I2C
         ---help---
