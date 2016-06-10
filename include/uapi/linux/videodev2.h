@@ -139,6 +139,7 @@ enum v4l2_buf_type {
 #endif
 	V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE = 9,
 	V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE  = 10,
+	V4L2_BUF_TYPE_SENSOR		   = 11,
 	/* Deprecated, do not use */
 	V4L2_BUF_TYPE_PRIVATE              = 0x80,
 };
@@ -282,6 +283,13 @@ struct v4l2_pix_format {
 	__u32          		sizeimage;
 	__u32			colorspace;	/* enum v4l2_colorspace */
 	__u32			priv;		/* private data, depends on pixelformat */
+};
+
+struct v4l2_sensor_dimension {
+	__u32	swidth;
+	__u32	sheight;
+	__u32	top;
+	__u32	left;
 };
 
 /*      Pixel format         FOURCC                          depth  Description  */
@@ -1239,6 +1247,13 @@ struct v4l2_ext_controls {
 	struct v4l2_ext_control *controls;
 };
 
+struct v4l2_send_command_control {
+	__u32		     id;
+	__u32		     value0;
+	__u32		     value1;
+	char	     	 debug[256];
+};
+
 #define V4L2_CTRL_ID_MASK      	  (0x0fffffff)
 #define V4L2_CTRL_ID2CLASS(id)    ((id) & 0x0fff0000UL)
 #define V4L2_CTRL_DRIVER_PRIV(id) (((id) & 0xffff) >= 0x1000)
@@ -1705,6 +1720,7 @@ struct v4l2_format {
 	__u32	 type;
 	union {
 		struct v4l2_pix_format		pix;     /* V4L2_BUF_TYPE_VIDEO_CAPTURE */
+		struct v4l2_sensor_dimension	spix;	 /* V4L2_BUF_TYPE_SENSOR */
 		struct v4l2_pix_format_mplane	pix_mp;  /* V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE */
 		struct v4l2_window		win;     /* V4L2_BUF_TYPE_VIDEO_OVERLAY */
 		struct v4l2_vbi_format		vbi;     /* V4L2_BUF_TYPE_VBI_CAPTURE */
@@ -1968,6 +1984,8 @@ struct v4l2_create_buffers {
 /* Experimental, meant for debugging, testing and internal use.
    Never use these in applications! */
 #define VIDIOC_DBG_G_CHIP_INFO  _IOWR('V', 102, struct v4l2_dbg_chip_info)
+
+#define VIDIOC_SEND_COMMAND	_IOWR('V', 103, struct v4l2_send_command_control)
 
 /* Reminder: when adding new ioctls please add support for them to
    drivers/media/video/v4l2-compat-ioctl32.c as well! */
