@@ -66,6 +66,7 @@ struct mxc_gpio_port {
 	struct irq_domain *domain;
 	struct bgpio_chip bgc;
 	u32 both_edges;
+	u32 m4_irq_reserved;
 };
 
 static struct mxc_gpio_hwdata imx1_imx21_gpio_hwdata = {
@@ -282,6 +283,9 @@ static void mx3_gpio_irq_handler(u32 irq, struct irq_desc *desc)
 
 	irq_stat = readl(port->base + GPIO_ISR) & readl(port->base + GPIO_IMR);
 
+	/* Do not handle interrupt if it is an M4 irq reserved. */
+	irq_stat = (irq_stat & ~(port->m4_irq_reserved));
+
 	mxc_gpio_irq_handler(port, irq_stat);
 
 	chained_irq_exit(chip, desc);
@@ -407,12 +411,29 @@ static int mxc_gpio_probe(struct platform_device *pdev)
 	struct resource *iores;
 	int irq_base;
 	int err;
+	int exclude_pin;
+	int len;
+	u32 m4_irq_reserved = 0x0;
 
 	mxc_gpio_get_hw(pdev);
 
 	port = devm_kzalloc(&pdev->dev, sizeof(*port), GFP_KERNEL);
 	if (!port)
 		return -ENOMEM;
+
+	if (of_find_property(np, "m4-reserved-pin", NULL)) {
+  	  for (len = 0; len < 32; len++) {
+	     if (of_property_read_u32_index(np, "m4-reserved-pin", len, &exclude_pin) == 0) {
+		if (exclude_pin < 32) {
+		   m4_irq_reserved |= (1 << exclude_pin);
+		} else {
+		   printk(KERN_ERR "Warning ! Ignoring invalid M4 irq pin reserved: %d > 31.", exclude_pin);
+		} 
+	     } 
+	  }
+	  printk(KERN_ERR "GPIO mask to reserved irq for M4 Core = 0x%08x \n", m4_irq_reserved);
+	}
+	port->m4_irq_reserved = m4_irq_reserved;
 
 	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	port->base = devm_ioremap_resource(&pdev->dev, iores);
