@@ -250,18 +250,6 @@
 	};
 };
 
-&gpio4 {
-        m4-reserved-pin = <4 6 8 9>;
-};
-
-&gpio5 {
-        m4-reserved-pin = <12 13 14 15 18 19 20 21>;
-};
-
-&gpio6 {
-        m4-reserved-pin = <18 19>;
-};
-
 &i2c2 {
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
