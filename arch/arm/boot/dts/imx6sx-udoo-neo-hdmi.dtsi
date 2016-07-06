@@ -15,7 +15,7 @@
 	};
 	
 	sound_hdmi {
-		compatible = "udoo,imx-audio-tda19988";
+		compatible = "udoo,audio-tda19988";
 		model = "imx6sx-tda19988";
 		cpu-dai = <&ssi2>;
 		audio-codec = <&codec_hdmi>;

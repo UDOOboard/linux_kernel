@@ -77,7 +77,7 @@ static struct snd_soc_dai_link imx_dai = {
 };
 
 static struct snd_soc_card snd_soc_card_imx_3stack = {
-	.name = "imx-audio-tda19988",
+	.name = "audio-tda19988",
 	.dai_link = &imx_dai,
 	.num_links = 1,
 };
@@ -154,7 +154,7 @@ static int imx_tda19988_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id imx_tda19988_dt_ids[] = {
-	{ .compatible = "udoo,imx-audio-tda19988", },
+	{ .compatible = "udoo,audio-tda19988", },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, imx_tda19988_dt_ids);
