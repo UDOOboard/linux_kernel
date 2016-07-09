@@ -91,6 +91,13 @@
 		};
 	};
 
+	backlight_lcd {// enable, disable lvds
+		compatible = "gpio-backlight", "udoo,lvds-backlight";
+		gpios = <&gpio6 3 GPIO_ACTIVE_HIGH>;
+		default-on;
+		status = "disabled";
+	};
+	
 	kim {
 	        compatible = "kim";
 	        nshutdown_gpio = <49>;  // GPIO2_17 The wl8 driver expects gpio to be an integer, so gpio2_17 is (2-1)*32+17=49
@@ -310,6 +317,7 @@
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
 
+				MX6SX_PAD_SD1_DATA1__GPIO6_IO_3  	0x80000000	// BL_ON
 				MX6SX_PAD_SD1_CLK__GPIO6_IO_0       0x80000000 // LED
 
 				MX6SX_PAD_SD1_CMD__GPIO6_IO_1       0x80000000 // USDHC2 PWR
@@ -487,7 +495,6 @@
 
 		pinctrl_ldb_0: ldbctrlgrp-0 {
 			fsl,pins = <
-				MX6SX_PAD_SD1_DATA1__GPIO6_IO_3  	0x80000000	// BL_ON
 				MX6SX_PAD_QSPI1B_DATA3__GPIO4_IO_27	0x80000000	// PANEL_ON
 			>;
 		};

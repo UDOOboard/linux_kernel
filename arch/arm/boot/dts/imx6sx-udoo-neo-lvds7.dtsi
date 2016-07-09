@@ -18,13 +18,8 @@
 		status = "okay";
 	};
 
-	reg_lcd_bl: lcd_bl {
-		compatible = "regulator-fixed", "udoo,lvds-backlight";
-		regulator-name = "LCD BACKLIGHT BL_ON";
-		gpio = <&gpio6 3 GPIO_ACTIVE_LOW>;
-		enable-active-high;
-		regulator-boot-on;
-		regulator-always-on;
+	backlight_lcd {
+		status = "okay";
 	};
 };
 
@@ -42,8 +37,7 @@
 &ldb {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ldb_0>;
-	lcd-supply = <&reg_lcd_pwr 
-                      &reg_lcd_bl>;
+	lcd-supply = <&reg_lcd_pwr>;
 	status = "okay";
 
 	lvds-channel@0 {
