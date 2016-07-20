@@ -65,7 +65,7 @@
 				MX6SX_PAD_SD4_CMD__ECSPI2_MOSI		0x100b1
 				MX6SX_PAD_SD4_DATA1__ECSPI2_SCLK	0x100b1
 				/*  CS SPI 1  */
-				MX6SX_PAD_SD4_DATA0__GPIO6_IO_14	0x80000000
+				MX6SX_PAD_SD4_DATA0__GPIO6_IO_14	0x0b0b1
 			>;
 		};
 
@@ -163,10 +163,16 @@
 
 &ecspi2 {
 	fsl,spi-num-chipselects = <1>;
-	cs-gpios = <&gpio6 14 0>;
+	cs-gpios = <&gpio6 14 GPIO_ACTIVE_LOW>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ecspi2>;
 	status = "disabled";
+
+	spidev0: spi@0 {
+		compatible = "spidev";
+		reg = <0>;
+		spi-max-frequency = <2000000>;
+	};
 };
 
 &uart1 {
