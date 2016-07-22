@@ -67,6 +67,20 @@
 			gpio = <&gpio4 10 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 		};
+
+		reg_lcd0_pwr: regulator@3 {
+			compatible = "regulator-fixed", "udoo,lvds-power";
+			reg = <3>;
+			regulator-name = "LCD0 POWER";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+			enable-active-high;
+			regulator-boot-on;
+			regulator-always-on;
+			status = "disabled";
+		};
+
 	};
 
 /*  __________________________________________________________________________
@@ -133,8 +147,7 @@
 			100
 			>;
 		default-brightness-level = <94>;
-		enable-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH
-				&gpio1 4 GPIO_ACTIVE_HIGH>;
+		enable-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 
@@ -629,106 +642,6 @@
 		fsl,data-width = <18>;
 		status = "okay";
 		primary;
-
-		display-timings {
-			native-mode = <&timing5>;
-			
-			timing0: LDB-WVGA {
-				clock-frequency = <38000000>;
-				hactive = <800>;
-				vactive = <480>;
-				hback-porch = <56>;
-				hfront-porch = <50>;
-				vback-porch = <20>;
-				vfront-porch = <53>;
-				hsync-len = <180>;
-				vsync-len = <30>;
-			};
-			
-			timing1: LDB-SVGA {
-				clock-frequency = <40000000>;
-				hactive = <800>;
-				vactive = <600>;
-				hback-porch = <40>;
-				hfront-porch = <60>;
-				vback-porch = <10>;
-				vfront-porch = <10>;
-				hsync-len = <20>;
-				vsync-len = <10>;
-			};
-
-			timing2: LDB-WXGA {
-				clock-frequency = <72000000>;
-				hactive = <1368>;
-				vactive = <768>;
-				hback-porch = <93>;
-				hfront-porch = <33>;
-				vback-porch = <22>;
-				vfront-porch = <7>;
-				hsync-len = <40>;
-				vsync-len = <4>;
-			};
-
-			timing3: LDB-XGA {
-				clock-frequency = <65000000>;
-				hactive = <1024>;
-				vactive = <768>;
-				hback-porch = <1230>;
-				hfront-porch = <40>;
-				vback-porch = <21>;
-				vfront-porch = <7>;
-				hsync-len = <60>;
-				vsync-len = <10>;
-			};
-
-			timing4: LDB-SXGA {
-				clock-frequency = <54000000>;
-				hactive = <1280>;
-				vactive = <1024>;
-				hback-porch = <220>;
-				hfront-porch = <40>;
-				vback-porch = <21>;
-				vfront-porch = <7>;
-				hsync-len = <60>;
-				vsync-len = <10>;
-			};
-			timing5: LDB-800x480 { /* Panel UMSH-8596MD-20T */
-				clock-frequency = <33260000>;
-				hactive = <800>;
-				vactive = <480>;
-				hback-porch = <10>;
-				hfront-porch = <120>;
-				vback-porch = <7>;
-				vfront-porch = <35>;
-				hsync-len = <30>;
-				vsync-len = <3>;
-				de-active = <1>;
-			};
-
-                        timing6: LDB-1080P60 {
-                                clock-frequency = <0x7bfa480>;
-                                hactive = <0x780>;
-                                vactive = <0x438>;
-                                hback-porch = <0x64>;
-                                hfront-porch = <0x28>;
-                                vback-porch = <0x1e>;
-                                vfront-porch = <0x2>;
-                                hsync-len = <0xa>;
-                                vsync-len = <0x2>;
-                        };
-
-                        timing7: LDB-1280P60 {
-                                clock-frequency = <66100000>;
-                                hactive = <1280>;
-                                vactive = <800>;
-                                hback-porch = <35>;
-                                hfront-porch = <35>;
-                                vback-porch = <4>;
-                                vfront-porch = <4>;
-                                hsync-len = <10>;
-                                vsync-len = <2>;
-                        };
-		};
 	};
 
 	lvds-channel@1 {
@@ -736,20 +649,6 @@
 		fsl,data-mapping = "spwg";
 		fsl,data-width = <18>;
 		status = "disabled";
-		display-timings {
-			native-mode = <&timing6>;
-			timing8: seco_lvds1 {
-				clock-frequency = <38000000>;
-				hactive = <800>;
-				vactive = <480>;
-				hback-porch = <56>;
-				hfront-porch = <50>;
-				vback-porch = <20>;
-				vfront-porch = <23>;
-				hsync-len = <150>;
-				vsync-len = <60>;
-			};
-		};
 	};
 
 };
