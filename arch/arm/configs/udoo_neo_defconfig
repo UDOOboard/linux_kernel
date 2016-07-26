@@ -1656,7 +1656,7 @@ CONFIG_I2C_IMX=y
 # CONFIG_I2C_DEBUG_ALGO is not set
 # CONFIG_I2C_DEBUG_BUS is not set
 CONFIG_SPI=y
-# CONFIG_SPI_DEBUG is not set
+CONFIG_SPI_DEBUG=y
 CONFIG_SPI_MASTER=y
 
 #
@@ -1677,7 +1677,7 @@ CONFIG_SPI_IMX=y
 #
 # SPI Protocol Masters
 #
-# CONFIG_SPI_SPIDEV is not set
+CONFIG_SPI_SPIDEV=m
 # CONFIG_SPI_TLE62X0 is not set
 # CONFIG_HSI is not set
 
