@@ -39,9 +39,11 @@
 #include<linux/sched.h>
 
 // used for send quee messages
+#ifdef SEND_IS_INTHE_THREAD
 #define MCC_TTY_NMAX_MSG_TO_SEND	8
 #define MCC_TTY_BUFFER_SEND_SIZE	512
 #define MCC_TTY_BUFFER_SEND_SIZE_PL	(MCC_TTY_BUFFER_SEND_SIZE-24)
+#endif
 
 /**
  * struct mcctty_port - Wrapper struct for imx mcc tty port.
@@ -70,14 +72,17 @@ static MCC_ENDPOINT mcc_endpoint_m4 = {1, MCC_NODE_M4, MCC_M4_PORT};
 // used for receive messages
 struct mcc_tty_msg {
 	char data[MCC_ATTR_BUFFER_SIZE_IN_BYTES - 24];
+	uint16_t dummy;	// for zero terminator
 };
 
+#ifdef SEND_IS_INTHE_THREAD
 // used for send messages
 struct mcc_tty_msg_out {
 	char data[MCC_TTY_BUFFER_SEND_SIZE_PL];
 	uint16_t count;
 };
 static struct mcc_tty_msg_out tty_msg_to_send[MCC_TTY_NMAX_MSG_TO_SEND];
+#endif
 
 static int mccNumMsgToSend = 0;
 static int mccMsgOutPtr = 0;
@@ -107,11 +112,17 @@ int thread_function(void *data)
 
 	while(thread_loop){
 
+#ifdef SEND_IS_INTHE_THREAD
 		ret = mcc_recv(&mcc_endpoint_m4,
 			       &mcc_endpoint_a9, &tty_msg,
 			       sizeof(struct mcc_tty_msg),
 			       &num_of_received_bytes, 0);
-
+#else
+		ret = mcc_recv(&mcc_endpoint_m4,
+			       &mcc_endpoint_a9, &tty_msg,
+			       sizeof(struct mcc_tty_msg),
+			       &num_of_received_bytes, 0xffffffff);
+#endif
 
 		if (MCC_SUCCESS == ret) {
 			if (num_of_received_bytes > 0) {
@@ -133,6 +144,7 @@ int thread_function(void *data)
 			}
 		}
 
+#ifdef SEND_IS_INTHE_THREAD
 		// send section
 		if (mccNumMsgToSend > 0) {
 			//printk(KERN_INFO"thread_function - mccNumMsgToSend %d  mccMsgOutPtr %d\n", mccNumMsgToSend, mccMsgOutPtr);
@@ -154,6 +166,7 @@ int thread_function(void *data)
 			//else
 			//printk(KERN_INFO"mcc thread_function - send KO\n");
 		}
+#endif
 	}
 
 	//printk(KERN_INFO"Exit da function thread!!\n");
@@ -261,6 +274,7 @@ static void mcctty_close(struct tty_struct *tty, struct file *filp)
 	return tty_port_close(tty->port, tty, filp);
 }
 
+#ifdef SEND_IS_INTHE_THREAD
 static int mcctty_write(struct tty_struct *tty, const unsigned char *buf,
 			int total)
 {
@@ -297,6 +311,43 @@ static int mcctty_write(struct tty_struct *tty, const unsigned char *buf,
 	}
 	return total;
 }
+#else
+static int mcctty_write(struct tty_struct *tty, const unsigned char *buf,
+			 int total)
+{
+	int i, count, ret = 0;
+	unsigned char *tmp;
+	struct mcc_tty_msg tty_msg;
+
+	if (NULL == buf) {
+		pr_err("buf shouldn't be null.\n");
+		return -ENOMEM;
+	}
+
+	count = total;
+	tmp = (unsigned char *)buf;
+	for (i = 0; i <= count / 999; i++) {
+		strlcpy(tty_msg.data, tmp, count >= 1000 ? 1000 : count + 1);
+		if (count >= 1000)
+			count -= 999;
+
+		/*
+		 * wait until the remote endpoint is created by
+		 * the other core
+		 */
+		ret = mcc_send(&mcc_endpoint_a9,
+				&mcc_endpoint_m4, &tty_msg,
+				//sizeof(struct mcc_tty_msg),
+				count,
+				1000);
+
+		if (MCC_SUCCESS != ret)
+			pr_err("A9 mcctty write error: %d\n", ret);
+
+	}
+	return total;
+}
+#endif
 
 static int mcctty_write_room(struct tty_struct *tty)
 {
