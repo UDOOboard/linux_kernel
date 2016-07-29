@@ -37,7 +37,7 @@
 };
 
 &mxcfb2 {
-	status = "okay";
+	status = "disabled";
 };
 
 &ldb {
@@ -60,9 +60,5 @@
 				vsync-len = <60>;
 			};
 		};
-	};
-
-	lvds-channel@1 {
-		crtc = "ipu2-di1"; 
 	};
 };

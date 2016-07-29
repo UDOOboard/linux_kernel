@@ -179,6 +179,7 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6dl-udoo-hdmi.dtb \
 	imx6dl-udoo-lvds7.dtb \
 	imx6dl-udoo-lvds15.dtb \
+	imx6dl-udoo-lvds7hdmi.dtb \
 	imx6q-arm2.dtb \
 	imx6q-pop-arm2.dtb \
 	imx6q-cubox-i.dtb \
@@ -205,6 +206,7 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-udoo-hdmi.dtb \
 	imx6q-udoo-lvds7.dtb \
 	imx6q-udoo-lvds15.dtb \
+	imx6q-udoo-lvds7hdmi.dtb \
 	imx6sx-udoo-neo-basic.dtb \
 	imx6sx-udoo-neo-basic-hdmi.dtb \
 	imx6sx-udoo-neo-basic-hdmi-m4.dtb \

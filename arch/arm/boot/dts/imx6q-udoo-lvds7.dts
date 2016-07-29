@@ -12,6 +12,7 @@
  */
 
 /dts-v1/;
+
 #include "imx6q.dtsi"
 #include "imx6qdl-udoo.dtsi"
 #include "imx6qdl-udoo-externalpins.dtsi"
@@ -29,17 +30,16 @@
 	backlight_lcd {
 		status = "okay";
 	};
+};
 
-	mxcfb1: fb@0 {
-		compatible = "fsl,mxc_sdc_fb";
-		disp_dev = "ldb";
-		interface_pix_fmt = "RGB666";
-		mode_str ="800x480";
-		default_bpp = <32>;
-		int_clk = <0>;
-		late_init = <0>;
-		status = "okay";
-	};
+&mxcfb1 {
+	interface_pix_fmt = "RGB666";
+	mode_str ="800x480";
+	status = "okay";
+};
+
+&mxcfb2 {
+	status = "disabled";
 };
 
 &ldb {

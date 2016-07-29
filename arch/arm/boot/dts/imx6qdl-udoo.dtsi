@@ -17,6 +17,7 @@
 	aliases {
 		mmc0 = &usdhc3; /* uSD */
 		mxcfb0 = &mxcfb1;
+		mxcfb1 = &mxcfb2;
 	};
 	
 	memory {
@@ -96,6 +97,28 @@
 		model = "imx-audio-hdmi";
 		hdmi-controller = <&hdmi_audio>;
 	};
+
+	mxcfb1: fb@0 {
+		compatible = "fsl,mxc_sdc_fb";
+		disp_dev = "ldb";
+		interface_pix_fmt = "RGB666";
+		mode_str = "LDB-WVGA";
+		default_bpp = <16>;
+		int_clk = <0>;
+		late_init = <0>;
+		status = "disabled";
+	};
+
+	mxcfb2: fb@1 {
+		compatible = "fsl,mxc_sdc_fb";
+		disp_dev = "hdmi";
+		interface_pix_fmt = "RGB24";
+		mode_str ="1920x1080M@60";
+		default_bpp = <24>;
+		int_clk = <0>;
+		late_init = <0>;
+		status = "disabled";
+	};	
 
 	v4l2_cap_0 {
 		compatible = "fsl,imx6q-v4l2-capture";

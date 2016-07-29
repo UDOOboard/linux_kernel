@@ -61,8 +61,4 @@
 			};
 		};
 	};
-
-	lvds-channel@1 {
-		crtc = "ipu2-di1"; 
-	};
 };

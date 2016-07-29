@@ -12,22 +12,22 @@
  */
 
 /dts-v1/;
-#include "imx6dl.dtsi"
+#include "imx6q.dtsi"
 #include "imx6qdl-udoo.dtsi"
 #include "imx6qdl-udoo-externalpins.dtsi"
 
 / {
-	model = "UDOO Dual-lite Board";
-	compatible = "udoo,imx6dl-udoo", "fsl,imx6dl";
+	model = "UDOO Quad Board";
+	compatible = "udoo,imx6q-udoo", "fsl,imx6q";	
 	
 	regulators {
 		reg_lcd0_pwr: regulator@1 {
 			status = "okay";
 		};
-		
-		reg_lcd0_backlight: regulator@2 {
-			status = "okay";
-		};   
+	};
+	
+	backlight_lcd {
+		status = "okay";
 	};
 };
 
@@ -38,7 +38,8 @@
 };
 
 &mxcfb2 {
-	status = "disabled";
+	mode_str ="1280x720M@60";
+	status = "okay";
 };
 
 &ldb {
@@ -46,19 +47,28 @@
 	lvds-channel@0 {     
 		status = "okay";
 		fsl,data-width = <18>;
+		crtc = "ipu2-di0";
 		display-timings {
 			native-mode = <&timing0>;
 			timing0: 800x480 {
-				clock-frequency = <33660000>;
+				clock-frequency = <38000000>;
 				hactive = <800>;
 				vactive = <480>;
 				hback-porch = <56>;
 				hfront-porch = <50>;
-				vback-porch = <23>;
-				vfront-porch = <20>;
+				vback-porch = <20>;
+				vfront-porch = <23>;
 				hsync-len = <150>;
-				vsync-len = <2>;
+				vsync-len = <60>;
 			};
 		};
 	};
+
+	lvds-channel@1 {
+		crtc = "ipu2-di1"; 
+	};
+};
+
+&sata {
+	status = "okay";
 };
