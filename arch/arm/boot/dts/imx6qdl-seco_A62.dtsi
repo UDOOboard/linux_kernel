@@ -219,8 +219,9 @@
 				MX6QDL_PAD_KEY_COL2__GPIO4_IO10   	0x80000000      /* Ethernet Power on */
 
 				MX6QDL_PAD_ENET_TX_EN__GPIO1_IO28       0x80000000       /*  Phy Interrupt  */
-				//MX6QDL_PAD_CSI0_DAT18__GPIO6_IO04 	0x80000000      /* Camera Power Enable */
-				//MX6QDL_PAD_CSI0_DAT19__GPIO6_IO05 	0x80000000	/* Camera Reset */
+				MX6QDL_PAD_CSI0_DAT18__GPIO6_IO04 	0x1f071      /* Camera Power Enable */
+				MX6QDL_PAD_CSI0_DAT19__GPIO6_IO05 	0x1f071	/* Camera Reset */
+				MX6QDL_PAD_CSI0_MCLK__CCM_CLKO1			0x130b0		// CSI master clock (CN11)
 
 				MX6QDL_PAD_NANDF_CS0__GPIO6_IO11  	0x80000000    	/* SATA led activity */ 	
 				MX6QDL_PAD_EIM_A25__GPIO5_IO02    	0x80000000     	/* HDMI - check */
@@ -525,6 +526,18 @@
 	pinctrl-0 = <&pinctrl_i2c3>;
 	status = "okay";
 
+	ov5640_mipi: ov5640_mipi@3c {
+		compatible = "ovti,ov5640_mipi";
+		reg = <0x3c>;
+		clocks = <&clks IMX6QDL_CLK_CKO>;
+		clock-names = "csi_mclk";
+		pwn-gpios = <&gpio6 4 GPIO_ACTIVE_LOW>;
+		rst-gpios = <&gpio6 5 GPIO_ACTIVE_HIGH>;
+		csi_id = <0>;
+		mclk = <24000000>;
+		mclk_source = <0>;
+	};
+
 	touchscreen@55 {
  		compatible = "sitronix,st1232";
  		reg = <0x55>;
@@ -625,6 +638,14 @@
 
 &audmux {
 	status = "okay";
+};
+
+&mipi_csi {
+   status = "okay";
+   ipu_id = <0>;
+   csi_id = <0>;
+   v_channel = <0>;
+   lanes = <2>;
 };
 
 &pwm1 {
