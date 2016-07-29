@@ -12,12 +12,12 @@
 
 /dts-v1/;
 
-#include "imx6dl.dtsi"
+#include "imx6q.dtsi"
 #include "imx6qdl-seco_A62.dtsi"
 
 / {
-	model = "SECO i.MX6 DualLite SBC (A62) Board";
-	compatible = "fsl,imx6dl-SBC_A62", "fsl,imx6dl";
+	model = "SECO i.MX6 Quad SBC (A62) Board";
+	compatible = "fsl,imx6q-SBC_A62", "fsl,imx6q";
 
 	regulators {
 		reg_lcd0_pwr: regulator@3 {
@@ -37,7 +37,7 @@
 };
 
 &mxcfb2 {
-	status = "disabled";
+	status = "okay";
 };
 
 &ldb {

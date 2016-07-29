@@ -159,9 +159,11 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-seco_A62-hdmi.dtb \
 	imx6q-seco_A62-lvds7.dtb \
 	imx6q-seco_A62-lvds15.dtb \
+	imx6q-seco_A62-lvds7hdmi.dtb \
 	imx6dl-seco_A62-hdmi.dtb \
 	imx6dl-seco_A62-lvds7.dtb \
 	imx6dl-seco_A62-lvds15.dtb \
+	imx6dl-seco_A62-lvds7hdmi.dtb \
 	imx6dl-seco_A62.dtb \
 	imx6dl-sabreauto.dtb \
 	imx6dl-sabreauto-flexcan1.dtb \
