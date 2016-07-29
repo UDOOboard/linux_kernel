@@ -2,12 +2,13 @@
  * Copyright 2013 Freescale Semiconductor, Inc.
  * Copyright 2015 Aidilab, Srl.
  *
- * The code contained herein is licensed under the GNU General Public
- * License. You may obtain a copy of the GNU General Public License
- * Version 2 or later at the following locations:
+ * Author: Fabio Estevam <fabio.estevam@freescale.com>
+ * Author: Ettore Chimenti <ettore.chimenti@udoo.org>
  *
- * http://www.opensource.org/licenses/gpl-license.html
- * http://www.gnu.org/copyleft/gpl.html
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
  */
 
 /dts-v1/;
@@ -19,50 +20,19 @@
 	model = "SECO i.MX6 Quad SBC (A62) Board";
 	compatible = "fsl,imx6q-SBC_A62", "fsl,imx6q";
 
-	regulators {
-		reg_lcd0_pwr: regulator@3 {
-			status = "okay";
-		};
-	};
-	
-	backlight {
+	mxcfb1: fb@0 {
+		compatible = "fsl,mxc_sdc_fb";
+		disp_dev = "hdmi";
+		interface_pix_fmt = "RGB24";
+		mode_str ="1920x1080M@60";
+		default_bpp = <32>;
+		int_clk = <0>;
+		late_init = <0>;
 		status = "okay";
 	};
-};
-
-&mxcfb1 {
-	interface_pix_fmt = "RGB666";
-	mode_str ="LDB-800x480";
-	status = "okay";
 };
 
 &mxcfb2 {
-	status = "okay";
+	status = "disabled";
 };
 
-&ldb {
-	status = "okay";
-	lvds-channel@0 {     
-		status = "okay";
-		fsl,data-width = <18>;
-		crtc = "ipu2-di0";
-		display-timings {
-			native-mode = <&timing0>;
-			timing0: LDB-800x480 {
-				clock-frequency = <38000000>;
-				hactive = <800>;
-				vactive = <480>;
-				hback-porch = <56>;
-				hfront-porch = <50>;
-				vback-porch = <20>;
-				vfront-porch = <23>;
-				hsync-len = <150>;
-				vsync-len = <60>;
-			};
-		};
-	};
-
-	lvds-channel@1 {
-		crtc = "ipu2-di1"; 
-	};
-};
