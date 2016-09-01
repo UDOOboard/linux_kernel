@@ -1813,8 +1813,8 @@ static void mxc_hdmi_edid_rebuild_modelist(struct mxc_hdmi *hdmi)
                         mode->xres <= 1920 &&
                         mode->yres <= 1080 ) {
 
-			dev_info(&hdmi->pdev->dev, "Added mode %d:", i);
-			dev_info(&hdmi->pdev->dev,
+			dev_dbg(&hdmi->pdev->dev, "Added mode %d:", i);
+			dev_dbg(&hdmi->pdev->dev,
 				"xres = %d, yres = %d, freq = %d, vmode = %d, flag = %d\n",
 				hdmi->fbi->monspecs.modedb[i].xres,
 				hdmi->fbi->monspecs.modedb[i].yres,

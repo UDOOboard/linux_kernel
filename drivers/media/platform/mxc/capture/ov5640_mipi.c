@@ -2074,7 +2074,6 @@ static int ov5640_probe(struct i2c_client *client,
 	struct device *dev = &client->dev;
 	int retval;
 	u8 chip_id_high, chip_id_low;
-printk("---------------------------OV5640_MIPI CAPTURE PROBE ------------------------");
 	/* request power down pin */
 	pwn_gpio = of_get_named_gpio(dev->of_node, "pwn-gpios", 0);
 	if (!gpio_is_valid(pwn_gpio)) {
@@ -2085,7 +2084,6 @@ printk("---------------------------OV5640_MIPI CAPTURE PROBE -------------------
 					"ov5640_mipi_pwdn");
 	if (retval < 0)
 		return retval;
-printk("---------------------------OV5640_MIPI CAPTURE PROBE 2 ------------------------");
 	/* request reset pin */
 	rst_gpio = of_get_named_gpio(dev->of_node, "rst-gpios", 0);
 	if (!gpio_is_valid(rst_gpio)) {
@@ -2096,7 +2094,6 @@ printk("---------------------------OV5640_MIPI CAPTURE PROBE 2 -----------------
 					"ov5640_mipi_reset");
 	if (retval < 0)
 		return retval;
-printk("---------------------------OV5640_MIPI CAPTURE PROBE 3 ------------------------");
 	/* Set initial values for the sensor struct. */
 	memset(&ov5640_data, 0, sizeof(ov5640_data));
 	ov5640_data.sensor_clk = devm_clk_get(dev, "csi_mclk");
@@ -2106,28 +2103,24 @@ printk("---------------------------OV5640_MIPI CAPTURE PROBE 3 -----------------
 		dev_err(dev, "clock-frequency missing or invalid\n");
 		return PTR_ERR(ov5640_data.sensor_clk);
 	}
-printk("---------------------------OV5640_MIPI CAPTURE PROBE 4 ------------------------");
 	retval = of_property_read_u32(dev->of_node, "mclk",
 					&(ov5640_data.mclk));
 	if (retval) {
 		dev_err(dev, "mclk missing or invalid\n");
 		return retval;
 	}
-printk("---------------------------OV5640_MIPI CAPTURE PROBE 5 ------------------------");
 	retval = of_property_read_u32(dev->of_node, "mclk_source",
 					(u32 *) &(ov5640_data.mclk_source));
 	if (retval) {
 		dev_err(dev, "mclk_source missing or invalid\n");
 		return retval;
 	}
-printk("---------------------------OV5640_MIPI CAPTURE PROBE 6 ------------------------");
 	retval = of_property_read_u32(dev->of_node, "csi_id",
 					&(ov5640_data.csi));
 	if (retval) {
 		dev_err(dev, "csi id missing or invalid\n");
 		return retval;
 	}
-printk("---------------------------OV5640_MIPI CAPTURE PROBE 7 ------------------------");
 	clk_prepare_enable(ov5640_data.sensor_clk);
 
 	ov5640_data.io_init = ov5640_reset;
@@ -2161,7 +2154,6 @@ printk("---------------------------OV5640_MIPI CAPTURE PROBE 7 -----------------
 	}
 
 	ov5640_standby(1);
-printk("---------------------------OV5640_MIPI CAPTURE PROBE 8 ------------------------");
 	ov5640_int_device.priv = &ov5640_data;
 	retval = v4l2_int_device_register(&ov5640_int_device);
 
