@@ -22,4 +22,6 @@ struct fec_platform_data {
 	void (*sleep_mode_enable)(int enabled);
 };
 
+int fec_phy_reset(struct platform_device *pdev);
+
 #endif

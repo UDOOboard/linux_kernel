@@ -153,6 +153,15 @@ static int kszphy_config_init(struct phy_device *phydev)
 	return 0;
 }
 
+static int ksz8081_config_init(struct phy_device *phydev)
+{
+	int rc = 0;
+	const u16 val = KSZPHY_OMSO_B_CAST_OFF | KSZPHY_OMSO_RMII_OVERRIDE;
+	phy_write(phydev, MII_KSZPHY_OMSO, val);
+
+	return 0;
+}
+
 static int ksz8021_config_init(struct phy_device *phydev)
 {
 	int rc;
@@ -275,6 +284,22 @@ static int ksz8873mll_config_aneg(struct phy_device *phydev)
 	return 0;
 }
 
+static int ksz8081_resume(struct phy_device *phydev)
+{
+	int value;
+
+	mutex_lock(&phydev->lock);
+	value = phy_read(phydev, MII_BMCR);
+	phy_write(phydev, MII_BMCR, value & ~BMCR_PDOWN);
+
+	value = phy_scan_fixups(phydev);
+	if (value < 0)
+		return value;
+	mutex_unlock(&phydev->lock);
+
+	return 0;
+}
+
 static struct phy_driver ksphy_driver[] = {
 {
 	.phy_id		= PHY_ID_KS8737,
@@ -385,7 +410,7 @@ static struct phy_driver ksphy_driver[] = {
 	.phy_id_mask	= 0x00fffff0,
 	.features	= (PHY_BASIC_FEATURES | SUPPORTED_Pause),
 	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
-	.config_init	= kszphy_config_init,
+	.config_init	= ksz8081_config_init,
 	.config_aneg	= genphy_config_aneg,
 	.read_status	= genphy_read_status,
 	.ack_interrupt	= kszphy_ack_interrupt,
