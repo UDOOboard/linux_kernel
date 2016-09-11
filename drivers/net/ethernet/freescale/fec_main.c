@@ -3390,11 +3390,12 @@ fec_probe(struct platform_device *pdev)
 
 	/* reset phy */
 
-	if (of_machine_is_compatible("fsl,imx6sx-seco-b08")) {
+#ifdef CONFIG_MICREL_PHY
+	if (of_machine_is_compatible("fsl,imx6sx-seco-b08"))
 		fec_phy_reset(pdev);
-	} else {
+	else 
+#endif
 		fec_reset_phy(pdev);
-	}
 
 	if (fep->bufdesc_ex)
 		fec_ptp_init(pdev);
