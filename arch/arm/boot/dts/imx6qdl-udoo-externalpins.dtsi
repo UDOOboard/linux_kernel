@@ -78,6 +78,15 @@
             >;
         };
 
+        pinctrl_ecspi1: ecspi1grp {
+            fsl,pins = <
+            MX6QDL_PAD_DISP0_DAT22__ECSPI1_MISO  0x100b1     // {{external-ecspi1-45}}
+            MX6QDL_PAD_DISP0_DAT20__ECSPI1_SCLK  0x100b1     // {{external-ecspi1-36}}
+            MX6QDL_PAD_DISP0_DAT21__ECSPI1_MOSI  0x100b1     // {{external-ecspi1-37}}
+            MX6QDL_PAD_DISP0_DAT23__GPIO5_IO17   0x80000000  // {{external-ecspi1-46}}
+            >;
+        };
+
         pinctrl_usdhc1: usdhc1grp {
             fsl,pins = <
             MX6QDL_PAD_SD1_CMD__SD1_CMD       0x17059
@@ -205,7 +214,19 @@
 	status = "disabled";
 };
 
+&ecspi1 {
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio5 17 0>;
+	pinctrl-0 = <&pinctrl_ecspi1>;
+	pinctrl-names = "default";
+	status = "disabled";
 
+	spidev0: spi@0 {
+		compatible = "spidev";
+		reg = <0>;
+		spi-max-frequency = <2000000>;
+	};
+};
 
 / {
     sound_spdif {
