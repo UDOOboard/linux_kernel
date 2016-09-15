@@ -1,0 +1,64 @@
+/*
+ * Copyright 2013 Freescale Semiconductor, Inc.
+ * Copyright 2015 Aidilab, Srl.
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+
+#include "imx6q.dtsi"
+#include "imx6qdl-seco_A62.dtsi"
+
+/ {
+	model = "SECO i.MX6 Quad SBC (A62) Board";
+	compatible = "fsl,imx6q-SBC_A62", "fsl,imx6q";
+
+	regulators {
+		reg_lcd0_pwr: regulator@3 {
+			status = "okay";
+		};
+	};
+	
+	backlight {
+		status = "okay";
+	};
+};
+
+&mxcfb1 {
+	interface_pix_fmt = "RGB666";
+	mode_str ="LDB-800x480";
+	status = "okay";
+};
+
+&mxcfb2 {
+	status = "disabled";
+};
+
+&ldb {
+	status = "okay";
+	lvds-channel@0 {     
+		status = "okay";
+		fsl,data-width = <18>;
+		crtc = "ipu2-di0";
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: LDB-800x480 {
+				clock-frequency = <38000000>;
+				hactive = <800>;
+				vactive = <480>;
+				hback-porch = <56>;
+				hfront-porch = <50>;
+				vback-porch = <20>;
+				vfront-porch = <23>;
+				hsync-len = <150>;
+				vsync-len = <60>;
+			};
+		};
+	};
+};

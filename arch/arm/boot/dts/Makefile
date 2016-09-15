@@ -164,6 +164,11 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6dl-sabresd-ldo.dtb \
 	imx6dl-sabresd-pf200.dtb \
 	imx6dl-sabresd-hdcp.dtb \
+        imx6dl-seco_A62-hdmi.dtb \
+        imx6dl-seco_A62-lvds7.dtb \
+        imx6dl-seco_A62-lvds15.dtb \
+        imx6dl-seco_A62-lvds7hdmi.dtb \
+        imx6dl-seco_A62.dtb \
 	imx6dl-wandboard.dtb \
 	imx6dl-udoo-hdmi.dtb \
 	imx6dl-udoo-lvds7.dtb \
@@ -183,6 +188,11 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-sabresd-hdcp.dtb \
 	imx6q-sabresd-ldo.dtb \
 	imx6q-sbc6x.dtb \
+	imx6q-seco_A62.dtb \
+        imx6q-seco_A62-hdmi.dtb \
+        imx6q-seco_A62-lvds7.dtb \
+        imx6q-seco_A62-lvds15.dtb \
+        imx6q-seco_A62-lvds7hdmi.dtb \
 	imx6q-udoo-hdmi.dtb \
 	imx6q-udoo-lvds7.dtb \
 	imx6q-udoo-lvds15.dtb \
