@@ -26,6 +26,7 @@
 #include <linux/of_gpio.h>
 #include <linux/platform_device.h>
 #include <linux/platform_data/usb3503.h>
+#include <linux/regulator/consumer.h>
 #include <linux/regmap.h>
 
 #define USB3503_VIDL		0x00
@@ -172,6 +173,7 @@ static int usb3503_probe(struct usb3503 *hub)
 	struct device *dev = hub->dev;
 	struct usb3503_platform_data *pdata = dev_get_platdata(dev);
 	struct device_node *np = dev->of_node;
+	struct regulator *reg_vbus;
 	int err;
 	u32 mode = USB3503_MODE_HUB;
 	const u32 *property;
@@ -193,6 +195,18 @@ static int usb3503_probe(struct usb3503 *hub)
 				u32 port = be32_to_cpu(property[i]);
 				if ((1 <= port) && (port <= 3))
 					hub->port_off_mask |= (1 << port);
+			}
+		}
+
+		if (of_machine_is_compatible("fsl,imx6sx-seco-b08")) {
+			if ((hub->port_off_mask & 0x1) != 0x1) {
+				reg_vbus = devm_regulator_get(dev, "vbusport3");
+				regulator_enable(reg_vbus);
+			}
+
+			if ((hub->port_off_mask & 0x2) != 0x2) {
+				reg_vbus = devm_regulator_get(dev, "vbusport4");
+				regulator_enable(reg_vbus);
 			}
 		}
 
