@@ -87,6 +87,15 @@
             >;
         };
 
+        pinctrl_ecspi2: ecspi2grp {
+            fsl,pins = <
+            MX6QDL_PAD_EIM_OE__ECSPI2_MISO      0x100b1     //  {{external-ecspi2-50}}
+            MX6QDL_PAD_EIM_CS0__ECSPI2_SCLK     0x100b1     //  {{external-ecspi2-52}}
+            MX6QDL_PAD_EIM_CS1__ECSPI2_MOSI     0x100b1     //  {{external-ecspi2-51}}
+            MX6QDL_PAD_DISP0_DAT18__GPIO5_IO12  0x80000000  //  {{external-ecspi2-34}}
+            >;
+        };
+
         pinctrl_usdhc1: usdhc1grp {
             fsl,pins = <
             MX6QDL_PAD_SD1_CMD__SD1_CMD       0x17059
@@ -97,7 +106,7 @@
             MX6QDL_PAD_SD1_DAT3__SD1_DATA3    0x17059
             >;
         };
-        
+
         pinctrl_pwm1: pwm1grp {
             fsl,pins = <
             MX6QDL_PAD_SD1_DAT3__PWM1_OUT     0x1b0b1  // {{external-pwm1-8}}
@@ -222,6 +231,20 @@
 	status = "disabled";
 
 	spidev0: spi@0 {
+		compatible = "spidev";
+		reg = <0>;
+		spi-max-frequency = <2000000>;
+	};
+};
+
+&ecspi2 {
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio5 12 0>;
+	pinctrl-0 = <&pinctrl_ecspi2>;
+	pinctrl-names = "default";
+	status = "disabled";
+
+	spidev1: spi@0 {
 		compatible = "spidev";
 		reg = <0>;
 		spi-max-frequency = <2000000>;
