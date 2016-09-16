@@ -96,6 +96,15 @@
             >;
         };
 
+        pinctrl_ecspi5: ecspi5grp {
+            fsl,pins = <
+            MX6QDL_PAD_SD1_DAT0__ECSPI5_MISO    0x100b1     //  {{external-ecspi5-3}}
+            MX6QDL_PAD_SD1_CMD__ECSPI5_MOSI     0x100b1     //  {{external-ecspi5-5}}
+            MX6QDL_PAD_SD1_CLK__ECSPI5_SCLK     0x100b1     //  {{external-ecspi5-2}}
+            MX6QDL_PAD_SD1_DAT1__GPIO1_IO17     0x80000000  //  {{external-ecspi5-4}}
+            >;
+        };
+
         pinctrl_usdhc1: usdhc1grp {
             fsl,pins = <
             MX6QDL_PAD_SD1_CMD__SD1_CMD       0x17059
@@ -245,6 +254,20 @@
 	status = "disabled";
 
 	spidev1: spi@0 {
+		compatible = "spidev";
+		reg = <0>;
+		spi-max-frequency = <2000000>;
+	};
+};
+
+&ecspi5 {
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio1 17 0>;
+	pinctrl-0 = <&pinctrl_ecspi5>;
+	pinctrl-names = "default";
+	status = "disabled";
+
+	spidev5: spi@0 {
 		compatible = "spidev";
 		reg = <0>;
 		spi-max-frequency = <2000000>;
