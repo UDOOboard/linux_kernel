@@ -19,11 +19,11 @@ config IMX_MCC_TEST
 
 	  If unsure, it is safe to say Y.
 
-config IMX_MCC_TTY
+config IMX_UDOONEO_MCC
 	bool "IMX PTY for MCC interface"
 	depends on SOC_IMX6SX && IMX_SEMA4 && !IMX_MCC_TEST
 	help
-	  This enables a PTY node for IMX6SX MCC, used as interface
+	  This enables a PTY node for udooNeo IMX6SX MCC, used as interface
 	  between kernel space and user space. Say N here, if the
 	  interface is not required.
 
