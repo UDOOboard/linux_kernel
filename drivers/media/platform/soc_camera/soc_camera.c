@@ -86,6 +86,8 @@ int soc_camera_power_on(struct device *dev, struct soc_camera_subdev_desc *ssdd,
 		clock_toggle = false;
 	}
 
+	printk(KERN_ERR "Disabled soc_camera_power_on function.\n");
+#if 0
 	ret = regulator_bulk_enable(ssdd->sd_pdata.num_regulators,
 				    ssdd->sd_pdata.regulators);
 	if (ret < 0) {
@@ -101,6 +103,7 @@ int soc_camera_power_on(struct device *dev, struct soc_camera_subdev_desc *ssdd,
 			goto epwron;
 		}
 	}
+#endif
 
 	return 0;
 

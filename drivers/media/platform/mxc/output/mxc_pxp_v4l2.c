@@ -1055,6 +1055,20 @@ static int pxp_s_crop(struct file *file, void *fh,
 	return 0;
 }
 
+static int pxp_s_fmt_vid_cap(struct file *file, void *priv,
+                                        struct v4l2_format *f)
+{
+        printk(KERN_ERR "Fake pxp_s_fmt_vid_cap function.\n");
+        return 0;
+}
+
+static int pxp_vidioc_g_std(struct file *file, void *priv,
+                                        struct v4l2_format *f)
+{
+        printk(KERN_ERR "Fake pxp_vidioc_g_std function.\n");
+        return 0;
+}
+
 static int pxp_queryctrl(struct file *file, void *priv,
 			 struct v4l2_queryctrl *qc)
 {

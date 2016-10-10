@@ -518,7 +518,8 @@ static struct ov772x_priv *to_ov772x(struct v4l2_subdev *sd)
 
 static inline int ov772x_read(struct i2c_client *client, u8 addr)
 {
-	return i2c_smbus_read_byte_data(client, addr);
+	i2c_smbus_write_byte(client, addr);
+	return i2c_smbus_read_byte(client);
 }
 
 static inline int ov772x_write(struct i2c_client *client, u8 addr, u8 value)
@@ -583,6 +584,8 @@ static int ov772x_s_ctrl(struct v4l2_ctrl *ctrl)
 	int ret = 0;
 	u8 val;
 
+printk(KERN_ERR "GGG ov772x_s_ctrl %d\n", ctrl->id);
+return 0;
 	switch (ctrl->id) {
 	case V4L2_CID_VFLIP:
 		val = ctrl->val ? VFLIP_IMG : 0x00;
@@ -698,6 +701,83 @@ static void ov772x_select_params(const struct v4l2_mbus_framefmt *mf,
 
 	/* Select a window size. */
 	*win = ov772x_select_win(mf->width, mf->height);
+}
+
+static int ov772x_querystd(struct v4l2_subdev *sd, v4l2_std_id *std)
+{
+	*std &= V4L2_STD_PAL_60;
+	printk(KERN_ERR "Fake ov772x_querystd function.\n");
+	return 0;
+}
+
+static int ov772x_g_std(struct v4l2_subdev *sd, v4l2_std_id *std)
+{
+	*std &= V4L2_STD_PAL_60;
+	printk(KERN_ERR "Fake ov772x_g_std function.\n");
+	return 0;
+}
+
+static int ov772x_s_std(struct v4l2_subdev *sd, v4l2_std_id std)
+{
+	printk(KERN_ERR "Fake ov772x_s_std function\n");
+	if (std == V4L2_STD_PAL_60)
+		printk(KERN_ERR  "-> V4L2_STD_PAL_60 \n");
+	else if (std == V4L2_STD_NTSC_443)
+		printk(KERN_ERR  "-> V4L2_STD_NTSC_443 \n");
+	else if (std == V4L2_STD_PAL_N)
+		printk(KERN_ERR  "-> V4L2_STD_PAL_N \n");
+	else if (std == V4L2_STD_PAL_M)
+		printk(KERN_ERR  "-> V4L2_STD_PAL_M \n");
+	else if (std == V4L2_STD_PAL_Nc)
+		printk(KERN_ERR  "-> V4L2_STD_PAL_Nc \n");
+	else if (std & V4L2_STD_PAL)
+		printk(KERN_ERR  "-> V4L2_STD_PAL \n");
+	else if (std & V4L2_STD_NTSC)
+		printk(KERN_ERR  "-> V4L2_STD_NTSC \n");
+	else if (std & V4L2_STD_SECAM)
+		printk(KERN_ERR  "-> V4L2_STD_SECAM \n");
+	else
+		printk(KERN_ERR  "-> INVALID \n");
+
+	return 0;
+}
+
+/*
+ * Implement G/S_PARM.  There is a "high quality" mode we could try
+ * to do someday; for now, we just do the frame rate tweak.
+ */
+static int ov772x_g_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
+{
+	struct v4l2_captureparm *cp = &parms->parm.capture;
+	struct v4l2_fract *tpf;
+
+	printk(KERN_ERR "Fake ov772x_g_parm function\n");
+	tpf->numerator = 1;
+	tpf->denominator = 1;
+	memset(cp, 0, sizeof(struct v4l2_captureparm));
+	cp->capability = V4L2_CAP_TIMEPERFRAME;
+	cp->timeperframe = *tpf;
+
+	return 0;
+}
+
+static int ov772x_s_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
+{
+	printk(KERN_ERR "Fake ov772x_s_parm functions.\n");
+	return 0;
+}
+
+/*
+ * Frame size enumeration
+ */
+static int ov772x_enum_framesizes(struct v4l2_subdev *sd,
+		struct v4l2_frmsizeenum *fsize)
+{
+	printk(KERN_ERR "Fake ov772x_enum_framesizes function.\n");
+	fsize->discrete.width	= VGA_WIDTH;
+	fsize->discrete.height	= VGA_HEIGHT;
+	fsize->type		= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	return 0;
 }
 
 static int ov772x_set_params(struct ov772x_priv *priv,
@@ -976,7 +1056,7 @@ static int ov772x_video_probe(struct ov772x_priv *priv)
 	ret = v4l2_ctrl_handler_setup(&priv->hdl);
 
 done:
-	ov772x_s_power(&priv->subdev, 0);
+//	ov772x_s_power(&priv->subdev, 0);
 	return ret;
 }
 
@@ -985,6 +1065,8 @@ static const struct v4l2_ctrl_ops ov772x_ctrl_ops = {
 };
 
 static struct v4l2_subdev_core_ops ov772x_subdev_core_ops = {
+	.g_std = ov772x_g_std,
+	.s_std = ov772x_s_std,
 #ifdef CONFIG_VIDEO_ADV_DEBUG
 	.g_register	= ov772x_g_register,
 	.s_register	= ov772x_s_register,
@@ -1024,7 +1106,11 @@ static struct v4l2_subdev_video_ops ov772x_subdev_video_ops = {
 	.try_mbus_fmt	= ov772x_try_fmt,
 	.cropcap	= ov772x_cropcap,
 	.g_crop		= ov772x_g_crop,
+	.s_parm 	= ov772x_s_parm,
+	.g_parm 	= ov772x_g_parm,
+	.querystd 	= ov772x_querystd,
 	.enum_mbus_fmt	= ov772x_enum_fmt,
+	.enum_framesizes = ov772x_enum_framesizes,
 	.g_mbus_config	= ov772x_g_mbus_config,
 };
 
@@ -1045,10 +1131,10 @@ static int ov772x_probe(struct i2c_client *client,
 	struct i2c_adapter	*adapter = to_i2c_adapter(client->dev.parent);
 	int			ret;
 
-	if (!ssdd || !ssdd->drv_priv) {
-		dev_err(&client->dev, "OV772X: missing platform data!\n");
-		return -EINVAL;
-	}
+//	if (!ssdd || !ssdd->drv_priv) {
+//		dev_err(&client->dev, "OV772X: missing platform data!\n");
+//		return -EINVAL;
+//	}
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA)) {
 		dev_err(&adapter->dev,
@@ -1061,7 +1147,7 @@ static int ov772x_probe(struct i2c_client *client,
 	if (!priv)
 		return -ENOMEM;
 
-	priv->info = ssdd->drv_priv;
+//	priv->info = ssdd->drv_priv;
 
 	v4l2_i2c_subdev_init(&priv->subdev, client, &ov772x_subdev_ops);
 	v4l2_ctrl_handler_init(&priv->hdl, 3);
@@ -1075,11 +1161,14 @@ static int ov772x_probe(struct i2c_client *client,
 	if (priv->hdl.error)
 		return priv->hdl.error;
 
-	priv->clk = v4l2_clk_get(&client->dev, "mclk");
-	if (IS_ERR(priv->clk)) {
-		ret = PTR_ERR(priv->clk);
-		goto eclkget;
-	}
+        priv->clk = NULL;
+//	priv->clk = v4l2_clk_get(&client->dev, "mclk");
+//	if (IS_ERR(priv->clk)) {
+//		ret = PTR_ERR(priv->clk);
+//		goto eclkget;
+//	}
+
+	v4l2_async_register_subdev(&priv->subdev);
 
 	ret = ov772x_video_probe(priv);
 	if (ret < 0) {
@@ -1098,7 +1187,7 @@ static int ov772x_remove(struct i2c_client *client)
 {
 	struct ov772x_priv *priv = to_ov772x(i2c_get_clientdata(client));
 
-	v4l2_clk_put(priv->clk);
+//	v4l2_clk_put(priv->clk);
 	v4l2_device_unregister_subdev(&priv->subdev);
 	v4l2_ctrl_handler_free(&priv->hdl);
 	return 0;

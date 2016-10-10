@@ -1,12 +1,12 @@
 /*
- * Author: Francesco Montefoschi <francesco.monte@gmail.com> 
+ * Author: Francesco Montefoschi <francesco.monte@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  *
  */
- 
+
 
 &iomuxc {
     imx6x-udoo-neo {
@@ -20,26 +20,26 @@
 				MX6SX_PAD_SD4_CLK__GPIO6_IO_12			0x80000000	// {{external-gpio-20}}
 				MX6SX_PAD_SD4_CMD__GPIO6_IO_13			0x80000000	// {{external-gpio-21}}
 				MX6SX_PAD_SD4_RESET_B__GPIO6_IO_22		0x80000000	// {{external-gpio-22}}
-				MX6SX_PAD_CSI_PIXCLK__GPIO1_IO_24		0x80000000	// {{external-gpio-23}}	
-						
-				MX6SX_PAD_CSI_VSYNC__GPIO1_IO_25		0x80000000	// {{external-gpio-24}}
-				MX6SX_PAD_CSI_HSYNC__GPIO1_IO_22		0x80000000	// {{external-gpio-25}}
-				MX6SX_PAD_CSI_DATA00__GPIO1_IO_14		0x80000000	// {{external-gpio-26}}
-				MX6SX_PAD_CSI_DATA01__GPIO1_IO_15		0x80000000	// {{external-gpio-27}}
-				MX6SX_PAD_CSI_DATA02__GPIO1_IO_16		0x80000000	// {{external-gpio-28}}
-				MX6SX_PAD_CSI_DATA03__GPIO1_IO_17		0x80000000	// {{external-gpio-29}}
-				MX6SX_PAD_CSI_DATA04__GPIO1_IO_18		0x80000000	// {{external-gpio-30}}
-				MX6SX_PAD_CSI_DATA05__GPIO1_IO_19		0x80000000	// {{external-gpio-31}}
-				MX6SX_PAD_CSI_DATA06__GPIO1_IO_20		0x80000000	// {{external-gpio-32}}
-				MX6SX_PAD_CSI_DATA07__GPIO1_IO_21		0x80000000	// {{external-gpio-33}}
-				
+				//MX6SX_PAD_CSI_PIXCLK__GPIO1_IO_24		0x80000000	// {{external-gpio-23}}
+
+				//MX6SX_PAD_CSI_VSYNC__GPIO1_IO_25		0x80000000	// {{external-gpio-24}}
+				//MX6SX_PAD_CSI_HSYNC__GPIO1_IO_22		0x80000000	// {{external-gpio-25}}
+				//MX6SX_PAD_CSI_DATA00__GPIO1_IO_14		0x80000000	// {{external-gpio-26}}
+				//MX6SX_PAD_CSI_DATA01__GPIO1_IO_15		0x80000000	// {{external-gpio-27}}
+				//MX6SX_PAD_CSI_DATA02__GPIO1_IO_16		0x80000000	// {{external-gpio-28}}
+				//MX6SX_PAD_CSI_DATA03__GPIO1_IO_17		0x80000000	// {{external-gpio-29}}
+				//MX6SX_PAD_CSI_DATA04__GPIO1_IO_18		0x80000000	// {{external-gpio-30}}
+				//MX6SX_PAD_CSI_DATA05__GPIO1_IO_19		0x80000000	// {{external-gpio-31}}
+				//MX6SX_PAD_CSI_DATA06__GPIO1_IO_20		0x80000000	// {{external-gpio-32}}
+				//MX6SX_PAD_CSI_DATA07__GPIO1_IO_21		0x80000000	// {{external-gpio-33}}
+
 				//MX6SX_PAD_USB_H_STROBE__GPIO7_IO_11	0x80000000	// {{external-gpio-34}}
 				//MX6SX_PAD_USB_H_DATA__GPIO7_IO_10		0x80000000	// {{external-gpio-35}}
 				MX6SX_PAD_SD4_DATA3__GPIO6_IO_17		0x80000000	// {{external-gpio-36}}
 				MX6SX_PAD_SD4_DATA2__GPIO6_IO_16		0x80000000	// {{external-gpio-37}}
 				MX6SX_PAD_SD4_DATA1__GPIO6_IO_15		0x80000000	// {{external-gpio-38}}
 				MX6SX_PAD_SD4_DATA0__GPIO6_IO_14		0x80000000	// {{external-gpio-39}}
-				
+
 				MX6SX_PAD_QSPI1A_SS1_B__GPIO4_IO_23		0x80000000	// {{external-gpio-40}}
 				MX6SX_PAD_QSPI1B_DQS__GPIO4_IO_28		0x80000000	// {{external-gpio-41}}
 				MX6SX_PAD_QSPI1B_SS1_B__GPIO4_IO_31		0x80000000	// {{external-gpio-42}}
@@ -97,19 +97,19 @@
 				MX6SX_PAD_USB_H_STROBE__PWM1_OUT	0x1b0b1
 			>;
 		};
-		
+
 		pinctrl_pwm2: pwm2grp {
 			fsl,pins = <
 				MX6SX_PAD_USB_H_DATA__PWM2_OUT	0x1b0b1
 			>;
 		};
-		
+
 		pinctrl_pwm3: pwm3grp {
 			fsl,pins = <
 				MX6SX_PAD_NAND_DATA06__PWM3_OUT	0x1b0b1
 			>;
 		};
-		
+
 		pinctrl_pwm4: pwm4grp {
 			fsl,pins = <
 				MX6SX_PAD_NAND_DATA07__PWM4_OUT	0x1b0b1
@@ -273,7 +273,7 @@
 		ssi-controller = <&ssi1>;
 		status = "disabled";
 	};
-	
+
 	sound_spdif {
 		compatible = "fsl,imx-audio-spdif";
 		model = "imx-spdif";

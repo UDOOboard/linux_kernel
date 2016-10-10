@@ -15,14 +15,14 @@
 / {
 	model = "UDOO Neo (based on iMX.6 SoloX)";
 	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
-	
+
 	aliases {
 		mmc0 = &usdhc2;
 	};
 
 	pxp_v4l2_out {
 		compatible = "fsl,imx6sx-pxp-v4l2", "fsl,imx6sl-pxp-v4l2";
-		status = "disabled";
+		status = "okay";
 	};
 
 	regulators {
@@ -78,6 +78,27 @@
 			enable-active-high;
 		};
 
+		ov_reset: fixedregulator@2 {
+			 compatible = "regulator-fixed";
+			 regulator-name = "ovreset";
+			 regulator-min-microvolt = <3300000>;
+			 regulator-max-microvolt = <3300000>;
+
+			 gpio = <&gpio5 14 0>;
+			 enable-active-high;
+			 regulator-always-on;
+		};
+
+		ov_power: fixedregulator@3 {
+			compatible = "regulator-fixed";
+			regulator-name = "ovpower";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+
+			gpio = <&gpio5 13 0>;
+			enable-active-high;
+			regulator-always-on;
+		};
 	};
 
 	leds {
@@ -270,10 +291,25 @@
 		reg = <0x48>;
 	};
 
-  si7006: si70xx@40 {   // Brick Humidity Sensor
-    compatible = "silabs,si70xx";
-    reg = <0x40>;
-  };
+	si7006: si70xx@40 {   // Brick Humidity Sensor
+		compatible = "silabs,si70xx";
+		reg = <0x40>;
+	};
+
+  	ov772x_1: camera@0x21 {
+  		compatible = "omnivision,ov772x";
+		reg = <0x21>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_csi_1>;
+		vddio-supply = <&ov_reset>;
+		vddcore-supply = <&ov_power>;
+
+                port {
+                        ov772x_ep: endpoint {
+                                remote-endpoint = <&csi1_ep>;
+                        };
+                };
+	};
 };
 
 
@@ -326,10 +362,10 @@
 				MX6SX_PAD_QSPI1A_SS0_B__GPIO4_IO_22   0x80000000 // MUX_D
 				MX6SX_PAD_QSPI1A_DATA2__GPIO4_IO_18   0x80000000 // MUX_E
 				MX6SX_PAD_QSPI1A_DATA3__GPIO4_IO_19   0x80000000 // MUX_F
-				
+
 				// Model recognition GPIOs
 				MX6SX_PAD_NAND_READY_B__GPIO4_IO_13	0x80000000		// Connected to R184
-				MX6SX_PAD_NAND_ALE__GPIO4_IO_0		0x80000000		// Connected to R185	
+				MX6SX_PAD_NAND_ALE__GPIO4_IO_0		0x80000000		// Connected to R185
 			>;
 		};
 
@@ -499,6 +535,22 @@
 			>;
 		};
 
+		pinctrl_csi_1: csigrp-1 {
+			fsl,pins = <
+				MX6SX_PAD_CSI_MCLK__CSI1_MCLK	  	0x110b0
+				MX6SX_PAD_CSI_PIXCLK__CSI1_PIXCLK	0x110b0
+				MX6SX_PAD_CSI_VSYNC__CSI1_VSYNC		0x110b0
+				MX6SX_PAD_CSI_HSYNC__CSI1_HSYNC		0x110b0
+				MX6SX_PAD_CSI_DATA00__CSI1_DATA_2	0x110b0
+				MX6SX_PAD_CSI_DATA01__CSI1_DATA_3	0x110b0
+				MX6SX_PAD_CSI_DATA02__CSI1_DATA_4	0x110b0
+				MX6SX_PAD_CSI_DATA03__CSI1_DATA_5	0x110b0
+				MX6SX_PAD_CSI_DATA04__CSI1_DATA_6	0x110b0
+				MX6SX_PAD_CSI_DATA05__CSI1_DATA_7	0x110b0
+				MX6SX_PAD_CSI_DATA06__CSI1_DATA_8	0x110b0
+				MX6SX_PAD_CSI_DATA07__CSI1_DATA_9	0x110b0
+			>;
+		};
 	};
 };
 
@@ -560,21 +612,30 @@
 };
 
 &csi1 {
-	status = "okay";
-	port {
-		csi1_ep: endpoint {
-			remote-endpoint = <&vadc_ep>;
-		};
-	};
+        status = "okay";
+        port {
+                csi1_ep: endpoint {
+                        remote-endpoint = <&ov772x_ep>;
+                };
+        };
 };
 
-&vadc {
-	vadc_in = <0>;
-	csi_id = <0>;
-	status = "okay";
-	port {
-		vadc_ep: endpoint {
-			remote-endpoint = <&csi1_ep>;
-		};
-	};
-};
+// &csi1 {
+// 	status = "okay";
+// 	port {
+// 		csi1_ep: endpoint {
+// 			remote-endpoint = <&vadc_ep>;
+// 		};
+// 	};
+// };
+// 
+// &vadc {
+// 	vadc_in = <0>;
+// 	csi_id = <0>;
+// 	status = "okay";
+// 	port {
+// 		vadc_ep: endpoint {
+// 			remote-endpoint = <&csi1_ep>;
+// 		};
+// 	};
+// };
