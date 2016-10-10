@@ -30,6 +30,17 @@
 #include <media/v4l2-ctrls.h>
 #include <media/v4l2-subdev.h>
 
+/* Tested on udooNeo acquiring video with the following command line
+ * gst-launch-1.0 --gst-debug-level=3 --gst-debug=imxv4l2src:9 imxv4l2videosrc \
+ *   device=/dev/video0 ! 'video/x-raw,format=YUY2,width=640,height=480' ! filesink \
+ *   location=/pat/to/file.yuv
+ *
+ * On PC convert the video with the command line:
+ *   mencoder file.yuv -demuxer rawvideo -rawvideo "w=640:h=480:yuy2" -ovc lavc \
+ *      -lavcopts vcodec=mpeg4 -nosound -ffourcc UMP4 -o file.mp4
+ *
+ */
+
 /*
  * register offset
  */
