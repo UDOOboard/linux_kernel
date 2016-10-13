@@ -373,8 +373,8 @@
 				MX6SX_PAD_SD3_DATA1__USDHC3_DATA1	0x17069
 				MX6SX_PAD_SD3_DATA2__USDHC3_DATA2	0x17069
 				MX6SX_PAD_SD3_DATA3__USDHC3_DATA3	0x17069
-				MX6SX_PAD_KEY_COL2__GPIO2_IO_12		0x15059
-				MX6SX_PAD_KEY_ROW1__GPIO2_IO_16		0x13059
+				MX6SX_PAD_KEY_COL2__GPIO2_IO_12		0x80000000
+				MX6SX_PAD_KEY_ROW1__GPIO2_IO_16		0x80000000
 			>;
 		};
 
@@ -415,7 +415,6 @@
 				MX6SX_PAD_KEY_COL4__I2C3_SCL            0x4001b8b1
 			>;
 		};
-
 
 		pinctrl_lcdif_dat_0: lcdifdatgrp {
 			fsl,pins = <
@@ -483,14 +482,14 @@
 			>;
 		};
 
-		pinctrl_qspi1_1: qspi1grp_1 {
+		pinctrl_qspi2_1: qspi2grp_1 {
 			fsl,pins = <
-				MX6SX_PAD_NAND_WP_B__QSPI2_A_DATA_0	0x70a1
-				MX6SX_PAD_NAND_READY_B__QSPI2_A_DATA_1  0x70a1
-				MX6SX_PAD_NAND_CE0_B__QSPI2_A_DATA_2	0x70a1
-				MX6SX_PAD_NAND_CE1_B__QSPI2_A_DATA_3	0x70a1
-				MX6SX_PAD_NAND_CLE__QSPI2_A_SCLK	0x70a1
-				MX6SX_PAD_NAND_ALE__QSPI2_A_SS0_B	0x70a1
+				MX6SX_PAD_NAND_WP_B__QSPI2_A_DATA_0	0x70f1
+				MX6SX_PAD_NAND_READY_B__QSPI2_A_DATA_1  0x70f1
+				MX6SX_PAD_NAND_CE0_B__QSPI2_A_DATA_2	0x70f1
+				MX6SX_PAD_NAND_CE1_B__QSPI2_A_DATA_3	0x70f1
+				MX6SX_PAD_NAND_CLE__QSPI2_A_SCLK	0x70f1
+				MX6SX_PAD_NAND_ALE__QSPI2_A_SS0_B	0x70f1
 			>;
 		};
 
@@ -889,11 +888,9 @@
 	};
 };
 
-&qspi1 {
+&qspi2 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_qspi1_1>;
-	/* only map 128MB */
-	reg = <0x021e0000 0x4000>, <0x60000000 0x8000000>;
+	pinctrl-0 = <&pinctrl_qspi2_1>;
 	ddrsmp=<2>;
 	status = "okay";
 
