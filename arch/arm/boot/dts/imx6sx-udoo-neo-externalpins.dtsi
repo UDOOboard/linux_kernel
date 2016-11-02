@@ -155,11 +155,11 @@
 	status = "disabled";
 };
 
-//&audmux {									// {{required-by-sound_dac}}
-//	pinctrl-names = "default";				// {{required-by-sound_dac}}
-//	pinctrl-1 = <&pinctrl_audmux_dac>;		// {{required-by-sound_dac}}
-//	status = "okay";						// {{required-by-sound_dac}}
-//};										// {{required-by-sound_dac}}
+//&audmux {									                                  // {{required-by-sound_dac}}
+//	pinctrl-names = "default";				                        // {{required-by-sound_dac}}
+//	pinctrl-0 = <&pinctrl_audmux_hdmi &pinctrl_audmux_dac>;		// {{required-by-sound_dac}}
+//	status = "okay";						                              // {{required-by-sound_dac}}
+//};										                                      // {{required-by-sound_dac}}
 
 &ecspi2 {
 	fsl,spi-num-chipselects = <1>;
