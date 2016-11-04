@@ -175,7 +175,7 @@ int thread_function(void *data)
 	struct mcc_tty_msg tty_msg;
 	struct mcctty_port *cport = &mcc_tty_port;
 
-	printk(KERN_INFO"ttymcc - enter into function thread with msgs available!!\n");
+	printk(KERN_INFO"ttymcc - enter into function thread with msgs available!\n");
 
 	while(thread_loop){
 
@@ -219,7 +219,7 @@ static int ttymcc_thread_init(void)
 {
 	data = 20;
 	thread_loop = 1;
-	printk(KERN_INFO "ttymcc_thread_init!!\n");
+	printk(KERN_INFO "ttyMCC thread init\n");
 	task = kthread_run(&thread_function,(void *)data,"pradeep");
 	printk(KERN_INFO"Kernel Thread : %s\n",task->comm);
 	return 0;
@@ -227,10 +227,9 @@ static int ttymcc_thread_init(void)
 
 static void ttymcc_thread_exit(void)
 {
-	printk(KERN_INFO"ttymcc_thread_exit!!\n");
+	printk(KERN_INFO"ttyMCC thread exit\n");
 	thread_loop = 0;
 }
-
 
 
 static int mcctty_install(struct tty_driver *driver, struct tty_struct *tty)
@@ -371,7 +370,7 @@ static int imx_mcc_tty_probe(struct platform_device *pdev)
 		pr_err("Couldn't install mcc tty driver: err %d\n", ret);
 		goto error;
 	} else
-		pr_info("Install mcc tty driver!\n");
+		pr_info("Install ttyMCC driver!\n");
 
 	ret = mcc_initialize(MCC_NODE_A9);
 	if (ret) {
@@ -382,18 +381,18 @@ static int imx_mcc_tty_probe(struct platform_device *pdev)
 
 	ret = mcc_get_info(MCC_NODE_A9, &mcc_info);
 	if (ret) {
-		pr_err("failed to get mcc info.\n");
+		pr_err("failed to get ttyMCC info.\n");
 		ret = -ENODEV;
 		goto error;
 	} else {
-		pr_info("\nA9 mcc prepares run, MCC version is %s\n",
+		pr_info("\nA9 ttyMCC prepares run, MCC version is %s\n",
 			mcc_info.version_string);
 	}
 
 	ret = mcc_create_endpoint(&mcc_endpoint_a9,
 				  MCC_A9_PORT);
 	if (ret) {
-		pr_err("failed to create a9 mcc ep.\n");
+		pr_err("failed to create A9 ttyMCC endpoint.\n");
 		ret = -ENODEV;
 		goto error;
 	}
@@ -417,9 +416,9 @@ static int imx_mcc_tty_remove(struct platform_device *pdev)
 	/* destory the mcc tty endpoint here */
 	ret = mcc_destroy_endpoint(&mcc_endpoint_a9);
 	if (ret)
-		pr_err("failed to destory a9 mcc ep.\n");
+		pr_err("failed to destory A9 ttyMCC endpoint.\n");
 	else
-		pr_info("destory a9 mcc ep.\n");
+		pr_info("destory A9 ttyMCC endpoint.\n");
 
 	tty_unregister_driver(mcctty_driver);
 	tty_port_destroy(&cport->port);
@@ -468,6 +467,6 @@ module_init(imxmcctty_init);
 module_exit(imxmcctty_exit);
 
 MODULE_AUTHOR("Seco S.r.L.");
-MODULE_DESCRIPTION("IMX M4 UDOONEO DEBUGGER, BASED ON MCC TTY");
+MODULE_DESCRIPTION("IMX M4 UDOONEO, BASED ON MCC TTY");
 MODULE_LICENSE("GPL");
 
