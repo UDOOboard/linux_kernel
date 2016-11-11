@@ -80,19 +80,19 @@
 
         pinctrl_ecspi1: ecspi1grp {
             fsl,pins = <
-            MX6QDL_PAD_DISP0_DAT22__ECSPI1_MISO  0x100b1     // {{external-ecspi1-45}}
-            MX6QDL_PAD_DISP0_DAT20__ECSPI1_SCLK  0x100b1     // {{external-ecspi1-36}}
-            MX6QDL_PAD_DISP0_DAT21__ECSPI1_MOSI  0x100b1     // {{external-ecspi1-37}}
-            MX6QDL_PAD_DISP0_DAT23__GPIO5_IO17   0x80000000  // {{external-ecspi1-46}}
+            MX6QDL_PAD_DISP0_DAT22__ECSPI1_MISO  0x100b1
+            MX6QDL_PAD_DISP0_DAT20__ECSPI1_SCLK  0x100b1
+            MX6QDL_PAD_DISP0_DAT21__ECSPI1_MOSI  0x100b1
+            MX6QDL_PAD_DISP0_DAT23__GPIO5_IO17   0x80000000
             >;
         };
 
         pinctrl_ecspi2: ecspi2grp {
             fsl,pins = <
-            MX6QDL_PAD_EIM_OE__ECSPI2_MISO      0x100b1     //  {{external-ecspi2-50}}
-            MX6QDL_PAD_EIM_CS0__ECSPI2_SCLK     0x100b1     //  {{external-ecspi2-52}}
-            MX6QDL_PAD_EIM_CS1__ECSPI2_MOSI     0x100b1     //  {{external-ecspi2-51}}
-            MX6QDL_PAD_DISP0_DAT18__GPIO5_IO12  0x80000000  //  {{external-ecspi2-34}}
+            MX6QDL_PAD_EIM_OE__ECSPI2_MISO      0x100b1
+            MX6QDL_PAD_EIM_CS0__ECSPI2_SCLK     0x100b1
+            MX6QDL_PAD_EIM_CS1__ECSPI2_MOSI     0x100b1
+            MX6QDL_PAD_DISP0_DAT18__GPIO5_IO12  0x80000000
             >;
         };
 
