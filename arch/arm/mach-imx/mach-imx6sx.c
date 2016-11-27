@@ -255,6 +255,35 @@ static inline void imx6sx_qos_init(void)
 	return;
 }
 
+/* G.P. ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
+#define ANATOP_ADDR 0x020c8000
+#define PLL_528_SS_OFFSET 0x40
+#define ANADIG_PLL_528_SYS_SS_ENABLE 0x00008000
+
+static inline void pll_528_ss_enable(void)
+{
+	void   __iomem *anatop_base;
+	anatop_base = ioremap(ANATOP_ADDR, 4096);
+	int enabled=1;
+	u32 sys_ss=0xFA0001;
+//	u32 denom=0x190;
+
+	/* Disable spread spectrum mode */
+	writel_relaxed((readl_relaxed(anatop_base + PLL_528_SS_OFFSET) & ~ANADIG_PLL_528_SYS_SS_ENABLE), anatop_base + PLL_528_SS_OFFSET);
+   
+	/* Write new values */
+	writel_relaxed(sys_ss, anatop_base + PLL_528_SS_OFFSET);
+//	writel_relaxed(denom, anatop_base + PLL2_528_OFFSET + PLL_528_DENOM_DIV_OFFSET);
+   
+	/* Enable spread spectrum mode */
+	if (enabled)
+		writel_relaxed((readl_relaxed(anatop_base + PLL_528_SS_OFFSET) | ANADIG_PLL_528_SYS_SS_ENABLE), anatop_base + PLL_528_SS_OFFSET);
+
+	iounmap(anatop_base);
+	return;
+}
+/* G.P. ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
+
 static void __init imx6sx_init_machine(void)
 {
 	struct device *parent;
@@ -272,6 +301,9 @@ static void __init imx6sx_init_machine(void)
 	imx_anatop_init();
 	imx6sx_pm_init();
 	imx6sx_qos_init();
+/* G.P. ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
+	pll_528_ss_enable();
+/* G.P. ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
 }
 
 static void __init imx6sx_init_irq(void)
