@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Freescale Semiconductor, Inc.
+ * Copyright 2016 Aidilab, Srl.
  *
  * Author: Fabio Estevam <fabio.estevam@freescale.com>
  * Author: Ettore Chimenti <ettore.chimenti@udoo.org>
@@ -23,10 +24,10 @@
 		reg_lcd0_pwr: regulator@1 {
 			status = "okay";
 		};
-		
-		reg_lcd0_backlight: regulator@2 {
-			status = "okay";
-		};   
+	};
+
+	backlight_lcd {
+		status = "okay";
 	};
 	
 	mxcfb1: fb@0 {
