@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Freescale Semiconductor, Inc.
- * Copyright 2015 Aidilab, Srl.
+ * Copyright 2016 Aidilab, Srl.
  *
  * Author: Fabio Estevam <fabio.estevam@freescale.com>
  * Author: Ettore Chimenti <ettore.chimenti@udoo.org>
@@ -19,15 +19,15 @@
 / {
 	model = "UDOO Dual-lite Board";
 	compatible = "udoo,imx6dl-udoo", "fsl,imx6dl";
-	
+
 	regulators {
 		reg_lcd0_pwr: regulator@1 {
 			status = "okay";
 		};
-		
-		reg_lcd0_backlight: regulator@2 {
-			status = "okay";
-		};   
+	};
+
+	backlight_lcd {
+		status = "okay";
 	};
 };
 
@@ -43,7 +43,7 @@
 
 &ldb {
 	status = "okay";
-	lvds-channel@0 {     
+	lvds-channel@0 {
 		status = "okay";
 		fsl,data-width = <18>;
 		display-timings {
