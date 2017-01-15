@@ -1,0 +1,69 @@
+/*
+ * Copyright 2013 Freescale Semiconductor, Inc.
+ * Copyright 2015 Aidilab, Srl.
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+
+#include "imx6dl.dtsi"
+#include "imx6qdl-seco_A62.dtsi"
+
+/ {
+	model = "SECO i.MX6 DualLite SBC (A62) Board";
+	compatible = "fsl,imx6dl-SBC_A62", "fsl,imx6dl";
+
+	regulators {
+		reg_lcd0_pwr: regulator@3 {
+			status = "okay";
+		};
+	};
+	
+	backlight {
+		status = "okay";
+	};
+};
+
+&mxcfb1 {
+	interface_pix_fmt = "RGB666";
+	mode_str ="LDB-1080P60";
+	status = "okay";
+};
+
+&mxcfb2 {
+	status = "okay";
+};
+
+&ldb {
+	status = "okay";
+	lvds-channel@0 {     
+		fsl,data-mapping = "spwg";
+		fsl,data-width = <18>;
+		status = "okay";
+		primary;
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: LDB-1080P60 {
+				clock-frequency = <0x7bfa480>;
+				hactive = <0x780>;
+				vactive = <0x438>;
+				hback-porch = <0x64>;
+				hfront-porch = <0x28>;
+				vback-porch = <0x1e>;
+				vfront-porch = <0x2>;
+				hsync-len = <0xa>;
+				vsync-len = <0x2>;
+			};
+		};
+	};
+
+	lvds-channel@1 {
+		crtc = "ipu2-di1"; 
+	};
+};
