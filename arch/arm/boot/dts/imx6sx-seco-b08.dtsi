@@ -159,9 +159,9 @@
 	        baud_rate = <921600>;
 	};
 
-	btwilink {
+	/*btwilink {
 	        compatible = "btwilink";
-	};
+	};*/
 
         sound-spdif {
                 compatible = "fsl,imx-audio-spdif";
@@ -506,13 +506,6 @@
 			>;
 		};
 
-		pinctrl_gt911: gt911grp {
-			fsl,pins = <
-				MX6SX_PAD_SD1_DATA2__GPIO6_IO_4  	0x80000000	// TOUCH_INT
-				MX6SX_PAD_SD1_DATA3__GPIO6_IO_5  	0x80000000	// TOUCH_RST
-			>;
-		};
-
 		pinctrl_st1232: st1232grp-0 {
 			fsl,pins = <
 				MX6SX_PAD_SD1_DATA2__GPIO6_IO_4  	0x80000000	// TOUCH_INT
@@ -787,40 +780,6 @@
 // 		reg = <0x20>;
 // 	};
 // };
-
-&lcdif1 {
-        pinctrl-names = "default";
-        pinctrl-0 = <&pinctrl_lcdif_dat_0
-        &pinctrl_lcdif_ctrl_0>;
-        lcd-supply = <&vgen5_reg>;
-        display = <&display0>;
-        status = "okay";
-
-        display0: display {
-                bits-per-pixel = <32>;
-                bus-width = <24>;
-
-                display-timings {
-                        native-mode = <&timing0>;
-                        timing0: timing0 {
-                                clock-frequency = <38000000>;
-                                hactive = <800>;
-                                vactive = <480>;
-                                hback-porch = <56>;
-                                hfront-porch = <50>;
-                                vback-porch = <20>;
-                                vfront-porch = <53>;
-                                hsync-len = <180>;
-                                vsync-len = <30>;
-
-                                hsync-active = <0>;
-                                vsync-active = <1>;
-                                de-active = <1>;
-                                pixelclk-active = <0>;
-                        };
-                };
-        };
-};
 
 
 &uart1 {
