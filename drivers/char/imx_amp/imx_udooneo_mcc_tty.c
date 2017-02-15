@@ -15,11 +15,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-//====================================================
-// new version gp 090216
-// Send messages moved in thread_function
-//====================================================
-
 #include <linux/delay.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -31,27 +26,15 @@
 #include <linux/mcc_config_linux.h>
 #include <linux/mcc_common.h>
 #include <linux/mcc_api.h>
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/kthread.h>
+#include <linux/sched.h>
 
-#include<linux/init.h>
-#include<linux/module.h>
-#include<linux/kernel.h>
-#include<linux/kthread.h>
-#include<linux/sched.h>
-
-
-/* 
- * Use define SEND_IS_IN_THE_THREAD because in other cases
- * the driver is more powerfull, but unstable 
- * */
-
-#define SEND_IS_IN_THE_THREAD
-
-// used for send quee messages
-#ifdef SEND_IS_IN_THE_THREAD
-#define MCC_TTY_NMAX_MSG_TO_SEND	8
-#define MCC_TTY_BUFFER_SEND_SIZE	512
-#define MCC_TTY_BUFFER_SEND_SIZE_PL	(MCC_TTY_BUFFER_SEND_SIZE-24)
-#endif
+#define MCC_TTY_NON_LOCKING_READ    1000
+#define MCC_TTY_LOCKING_READ        0xffffffff
+#define MCC_TTY_BUFFER_SEND_SIZE    512
 
 /**
  * struct mcctty_port - Wrapper struct for imx mcc tty port.
@@ -73,7 +56,7 @@ enum {
 	MCC_M4_PORT = 2,
 };
 
-/* mcc endpoint */
+/* mcc endpoints */
 static MCC_ENDPOINT mcc_endpoint_a9 = {0, MCC_NODE_A9, MCC_A9_PORT};
 static MCC_ENDPOINT mcc_endpoint_m4 = {1, MCC_NODE_M4, MCC_M4_PORT};
 
@@ -83,32 +66,11 @@ struct mcc_tty_msg {
 	uint16_t dummy;	// for zero terminator
 };
 
-#ifdef SEND_IS_IN_THE_THREAD
-// used for send messages
-struct mcc_tty_msg_out {
-	char data[MCC_TTY_BUFFER_SEND_SIZE_PL];
-	uint16_t count;
-};
-static struct mcc_tty_msg_out tty_msg_to_send[MCC_TTY_NMAX_MSG_TO_SEND];
-#endif
-
-static int mccNumMsgToSend = 0;
-static int mccMsgOutPtr = 0;
-static int mccMsgInPtr = 0;
-
 static struct tty_port_operations  mcctty_port_ops = { };
-
-
 struct task_struct *task;
-int data;
-int ret;
-int thread_loop = 1;
+int mcc_read_thread_running = 1;
 
-//#define RECEIVE_WITH_MSG_AVAILABLE
-
-// thread function listen for new message from M4 endpoint
-#ifndef RECEIVE_WITH_MSG_AVAILABLE
-int thread_function(void *data)
+static int mcc_read_thread(void *arg)
 {
 	int ret = 0, space;
 	unsigned char *cbuf;
@@ -116,21 +78,12 @@ int thread_function(void *data)
 	struct mcc_tty_msg tty_msg;
 	struct mcctty_port *cport = &mcc_tty_port;
 
-	while(thread_loop){
+	while (mcc_read_thread_running) {
+		ret = mcc_recv(&mcc_endpoint_m4, &mcc_endpoint_a9, &tty_msg,
+			      sizeof(struct mcc_tty_msg), &num_of_received_bytes,
+					  MCC_TTY_NON_LOCKING_READ);
 
-#ifdef SEND_IS_IN_THE_THREAD
-		ret = mcc_recv(&mcc_endpoint_m4,
-			       &mcc_endpoint_a9, &tty_msg,
-			       sizeof(struct mcc_tty_msg),
-			       &num_of_received_bytes, 0);
-#else
-		ret = mcc_recv(&mcc_endpoint_m4,
-			       &mcc_endpoint_a9, &tty_msg,
-			       sizeof(struct mcc_tty_msg),
-			       &num_of_received_bytes, 0xffffffff);
-#endif
-
-		if (MCC_SUCCESS == ret) {
+		if (ret == MCC_SUCCESS) {
 			if (num_of_received_bytes > 0) {
 				/* flush the recv-ed data to tty node */
 				tty_msg.data[num_of_received_bytes++] = 0;
@@ -144,91 +97,25 @@ int thread_function(void *data)
 				tty_flip_buffer_push(&cport->port);
 				spin_unlock_bh(&cport->rx_lock);
 			}
-		}
-
-#ifdef SEND_IS_IN_THE_THREAD
-		if (mccNumMsgToSend > 0) {
-
-			ret = mcc_send(&mcc_endpoint_a9,
-				       &mcc_endpoint_m4, &tty_msg_to_send[mccMsgOutPtr],
-				       tty_msg_to_send[mccMsgOutPtr].count,
-				       0);
-
-			if (MCC_SUCCESS == ret) {
-				mccNumMsgToSend--;
-				mccMsgOutPtr++;
-				if (mccMsgOutPtr >= MCC_TTY_NMAX_MSG_TO_SEND) mccMsgOutPtr = 0;
-			}
-		}
-#endif
-	}
-
-	do_exit(0);
-	return (0);
-}
-#else
-int thread_function(void *data)
-{
-	int ret = 0, space, num_msgs;
-	unsigned char *cbuf;
-	MCC_MEM_SIZE num_of_received_bytes;
-	struct mcc_tty_msg tty_msg;
-	struct mcctty_port *cport = &mcc_tty_port;
-
-	printk(KERN_INFO"ttymcc - enter into function thread with msgs available!\n");
-
-	while(thread_loop){
-
-		if ((MCC_SUCCESS == mcc_msgs_available(&mcc_endpoint_a9, &num_msgs))) {
-			if (num_msgs > 0) {
-
-				do {
-					ret = mcc_recv(&mcc_endpoint_m4,
-						       &mcc_endpoint_a9, &tty_msg,
-						       sizeof(struct mcc_tty_msg),
-						       &num_of_received_bytes, 0);
-
-
-					if (MCC_SUCCESS == ret) {
-						if (num_of_received_bytes > 0) {
-							tty_msg.data[num_of_received_bytes++] = 0;
-							spin_lock_bh(&cport->rx_lock);
-							space = tty_prepare_flip_string(&cport->port, &cbuf,
-											strlen(tty_msg.data));
-							if (space <= 0)
-								return -ENOMEM;
-
-
-							memcpy(cbuf, &tty_msg.data, num_of_received_bytes);
-							tty_flip_buffer_push(&cport->port);
-							spin_unlock_bh(&cport->rx_lock);
-						}
-					}
-					num_msgs--;
-				} while (num_msgs > 0);
-			}
+		} else if (ret != MCC_ERR_TIMEOUT) {
+			pr_err("ttyMCC: mcc_recv failed (%d)!\n", ret);
 		}
 	}
 
 	do_exit(0);
-	return (0);
-}
-#endif
-
-static int ttymcc_thread_init(void)
-{
-	data = 20;
-	thread_loop = 1;
-	printk(KERN_INFO "ttyMCC thread init\n");
-	task = kthread_run(&thread_function,(void *)data,"pradeep");
-	printk(KERN_INFO"Kernel Thread : %s\n",task->comm);
 	return 0;
+}
+
+static void ttymcc_thread_init(void)
+{
+	mcc_read_thread_running = 1;
+	printk(KERN_INFO "ttyMCC read thread started\n");
+	task = kthread_run(&mcc_read_thread, NULL, "ttyMCC.read");
 }
 
 static void ttymcc_thread_exit(void)
 {
-	printk(KERN_INFO"ttyMCC thread exit\n");
-	thread_loop = 0;
+	mcc_read_thread_running = 0;
 }
 
 
@@ -239,9 +126,6 @@ static int mcctty_install(struct tty_driver *driver, struct tty_struct *tty)
 
 static int mcctty_open(struct tty_struct *tty, struct file *filp)
 {
-	mccNumMsgToSend = 0;
-	mccMsgOutPtr = 0;
-	mccMsgInPtr = 0;
 	ttymcc_thread_init();
 	return tty_port_open(tty->port, tty, filp);
 }
@@ -252,75 +136,33 @@ static void mcctty_close(struct tty_struct *tty, struct file *filp)
 	return tty_port_close(tty->port, tty, filp);
 }
 
-#ifdef SEND_IS_IN_THE_THREAD
-static int mcctty_write(struct tty_struct *tty, const unsigned char *buf,
-			int total)
+static int mcctty_write(struct tty_struct *tty, const unsigned char *buf, int total)
 {
-	int i, count = 0;
-	unsigned char *tmp;
-
-	if (NULL == buf) {
-		pr_err("buf shouldn't be null.\n");
-		return -ENOMEM;
-	}
-
-	count = total;
-	tmp = (unsigned char *)buf;
-	for (i = 0; i <= count / (MCC_TTY_BUFFER_SEND_SIZE_PL-1); i++) {
-		if (mccNumMsgToSend < MCC_TTY_NMAX_MSG_TO_SEND) {
-			strlcpy(tty_msg_to_send[mccMsgInPtr].data, tmp, count >= (MCC_TTY_BUFFER_SEND_SIZE_PL) ? (MCC_TTY_BUFFER_SEND_SIZE_PL) : count + 1);
-			tty_msg_to_send[mccMsgInPtr].count = count;
-			mccNumMsgToSend++;
-			mccMsgInPtr++;
-			if (mccMsgInPtr >= MCC_TTY_NMAX_MSG_TO_SEND)
-				mccMsgInPtr = 0;
-		}
-		else {
-			printk(KERN_INFO"mcctty_write - list messages to send is full!\n");
-		}
-
-		if (count >= (MCC_TTY_BUFFER_SEND_SIZE_PL))
-			count -= (MCC_TTY_BUFFER_SEND_SIZE_PL-1);
-
-	}
-	return total;
-}
-#else
-static int mcctty_write(struct tty_struct *tty, const unsigned char *buf,
-			 int total)
-{
-	int i, count, ret = 0;
-	unsigned char *tmp;
+	int ret = 0;
 	struct mcc_tty_msg tty_msg;
 
 	if (NULL == buf) {
-		pr_err("buf shouldn't be null.\n");
+		pr_err("ttyMCC: outbound message should not be null!\n");
+		return -ENOMEM;
+	}
+	
+	if (total > MCC_ATTR_BUFFER_SIZE_IN_BYTES) {
+		pr_err("ttyMCC: outbound message must be shorter than %d!\n", MCC_TTY_BUFFER_SEND_SIZE);
 		return -ENOMEM;
 	}
 
-	count = total;
-	tmp = (unsigned char *)buf;
-	for (i = 0; i <= count / 999; i++) {
-		strlcpy(tty_msg.data, tmp, count >= 1000 ? 1000 : count + 1);
-		if (count >= 1000)
-			count -= 999;
-
-		/*
-		 * wait until the remote endpoint is created by
-		 * the other core
-		 */
-		ret = mcc_send(&mcc_endpoint_a9,
-				&mcc_endpoint_m4, &tty_msg,
-				count,
-				1000);
-
-		if (MCC_SUCCESS != ret)
-			pr_err("A9 mcctty write error: %d\n", ret);
-
+	strlcpy(tty_msg.data, buf, total+1);
+	ret = mcc_send(&mcc_endpoint_a9,
+			&mcc_endpoint_m4, &tty_msg,
+			total,
+			1000);
+			
+	if (ret != MCC_SUCCESS) {
+		pr_err("ttyMCC: write A9->M4 error: %d\n", ret);
 	}
+
 	return total;
 }
-#endif
 
 static int mcctty_write_room(struct tty_struct *tty)
 {
@@ -370,29 +212,29 @@ static int imx_mcc_tty_probe(struct platform_device *pdev)
 		pr_err("Couldn't install mcc tty driver: err %d\n", ret);
 		goto error;
 	} else
-		pr_info("Install ttyMCC driver!\n");
+		pr_info("Installing ttyMCC driver!\n");
 
 	ret = mcc_initialize(MCC_NODE_A9);
 	if (ret) {
-		pr_err("failed to initialize mcc.\n");
+		pr_err("Failed to initialize ttyMCC.\n");
 		ret = -ENODEV;
 		goto error;
 	}
 
 	ret = mcc_get_info(MCC_NODE_A9, &mcc_info);
 	if (ret) {
-		pr_err("failed to get ttyMCC info.\n");
+		pr_err("Failed to get ttyMCC info.\n");
 		ret = -ENODEV;
 		goto error;
 	} else {
-		pr_info("\nA9 ttyMCC prepares run, MCC version is %s\n",
+		pr_info("\nA9 ttyMCC prepares to run, MCC version is %s\n",
 			mcc_info.version_string);
 	}
 
 	ret = mcc_create_endpoint(&mcc_endpoint_a9,
 				  MCC_A9_PORT);
 	if (ret) {
-		pr_err("failed to create A9 ttyMCC endpoint.\n");
+		pr_err("Failed to create A9 ttyMCC endpoint.\n");
 		ret = -ENODEV;
 		goto error;
 	}
@@ -416,9 +258,9 @@ static int imx_mcc_tty_remove(struct platform_device *pdev)
 	/* destory the mcc tty endpoint here */
 	ret = mcc_destroy_endpoint(&mcc_endpoint_a9);
 	if (ret)
-		pr_err("failed to destory A9 ttyMCC endpoint.\n");
+		pr_err("Failed to destory A9 ttyMCC endpoint.\n");
 	else
-		pr_info("destory A9 ttyMCC endpoint.\n");
+		pr_info("Destoried A9 ttyMCC endpoint.\n");
 
 	tty_unregister_driver(mcctty_driver);
 	tty_port_destroy(&cport->port);
