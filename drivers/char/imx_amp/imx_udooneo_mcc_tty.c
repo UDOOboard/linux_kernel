@@ -57,16 +57,17 @@ enum {
 };
 
 /* mcc endpoints */
-static MCC_ENDPOINT mcc_endpoint_a9 = {0, MCC_NODE_A9, MCC_A9_PORT};
-static MCC_ENDPOINT mcc_endpoint_m4 = {1, MCC_NODE_M4, MCC_M4_PORT};
+static MCC_ENDPOINT mcc_endpoint_a9 = { 0, MCC_NODE_A9, MCC_A9_PORT };
+static MCC_ENDPOINT mcc_endpoint_m4 = { 1, MCC_NODE_M4, MCC_M4_PORT };
 
 // used for receive messages
 struct mcc_tty_msg {
 	char data[MCC_ATTR_BUFFER_SIZE_IN_BYTES - 24];
-	uint16_t dummy;	// for zero terminator
+	uint16_t dummy;		// for zero terminator
 };
 
-static struct tty_port_operations  mcctty_port_ops = { };
+static struct tty_port_operations mcctty_port_ops = { };
+
 struct task_struct *task;
 int mcc_read_thread_running = 1;
 
@@ -80,8 +81,9 @@ static int mcc_read_thread(void *arg)
 
 	while (mcc_read_thread_running) {
 		ret = mcc_recv(&mcc_endpoint_m4, &mcc_endpoint_a9, &tty_msg,
-			      sizeof(struct mcc_tty_msg), &num_of_received_bytes,
-					  MCC_TTY_NON_LOCKING_READ);
+			       sizeof(struct mcc_tty_msg),
+			       &num_of_received_bytes,
+			       MCC_TTY_NON_LOCKING_READ);
 
 		if (ret == MCC_SUCCESS) {
 			if (num_of_received_bytes > 0) {
@@ -118,7 +120,6 @@ static void ttymcc_thread_exit(void)
 	mcc_read_thread_running = 0;
 }
 
-
 static int mcctty_install(struct tty_driver *driver, struct tty_struct *tty)
 {
 	return tty_port_install(&mcc_tty_port.port, driver, tty);
@@ -136,7 +137,8 @@ static void mcctty_close(struct tty_struct *tty, struct file *filp)
 	return tty_port_close(tty->port, tty, filp);
 }
 
-static int mcctty_write(struct tty_struct *tty, const unsigned char *buf, int total)
+static int mcctty_write(struct tty_struct *tty, const unsigned char *buf,
+			int total)
 {
 	int ret = 0;
 	struct mcc_tty_msg tty_msg;
@@ -145,18 +147,17 @@ static int mcctty_write(struct tty_struct *tty, const unsigned char *buf, int to
 		pr_err("ttyMCC: outbound message should not be null!\n");
 		return -ENOMEM;
 	}
-	
+
 	if (total > MCC_ATTR_BUFFER_SIZE_IN_BYTES) {
-		pr_err("ttyMCC: outbound message must be shorter than %d!\n", MCC_TTY_BUFFER_SEND_SIZE);
+		pr_err("ttyMCC: outbound message must be shorter than %d!\n",
+		       MCC_TTY_BUFFER_SEND_SIZE);
 		return -ENOMEM;
 	}
 
-	strlcpy(tty_msg.data, buf, total+1);
+	strlcpy(tty_msg.data, buf, total + 1);
 	ret = mcc_send(&mcc_endpoint_a9,
-			&mcc_endpoint_m4, &tty_msg,
-			total,
-			1000);
-			
+		       &mcc_endpoint_m4, &tty_msg, total, 1000);
+
 	if (ret != MCC_SUCCESS) {
 		pr_err("ttyMCC: write A9->M4 error: %d\n", ret);
 	}
@@ -231,8 +232,7 @@ static int imx_mcc_tty_probe(struct platform_device *pdev)
 			mcc_info.version_string);
 	}
 
-	ret = mcc_create_endpoint(&mcc_endpoint_a9,
-				  MCC_A9_PORT);
+	ret = mcc_create_endpoint(&mcc_endpoint_a9, MCC_A9_PORT);
 	if (ret) {
 		pr_err("Failed to create A9 ttyMCC endpoint.\n");
 		ret = -ENODEV;
@@ -255,12 +255,12 @@ static int imx_mcc_tty_remove(struct platform_device *pdev)
 	int ret = 0;
 	struct mcctty_port *cport = &mcc_tty_port;
 
-	/* destory the mcc tty endpoint here */
+	/* destroy the mcc tty endpoint here */
 	ret = mcc_destroy_endpoint(&mcc_endpoint_a9);
 	if (ret)
-		pr_err("Failed to destory A9 ttyMCC endpoint.\n");
+		pr_err("Failed to destroy A9 ttyMCC endpoint.\n");
 	else
-		pr_info("Destoried A9 ttyMCC endpoint.\n");
+		pr_info("Destroyed A9 ttyMCC endpoint.\n");
 
 	tty_unregister_driver(mcctty_driver);
 	tty_port_destroy(&cport->port);
@@ -270,7 +270,7 @@ static int imx_mcc_tty_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id imx6sx_mcc_tty_ids[] = {
-	{ .compatible = "fsl,imx6sx-mcc-tty", },
+	{.compatible = "fsl,imx6sx-mcc-tty",},
 	{ /* sentinel */ }
 };
 
