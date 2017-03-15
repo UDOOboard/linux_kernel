@@ -159,9 +159,9 @@
 	        baud_rate = <921600>;
 	};
 
-	/*btwilink {
+	btwilink {
 	        compatible = "btwilink";
-	};*/
+	};
 
         sound-spdif {
                 compatible = "fsl,imx-audio-spdif";
@@ -462,8 +462,8 @@
 			fsl,pins = <
 				MX6SX_PAD_LCD1_CLK__LCDIF1_CLK	0x4001b0b0
 				MX6SX_PAD_LCD1_ENABLE__LCDIF1_ENABLE 0x4001b0b0
-				MX6SX_PAD_LCD1_VSYNC__LCDIF1_VSYNC 0x4001b0b0
-				MX6SX_PAD_LCD1_HSYNC__LCDIF1_HSYNC 0x4001b0b0
+				MX6SX_PAD_LCD1_VSYNC__LCDIF1_VSYNC 0x4001b080
+				MX6SX_PAD_LCD1_HSYNC__LCDIF1_HSYNC 0x40018080
 				MX6SX_PAD_LCD1_RESET__GPIO3_IO_27  0x80000000
 			>;
 		};
@@ -503,6 +503,13 @@
 			fsl,pins = <
 				MX6SX_PAD_GPIO1_IO11__SPDIF_IN		0x1b0b0
 				MX6SX_PAD_GPIO1_IO12__SPDIF_OUT		0x1b0b0
+			>;
+		};
+
+		pinctrl_gt911: gt911grp {
+			fsl,pins = <
+				MX6SX_PAD_SD1_DATA2__GPIO6_IO_4  	0x80000000	// TOUCH_INT
+				MX6SX_PAD_SD1_DATA3__GPIO6_IO_5  	0x80000000	// TOUCH_RST
 			>;
 		};
 

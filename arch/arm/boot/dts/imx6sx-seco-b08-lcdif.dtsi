@@ -41,3 +41,20 @@
         };
 };
 
+&i2c1 {
+        touch_goodix: gt911@14 {
+                compatible = "goodix,gt911";
+                reg = <0x14>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_gt911>;
+                interrupt-parent = <&gpio6>;
+ 		interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
+		gpios = <&gpio6 5 GPIO_ACTIVE_LOW>;
+ 		interrupt-gpio = <164>;
+ 		reset-gpio = <165>;
+		ts-max-width = <800>;
+		ts-max-height = <480>;
+		ts-max-finger = <1>;
+        };
+};
+
