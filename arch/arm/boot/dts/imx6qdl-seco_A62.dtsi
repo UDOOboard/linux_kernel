@@ -111,6 +111,7 @@
 	mxcfb1: fb@0 {
 		compatible = "fsl,mxc_sdc_fb";
 		disp_dev = "ldb";
+		/* interface_pix_fmt = "RGB24"; // For 10' display */
 		interface_pix_fmt = "RGB666";
 		mode_str = "LDB-WVGA";
 		default_bpp = <16>;
@@ -551,6 +552,16 @@
  		interrupts = <13 IRQ_TYPE_LEVEL_LOW>;
  		gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
  	};
+
+	gt928@5d {
+		compatible       = "goodix,gt928";
+		reg              = <0x5d>;
+		touchscreen-inverted-y;
+		interrupt-parent = <&gpio1>;
+		interrupts       = <13 IRQ_TYPE_LEVEL_LOW>;
+		irq-gpio         = <&gpio1 13 GPIO_ACTIVE_LOW>;
+		reset-gpio       = <&gpio1 15 GPIO_ACTIVE_LOW>;
+	};
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
