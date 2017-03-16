@@ -301,7 +301,7 @@ static void __init imx6sx_init_machine(void)
 	imx6sx_pm_init();
 	imx6sx_qos_init();
         /* ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
-        if (of_machine_is_compatible("fsl,imx6sx-seco-b08")
+        if (of_machine_is_compatible("fsl,imx6sx-seco-b08"))
 	    pll_528_ss_enable();
         /* ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
 }
