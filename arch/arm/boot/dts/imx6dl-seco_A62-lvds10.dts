@@ -16,7 +16,7 @@
 #include "imx6qdl-seco_A62.dtsi"
 
 / {
-	model = "SECO i.MX6 DualLite SBC (A62) Board";
+	model = "SECO i.MX6 DualLite SBC (A62-lvds10) Board";
 	compatible = "fsl,imx6dl-SBC_A62", "fsl,imx6dl";
 
 	regulators {
@@ -31,7 +31,7 @@
 };
 
 &mxcfb1 {
-	interface_pix_fmt = "RGB666";
+	interface_pix_fmt = "RGB24";
 	mode_str ="LDB-1280P60";
 	status = "okay";
 };
@@ -44,7 +44,7 @@
 	status = "okay";
 	lvds-channel@0 {     
 		status = "okay";
-		fsl,data-width = <18>;
+		fsl,data-width = <24>;
 		crtc = "ipu2-di0";
 		display-timings {
 			native-mode = <&timing0>;

@@ -16,7 +16,7 @@
 #include "imx6qdl-seco_A62.dtsi"
 
 / {
-	model = "SECO i.MX6 DualLite SBC (A62) Board";
+	model = "SECO i.MX6 DualLite SBC (A62-lvds15) Board";
 	compatible = "fsl,imx6dl-SBC_A62", "fsl,imx6dl";
 
 	regulators {
