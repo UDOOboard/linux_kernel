@@ -1094,6 +1094,7 @@ static int imx_uart_dma_init(struct imx_port *sport)
 
 	sport->dma_is_inited = 1;
 
+	dev_dbg(dev, "DMA channel enabled.\n");
 	return 0;
 err:
 	imx_uart_dma_exit(sport);
@@ -1220,8 +1221,9 @@ static int imx_startup(struct uart_port *port)
 	}
 
 	/* Can we enable the DMA support? */
-	if (is_imx6q_uart(sport) && !uart_console(port)
-		&& !sport->dma_is_inited)
+	if (!uart_console(port)
+		&& !sport->dma_is_inited
+		&& !sport->port.flags == UPF_LOW_LATENCY)
 		imx_uart_dma_init(sport);
 
 	if (sport->dma_is_inited) {
