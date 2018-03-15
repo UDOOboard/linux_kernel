@@ -8,7 +8,7 @@ set -e
 
 #board specific
 dtb=( imx6sx-seco-b08{-lvds7,-lcdif}.dtb )
-defconfig="imx_v7_seco_b08_defconfig"
+defconfig="imx_v7_seco_b08_config"
 export LOCALVERSION="-secob08" 
 
 #generic
