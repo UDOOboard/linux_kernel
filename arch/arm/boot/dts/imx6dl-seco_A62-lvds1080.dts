@@ -47,6 +47,7 @@
 		fsl,data-width = <18>;
 		status = "okay";
 		primary;
+		crtc = "ipu1-di0"; 
 		display-timings {
 			native-mode = <&timing0>;
 			timing0: LDB-1080P60 {
@@ -64,6 +65,6 @@
 	};
 
 	lvds-channel@1 {
-		crtc = "ipu2-di1"; 
+		crtc = "ipu1-di1"; 
 	};
 };

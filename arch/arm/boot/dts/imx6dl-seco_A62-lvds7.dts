@@ -45,7 +45,7 @@
 	lvds-channel@0 {     
 		status = "okay";
 		fsl,data-width = <18>;
-		crtc = "ipu2-di0";
+		crtc = "ipu1-di0";
 		display-timings {
 			native-mode = <&timing0>;
 			timing0: LDB-800x480 {

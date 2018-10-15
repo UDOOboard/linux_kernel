@@ -45,7 +45,8 @@
 	lvds-channel@0 {     
 		status = "okay";
 		fsl,data-width = <24>;
-		crtc = "ipu2-di0";
+		fsl,data-mapping = "jeida"; 
+		crtc = "ipu1-di0";
 		display-timings {
 			native-mode = <&timing0>;
 			timing0: LDB-1280P60 {
