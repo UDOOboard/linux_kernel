@@ -16,7 +16,7 @@
 #include "imx6qdl-seco_A62.dtsi"
 
 / {
-	model = "SECO i.MX6 DualLite SBC (A62-lvds10) Board";
+	model = "SECO i.MX6 DualLite SBC (A62-lvds10-hdmi) Board";
 	compatible = "fsl,imx6dl-SBC_A62", "fsl,imx6dl";
 
 	regulators {
@@ -37,7 +37,13 @@
 };
 
 &mxcfb2 {
-	status = "disabled";
+	status = "okay";
+};
+
+&hdmi_core {
+	ipu_id = <0>;
+	disp_id = <1>;
+	status = "okay";
 };
 
 &ldb {
@@ -60,5 +66,9 @@
 				vsync-len = <2>;
 			};
 		};
+	};
+
+	lvds-channel@1 {
+		crtc = "ipu1-di1"; 
 	};
 };
