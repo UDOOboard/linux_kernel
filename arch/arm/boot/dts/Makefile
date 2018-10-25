@@ -159,12 +159,14 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-seco_A62-hdmi.dtb \
 	imx6q-seco_A62-lvds7.dtb \
 	imx6q-seco_A62-lvds10.dtb \
+	imx6q-seco_A62-lvds10hdmi.dtb \
 	imx6q-seco_A62-lvds7hdmi.dtb \
 	imx6q-seco_A62-lvds15.dtb \
 	imx6q-seco_A62-lvds1080.dtb \
 	imx6dl-seco_A62-hdmi.dtb \
 	imx6dl-seco_A62-lvds7.dtb \
 	imx6dl-seco_A62-lvds10.dtb \
+	imx6dl-seco_A62-lvds10hdmi.dtb \
 	imx6dl-seco_A62-lvds7hdmi.dtb \
 	imx6dl-seco_A62-lvds15.dtb \
 	imx6dl-seco_A62-lvds1080.dtb \
