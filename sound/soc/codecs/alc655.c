@@ -34,6 +34,10 @@
 #include "alc655.h"
 #define DRV_NAME "alc655-codec"
 
+// [ID = 414c - 4760]
+#define VENDOR_ID1 0x414c
+#define VENDOR_ID2 0x4760
+
 /* TODO: S/PDIF implementation. As this driver was developed for UDOO board's needs,
 * we skipped S/PDIF features developing*/ 
 
@@ -356,7 +360,7 @@ reset:
 	}
 	codec->ac97->bus->ops->warm_reset(codec->ac97);
 	id = soc_ac97_ops->read(codec->ac97, AC97_VENDOR_ID2);
-	if (id != 0x4123) {
+	if (id != VENDOR_ID2) {
 		alc655_reset(codec, 0);
 		reset++;
 		goto reset;
@@ -369,6 +373,9 @@ reset:
 static int alc655_codec_probe(struct snd_soc_codec *codec)
 {
 	int ret = 0;
+	int i, max_retries = 5;
+	int vendid1, vendid2;
+
 	struct regmap *regmap;
 
 	ret = snd_soc_new_ac97_codec(codec, soc_ac97_ops, 0);
@@ -411,9 +418,20 @@ static int alc655_codec_probe(struct snd_soc_codec *codec)
 		goto free_regmap;
 	}
 
-	/* Read out vendor IDs */
-	printk(KERN_INFO "alc655 SoC Audio Codec [ID = %04x - %04x]\n", 
-		snd_soc_read(codec, AC97_VENDOR_ID1), snd_soc_read(codec, AC97_VENDOR_ID2));
+	for (i = max_retries; i > 0; i--) {
+		/* Read out vendor IDs */
+		vendid1 = snd_soc_read(codec, AC97_VENDOR_ID1);
+		vendid2 = snd_soc_read(codec, AC97_VENDOR_ID2);
+
+		if ((vendid1 == VENDOR_ID1) && (vendid2 == VENDOR_ID2)) {
+			printk(KERN_INFO "alc655 SoC Audio Codec [ID = %04x - %04x]\n", vendid1, vendid2);
+			break;
+		} else {
+			printk(KERN_INFO "alc655 Recognition failed at cicle %d. Retrying\n", (max_retries - i));
+			alc655_reset(codec, 0);
+			msleep(1);
+		}
+	}
 
 	alc655_set_bias_level(codec, SND_SOC_BIAS_STANDBY);
 
